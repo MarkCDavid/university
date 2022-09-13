@@ -1,16 +1,30 @@
 #!/usr/bin/python3
+from typing import Dict, Tuple
 
-def caesar(symbol, key, size, decrypt = False):
-    symbol = ord(symbol) - ord("A")
-    key = -key if decrypt else key    
-    cipher = (symbol + key) % size
-    return chr(cipher + ord("A"))
+def shift(string: 'str', amount: 'int') -> str:
+    amount %= len(string)
+    return string[amount:] + string[:amount]
 
-def tcaesar(symbols, key, size, decrypt = False):
-    return ''.join(caesar(x, key, size, decrypt) for x in symbols)
+class CaesarCipher:
+    def __init__(self: 'CaesarCipher', *, alphabet: 'str', offset: 'int'):
+        self.cipher: 'Dict[str, str]' = {
+            source:target
+            for (source, target)
+            in zip(alphabet, shift(alphabet, offset))
+        }
 
-if __name__ == "__main__":
-    cyphertext = "LEZMVIJKPJKLUVEKJ"
-    for i in range(26):
-        print(i, tcaesar(cyphertext, i, 26, True))
+    def compute(self: 'CaesarCipher', text: 'str') -> 'str':
+        return ''.join(
+            # if we cannot find the symbol in the map, we simply use the original symbol
+            self.cipher[symbol] if symbol in self.cipher else symbol
+            for symbol 
+            in text)
+
+# A pair of Caesar Ciphers, one used for encrpytion, one used for decrpytion.
+def encrypt_decrypt_pair(*, alphabet: 'str', offset: 'int') -> 'Tuple[CaesarCipher, CaesarCipher]':
+    return (
+        CaesarCipher(alphabet=alphabet, offset=offset), 
+        CaesarCipher(alphabet=alphabet, offset=-offset)
+    )
+
 
