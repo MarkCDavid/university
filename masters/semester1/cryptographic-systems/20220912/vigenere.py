@@ -1,18 +1,15 @@
 from caesar import caesar
 
-plaintext = "IAMTIRED"
-key = "NICENICE"
+plaintext = "VILNIUSGEDIMINASTECHNICALUNIVERSITY"
+key = "AURIMASSAKALYSAURIMASSAKALYSAURIMASSAKALYS"
 
-def vigenere(symbol, key):
-    return caesar(symbol, ord(key) - ord("A"), 26)
+def vigenere(symbol, key, decrypt = False):
+    return caesar(symbol, ord(key) - ord("A"), 26, decrypt)
 
-def dvigenere(symbol, key):
-    return caesar(symbol, 26 - ord(key) - ord("A"), 26)
-
-def tvigenere(symbols, key, vigenere_lambda ):
-   return ''.join(vigenere_lambda(symbols[i], key[i % len(key)]) for i in range(len(symbols))) 
+def tvigenere(symbols, key, decrypt = False):
+    return ''.join(vigenere(symbols[i], key[i], decrypt) for i in range(len(symbols))) 
    
-ciphertext = tvigenere(plaintext, key, vigenere)
-dplaintext = tvigenere(ciphertext, key, dvigenere)
+ciphertext = tvigenere(plaintext, key)
+dplaintext = tvigenere(ciphertext, key, True)
 
 print(plaintext, ciphertext, dplaintext)
