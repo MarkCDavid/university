@@ -1,22 +1,38 @@
 # Research
 
+## Task 3
+
+Suggested tools for managing assword policy.
+
+> Windows: local security policy, #net accounts
+
+> Linux: PAM, **chage**
+
 ## Task 9
 
 We have to use all the tools that are specified in the task.
 
-> Windows: icacls, takeown, inheritance, net accounts, LGP (local group policy),
-auditpol, NTRIGHTS
+> Windows: icacls, takeown, inheritance, net accounts, LGP (local group policy),auditpol, NTRIGHTS
 
-> Linux: chmod, setfacl, getfacl, default ACL, SUID, GUID, sticky bit, chown,
-passwd, chattr
+> Linux: **chmod**, setfacl, getfacl, default ACL, **SUID**, **GUID**, **sticky bit**, **chown**, **passwd**, chattr
+
+
+
+## Linux Tools
 
 ### Sources
 
+`man`
+
 [Linux Handbook - SUID, SGID, Sticky Bit](https://linuxhandbook.com/suid-sgid-sticky-bit/)
 
-### Linux Tools
+[Why can't a normal user chown a file](https://unix.stackexchange.com/questions/27350/why-cant-a-normal-user-chown-a-file/27374#27374)
 
-#### Basic permissions (rwx)
+[knobs-dials.com - PAM notes](https://helpful.knobs-dials.com/index.php/PAM_notes)
+
+[How To Set Password Policies In Linux](https://ostechnix.com/how-to-set-password-policies-in-linux/)
+
+### Basic permissions (rwx)
 
 Files and directories can have these kinds of *basic* permissions:
 * Read (r):
@@ -34,7 +50,7 @@ There permissions are granted for three types of categories of users:
 * Group (Group | g)
 * Others (All | a)
 
-#### Displaying permissions
+### Displaying permissions
 The file/directory permissions are displayed (using `ls -la`) as follows:
 ```
 Permissions Links Owner      Group      Size Modified        Name
@@ -48,9 +64,9 @@ Directory Owner Group Others
 d         rwx   rwx   r-x
 ```
 
-#### chmod
+### chmod
 
-This command changes the basic permissions (rwx) for a file.
+This command changes the basic permissions (rwx) for a file/directory.
 
 ```
       uga
@@ -61,7 +77,46 @@ chmod 777 /path/to/file
 1 - execute
 ```
 
-#### SUID
+### chown
+
+This command changes the owner(:group) for a file/directory.
+
+```
+chown owner(:group) /path/to/file
+```
+
+`chown` command is a root-only utility, due to [certain security issues](https://unix.stackexchange.com/a/27374).
+
+### passwd
+
+A command that changes passwords for users. 
+
+A regular user can only change their own password, a root user can change password of any account.
+
+```
+passwd user
+```
+
+`passwd` command has SUID set, which allows everyone to run the command with root permissions, as the command edits files that are owned by the root user.
+```
+ls -l /usr/bin/passwd
+-rwsr-xr-x 1 root root 68208 kov.   14  2022 /usr/bin/passwd
+   ↑
+```
+
+There are a few flags that might be important to the execution of the given scenario:
+
+`-x, --maxdays MAX_DAYS` - sets how many days a password is valid for, until it **HAS** to be changed
+
+`-e, --expire` - immediately expires the users password, forcing them to change the password on next login
+
+### chage
+
+A command that is capable of changing user password expiration dates. It uses some similar flags, to the command `passwd`.
+
+`-M, --maxdays MAX_DAYS` - sets how many days a password is valid for, until it **HAS** to be changed
+
+### SUID
 
 SUID (Set owner User ID) is a permission bit that can be set on an executable file or [directory](https://www.gnu.org/software/coreutils/manual/html_node/Directory-Setuid-and-Setgid.html).
 
@@ -71,7 +126,7 @@ When set, the permission shows an `s` symbol for `owner user execute permission`
 -rwsrwxr-x
 ```
 
-##### SUID on a File
+#### SUID on a File
 
 If set on a file, when the file is executed, it will be executed with the same permissions as the owner of the file. 
 
@@ -101,13 +156,13 @@ chmod 4777 file_name
 
 If the file has a capital `S` as the bit, it means that the SUID bit is set, but `x` permission is not set. In this state, SUID has no use, as the file cannot be executed.
 
-##### SUID on a Directory
+#### SUID on a Directory
 
 While in some systems (according to the [GNU coreutils manual](https://www.gnu.org/software/coreutils/manual/html_node/Directory-Setuid-and-Setgid.html)), the SUID set on a directory might have some meaning, in Linux this bit has no meaning.
 
 In Linux, regular users cannot give files away to other users ([source](https://unix.stackexchange.com/questions/27350/why-cant-a-normal-user-chown-a-file/27374#27374)), and as such SUID set on a directory follows suit, and files/directories created within a directory with SUID set, are still created with creator ownership.
 
-#### GUID/SGID
+### GUID/SGID
 
 SGID (Set owner Group ID) is a permission bit that can be set on an executable file or directory.
 
@@ -117,11 +172,11 @@ When set, the permission shows an `s` symbol for `owner group execute permission
 -rwxrwsr-x
 ```
 
-##### SGID on a File
+#### SGID on a File
 
 Works very similarly to SUID, except elevates executing users privileges to that of the group owner.
 
-##### SGID on a Directory
+#### SGID on a Directory
 
 As opposed to SUID on a directory, SGID has a very practical use when set on a directory. 
 
@@ -143,7 +198,7 @@ chmod 2777 directory_name
 
 If the directory has a capital `S` as the bit, it means that the SGID bit is set, but `x` permission is not set. In this state, SGID has no use, as no new files/directories can be created within the folder.
 
-#### Sticky Bit
+### Sticky Bit
 
 Sticky bit is a permission bit that can be set on an executable file or directory.
 
@@ -153,11 +208,11 @@ When set, the permission shows an `t` symbol for `others execute permission`:
 -rwxrwxr-t
 ```
 
-##### Sticky Bit on a file
+#### Sticky Bit on a file
 
 Linux system ignores sticky bits on a file.
 
-##### Sticky Bit on a Directory
+#### Sticky Bit on a Directory
 
 When sticky bit is set on a directory, files within the directory can only be deleted by their owner or root user.
 
@@ -180,3 +235,30 @@ chmod -t directory_name
 # octal number for SUID is 1
 chmod 1777 directory_name
 ```
+
+### PAM / Pluggable Authentication Modules
+
+A set of libraries that allows fine tuned configuration for user authentication.
+
+#### Configuration file
+
+On Debian based systems, PAM policies are defined in `/etc/pam.d/common-password`. It is suggested to create a backup, before editing the file.
+
+To add constraints, add additional constraints to the lines:
+```
+password [success=2 default=ignore] pam_unix.so obscure sha512
+```
+
+#### Length constraints
+
+Minimum length - `minlen=8`
+
+#### Complexity
+
+For Debian based systems, one needs to install PAM library `libpam-pwquality`.
+
+```
+sudo apt install libpam-pwquality
+```
+
+Once installed, the following 
