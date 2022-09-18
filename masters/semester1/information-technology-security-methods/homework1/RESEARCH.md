@@ -28,6 +28,8 @@ We have to use all the tools that are specified in the task.
 
 [Why can't a normal user chown a file](https://unix.stackexchange.com/questions/27350/why-cant-a-normal-user-chown-a-file/27374#27374)
 
+[FreeBSD - Pluggable Authentication Modules](https://docs.freebsd.org/en/articles/pam/)
+
 [knobs-dials.com - PAM notes](https://helpful.knobs-dials.com/index.php/PAM_notes)
 
 [How To Set Password Policies In Linux](https://ostechnix.com/how-to-set-password-policies-in-linux/)
@@ -240,25 +242,65 @@ chmod 1777 directory_name
 
 A set of libraries that allows fine tuned configuration for user authentication.
 
-#### Configuration file
+#### Configuration files
 
-On Debian based systems, PAM policies are defined in `/etc/pam.d/common-password`. It is suggested to create a backup, before editing the file.
+PAM configuration files are usually stored in `/etc/pam.d` directory. A file within that directory corresponds to the application that is trying to authenticate. If the application that is trying to authenticate using PAM does not find a configuration file in the directory, it uses the default `/etc/pam.conf` file.
 
-To add constraints, add additional constraints to the lines:
-```
-password [success=2 default=ignore] pam_unix.so obscure sha512
-```
+#### Policy Configuration 
 
-#### Length constraints
-
-Minimum length - `minlen=8`
-
-#### Complexity
-
-For Debian based systems, one needs to install PAM library `libpam-pwquality`.
+Each policy configuration file contains rules using the following syntax:
 
 ```
-sudo apt install libpam-pwquality
+Facility  Control Flag                    Module        Arguments
+auth      [success=1 default=ignore]      pam_unix.so   nullok_secure
+auth      requisite                       pam_deny.so
 ```
 
-Once installed, the following 
+If policy configuration is done outside `/etc/pam.d`, an additional field must be set:
+
+```
+Application Facility  Control Flag                    Module        Arguments
+sshd        auth      [success=1 default=ignore]      pam_unix.so   nullok_secure
+```
+
+#### Facilities
+
+`auth` - Authentication and establishment of account credentials;
+
+`account` - Access handling (e.g. account expiration, time-of-day);
+
+`session` - Tasks associated with session set-up and tear-down.
+
+`password` - Update of authentication token
+
+#### Chains
+
+A policy is made up of four chains, each for one of available facilities (`auth`, `account`, `session`, `password`).
+
+A chain is a sequence of statements, specifying control flag, module and arguments. 
+
+#### Control Flags
+
+There exists five named control flags:
+
+`binding`
+* `SUCCESS` - If no prior failure occured, module immediately breaks and grants access. 
+* `FAILURE` - Rest of the chain is executed, access will ultimately be denied.
+
+`required` 
+* `SUCCESS` - Rest of the chain is executed, will grant access (if no other failures occured)
+* `FAILURE` - Rest of the chain is executed, access will ultimately be denied.
+
+`requisite` 
+* `SUCCESS` - Rest of the chain is executed, will grant access (if no other failures occured)
+* `FAILURE` - Chain is immediately terminated, access is denied.
+
+`sufficient` 
+* `SUCCESS` - Chain is immediately terminated, will immediately grant access
+* `FAILURE` - Module is ignored, rest of the chain is executed
+
+`optional` 
+
+Module is executed, but the results are ignored. 
+
+**NOTE:** The request will be granted ***if and only if*** at least one module was executed and all non-optional modules has succeeded.
