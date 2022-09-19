@@ -1,0 +1,20 @@
+Homework 1
+
+Encrypt using DES
+Plaintext - Name Surname
+Key - Student Number
+
+Homework 2
+Test Diffusion
+
+62	27	4f	76	4c	af	ce	57	
+22	c6	f8	ca	34	c1	6f	36
+
+83	48	ef	81	f9	d3	e7	ec	69	a7	db	34	3e	2b	58	b8
+0f	23	66	36	db	aa	f1	70	69	a7	db	34	3e	2b	58	b8
+83	48	ef	81	f9	d3	e7	ec	31	15	e7	af	0b	0d	c5	ac
+
+
+5d	24	de	71	b5	c5	e9	37	92	f0	f6	cf	bc	6a	94	19
+5d	24	de	71	b5	c5	e9	37	92	f0	f6	cf	bc	6a	94	19
+54	63	1f	a6	4f	d2	8a	5d	ae	47	79	e7	0d	43	f9	45
