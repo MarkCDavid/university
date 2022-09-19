@@ -2,6 +2,8 @@ from pydoc import plain
 from typing import List
 from bitarray import BitArray
 
+# sauce: https://terenceli.github.io/assets/file/mimaxue/SDES.pdf
+
 P10 = [2, 4, 1, 6, 3, 9, 0, 8, 7, 5]
 P8 = [5, 2, 6, 3, 7, 4, 9, 8]
 P4 = [1, 3, 2, 0]
