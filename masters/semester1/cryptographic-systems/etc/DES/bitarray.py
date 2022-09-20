@@ -9,8 +9,10 @@ class BitArray:
 
     @staticmethod
     def fromString(string: 'str', encoding: 'str') -> 'BitArray':
-        bytes = string.encode(encoding)
-        return BitArray(len(bytes) * 8, int.from_bytes(bytes, "little"))
+        _bytes = string.encode(encoding)
+        bit_count = len(_bytes) * 8
+        bits = int.from_bytes(_bytes, "little")
+        return BitArray(bit_count, bits)
 
     @staticmethod
     def fromBitString(string: 'str') -> 'BitArray':
@@ -24,45 +26,39 @@ class BitArray:
         return result 
 
     @staticmethod
-    def fromBitArray(bitArray: 'BitArray') -> 'BitArray':
-        return BitArray(bitArray.size, bitArray.bits)
-
-    @staticmethod
     def empty(size: 'int') -> 'BitArray':
         return BitArray(size, 0)
 
     def split(self) -> 'Tuple[BitArray, BitArray]':
         return self.left(), self.right()
 
+    def middle(self) -> 'int':
+        return ceil(len(self) / 2)
+
     def left(self) -> 'BitArray':
-        middle = ceil(len(self) / 2)
-        return self[:middle]
+        return self[:self.middle()]
 
     def right(self) -> 'BitArray':
-        middle = ceil(len(self) / 2)
-        return self[middle:]
+        return self[self.middle():]
+
+    def swap_halves(self) -> 'BitArray':
+        left, right = self.split()
+        return right + left
+
+    def copy(self) -> 'BitArray':
+        return BitArray(self.size, self.bits)
+
+    def __len__(self) -> 'int':
+        return self.size
 
     def __eq__(self: 'BitArray', other: 'BitArray') -> 'bool':
         return self.bits == other.bits
 
     def __add__(self: 'BitArray', other: 'BitArray') -> 'BitArray':
-        result = BitArray.empty(self.size + other.size)
-        for sourceIndex, targetIndex in enumerate(range(self.size)):
-            result[targetIndex] = self[sourceIndex]
-
-        for sourceIndex, targetIndex in enumerate(range(self.size, self.size + other.size)):
-            result[targetIndex] = other[sourceIndex]
-        
-        return result
+        return BitArray.fromBitString(str(self) + str(other))
 
     def __xor__(self: 'BitArray', other: 'BitArray') -> 'BitArray':
-        size = min(self.size, other.size)
-        result = BitArray.empty(size)
-
-        for index in range(size):
-            result[index] = self[index] ^ other[index]
-        
-        return result
+        return BitArray(min(self.size, other.size), self.bits ^ other.bits)
 
     def __lshift__(self: 'BitArray', amount: 'int') -> 'BitArray':
         return self._circular_shift(-amount)
@@ -70,17 +66,14 @@ class BitArray:
     def __rshift__(self: 'BitArray', amount: 'int') -> 'BitArray':
         return self._circular_shift(amount)
 
-    def _circular_shift(self: 'BitArray', amount: 'int') -> 'BitArray':
-        if self.size == 0:
-            return BitArray.empty(0)
+    def __str__(self) -> 'str':
+        return ''.join(str(bit) for bit in self)
 
-        result = BitArray.fromBitArray(self)
-        
-        for source in range(result.size):
-            target = (source + amount) % result.size
-            result[target] = self[source]
+    def __repr__(self) -> 'str':
+        return f"BitArray.fromBitString({str(self)})"
 
-        return result
+    def __iter__(self) -> 'BitArray':
+        return BitArrayIterator(self)
    
     def __setitem__(self, index: 'int', value: 'int') -> 'None':
         self._assert_index_within_range(index)
@@ -97,11 +90,11 @@ class BitArray:
         raise Exception()
 
     def __getitem_index__(self, index: 'int') -> 'int':
-        assert index < self.size
+        self._assert_index_within_range(index)
         return (self.bits >> index) & 1
 
-    def __getitem_slice__(self: 'BitArray', slice: 'slice') -> 'BitArray':
-        start, stop, step = self._unpack_silce(slice)
+    def __getitem_slice__(self: 'BitArray', _slice: 'slice') -> 'BitArray':
+        start, stop, step = self._unpack_silce(_slice)
         bit_count = ceil((stop - start) / step)
 
         result = BitArray(bit_count, 0)
@@ -110,17 +103,26 @@ class BitArray:
         
         return result
 
-    def _set(self, index) -> None:
+    def _set(self, index) -> 'None':
         self.bits |= (1 << index)
 
-    def _unset(self, index) -> None:
+    def _unset(self, index) -> 'None':
         self.bits &= (~(1 << index))
+
+    def _circular_shift(self: 'BitArray', amount: 'int') -> 'BitArray':
+        result = BitArray.empty(self.size)
+        
+        for source in range(result.size):
+            target = (source + amount) % result.size
+            result[target] = self[source]
+
+        return result
 
     def _unpack_silce(self, slice: 'slice') -> 'Tuple[int, int, int]':
         start, stop, step = slice.start or 0, slice.stop or self.size, slice.step or 1
         self._assert_index_within_range(start)
         self._assert_index_within_range(stop)
-        start, stop = (stop, start - 1) if step < 0 else (start, stop)
+        start, stop = (stop - 1, start - 1) if step < 0 else (start, stop)
         return start, stop, step
 
     def _assert_index_within_range(self, index: 'int'):
@@ -129,8 +131,18 @@ class BitArray:
     def _assert_value_within_range(self, value: 'int'):
         assert value == 0 or value == 1
     
-    def __str__(self) -> 'str':
-        return ''.join(str(self[index]) for index in range(self.size))
 
-    def __len__(self) -> 'int':
-        return self.size
+class BitArrayIterator:
+
+    def __init__(self, bit_array: 'BitArray') -> 'None':
+        self.bit_array = bit_array
+        self.index = 0
+    
+    def __next__(self) -> 'int':
+        if self.index == len(self.bit_array):
+            raise StopIteration
+        
+        bit = self.bit_array[self.index]
+        self.index += 1
+        return bit
+
