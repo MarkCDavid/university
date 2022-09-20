@@ -13,12 +13,37 @@ class BitArray:
         return BitArray(len(bytes) * 8, int.from_bytes(bytes, "little"))
 
     @staticmethod
+    def fromBitString(string: 'str') -> 'BitArray':
+        assert all(symbol == '0' or symbol == '1' for symbol in string)
+        values = [int(symbol) for symbol in string]
+
+        result = BitArray.empty(len(string))
+        for index, value in enumerate(values):
+            result[index] = value
+                
+        return result 
+
+    @staticmethod
     def fromBitArray(bitArray: 'BitArray') -> 'BitArray':
         return BitArray(bitArray.size, bitArray.bits)
 
     @staticmethod
     def empty(size: 'int') -> 'BitArray':
         return BitArray(size, 0)
+
+    def split(self) -> 'Tuple[BitArray, BitArray]':
+        return self.left(), self.right()
+
+    def left(self) -> 'BitArray':
+        middle = ceil(len(self) / 2)
+        return self[:middle]
+
+    def right(self) -> 'BitArray':
+        middle = ceil(len(self) / 2)
+        return self[middle:]
+
+    def __eq__(self: 'BitArray', other: 'BitArray') -> 'bool':
+        return self.bits == other.bits
 
     def __add__(self: 'BitArray', other: 'BitArray') -> 'BitArray':
         result = BitArray.empty(self.size + other.size)
