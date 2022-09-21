@@ -370,3 +370,57 @@ user::rwx # ACL for user owner, with rwx permissions
 mask:r-x # ACL Effective rights mask, with rw permissions
 ```
 
+### chattr
+
+Most of the attributes does not seem to be of significant use for `access control` use case.
+
+```
+# Files can only be opened for appending. Could be used for AC / special permissions;
+append only (a) 
+
+# Access times are not updated when file is accessed. No significant AC use;
+no atime updates (A) 
+
+# Files are compressed on disk. No AC use;
+compressed (c)
+
+# No AC use;
+no copy on write (C)
+
+# No AC use;
+no dump (d)
+
+# No AC use;
+synchronous directory updates (D)
+
+# No AC use;
+extent format (e)
+
+# No AC use;
+case-insensitive directory lookups (F)
+
+# Files can only be modified by superuser/process with CAP_LINUX_IMMUTABLE. No significant AC use;
+immutable (i) 
+
+# No AC use;
+data journalling (j) 
+
+# No significant AC use;
+project  hierarchy  (P) 
+
+# No AC use;
+secure deletion (s) 
+
+# No AC use;
+synchronous updates (S)
+
+# No AC use;
+no tail-merging (t)
+
+# No AC use;
+top of directory hierarchy (T)
+
+# No AC use;
+un‐deletable (u)
+```
+
