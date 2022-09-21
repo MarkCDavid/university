@@ -6,7 +6,7 @@ Suggested tools for managing assword policy.
 
 > Windows: local security policy, #net accounts
 
-> Linux: PAM, **chage**
+> Linux: **PAM**, **chage**
 
 ## Task 9
 
@@ -14,7 +14,7 @@ We have to use all the tools that are specified in the task.
 
 > Windows: icacls, takeown, inheritance, net accounts, LGP (local group policy),auditpol, NTRIGHTS
 
-> Linux: **chmod**, setfacl, getfacl, default ACL, **SUID**, **GUID**, **sticky bit**, **chown**, **passwd**, chattr
+> Linux: **chmod**, **setfacl**, **getfacl**, **default ACL**, **SUID**, **GUID**, **sticky bit**, **chown**, **passwd**, chattr
 
 
 
@@ -33,6 +33,8 @@ We have to use all the tools that are specified in the task.
 [knobs-dials.com - PAM notes](https://helpful.knobs-dials.com/index.php/PAM_notes)
 
 [How To Set Password Policies In Linux](https://ostechnix.com/how-to-set-password-policies-in-linux/)
+
+[An introduction to Linux Access Control Lists (ACLs)](https://www.redhat.com/sysadmin/linux-access-control-lists)
 
 ### Basic permissions (rwx)
 
@@ -304,3 +306,67 @@ There exists five named control flags:
 Module is executed, but the results are ignored. 
 
 **NOTE:** The request will be granted ***if and only if*** at least one module was executed and all non-optional modules has succeeded.
+
+### ACL
+
+Default Linux permissions are not extensive enough to support more complex access control scenarios. 
+
+#### Viewing ACL
+
+`getfactl <file>`
+
+The format is as follows:
+
+```
+# file: somedir/                             ::: Name of the file
+# owner: lisa                                ::: User owner of the file
+# group: staff                               ::: Group owner of the file
+# flags: -s-                                 ::: SUID, SGID, Sticky Bit flags
+user::rwx                                    ::: Base ACL entry for user owner
+user:joe:rwx               #effective:r-x    ::: Named user ACL entry for group owner
+group::rwx                 #effective:r-x    ::: Base ACL entry for group owner - Linux permissions
+group:cool:r-x                               ::: Named group ACL entry for group owner
+mask::r-x                                    ::: Effective rights mask - provides effective rights masking for groups and named users
+other::r-x                                   ::: Base ACL entry for user owner
+default:user::rwx                            ::: Default user owner permissions, to be inherited
+default:user:joe:rwx       #effective:r-x    ::: Default named user owner permissions, to be inherited
+default:group::r-x                           ::: Default group owner permissions, to be inherited
+default:mask::r-x                            ::: Default effective rights mask, to be inherited
+default:other::---                           ::: Default permissions for other users, to be inherited
+```
+
+#### Modifying ACL
+
+`setfacl [{-m|-x} ACL] file`
+
+`setfacl [{-M|-X} ACL_FILE] file`
+
+`--set`, `--set-file` flags are for ***replacing*** ACL
+
+`-m`, `-M` flags are for modifying ACL (adding, editing)
+
+`-x`, `-X` flags are for removing ACL
+
+The `--set-file`, `-M` and `-X` flags are used to read ACL from files. The file must have ***at most*** one entry per line. `#` symbol symbolizes a comment, from start of the symbol, until end of the line.
+
+`-d` flag is used to apply the `default` ACLs for inheritance. It's possible to set defaults without usage of the flag.
+
+
+#### ACL Format
+Permissions for a user: `[default:] [user:]uid [:permissions]`.
+***uid*** can be empty. If so, permissions are aplied for user owner. 
+
+Permissions for a group: `[default:] group:uid [:permissions]`
+***uid*** can be empty. If so, permissions are aplied for group owner. 
+
+Effective rights mask: `[default:] mask [:permissions]`
+
+Permissions for others: `[default:] other [:permissions]`
+
+Examples:
+```
+default:user:markcdavid:rw- # Default ACL for named user 'markcdavid', with rw permissions
+user::rwx # ACL for user owner, with rwx permissions
+mask:r-x # ACL Effective rights mask, with rw permissions
+```
+
