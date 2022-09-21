@@ -22,7 +22,7 @@ We have to use all the tools that are specified in the task.
 
 ### Sources
 
-`man`
+`man` pages
 
 [Linux Handbook - SUID, SGID, Sticky Bit](https://linuxhandbook.com/suid-sgid-sticky-bit/)
 
