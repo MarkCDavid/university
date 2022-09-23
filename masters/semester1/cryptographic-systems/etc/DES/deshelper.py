@@ -1,6 +1,6 @@
 from math import ceil
 from typing import List, Tuple
-from bitarray import BitArray
+from etc.bitarray import BitArray
 
 def _permute(permutation: 'List[int]', bits: 'BitArray') -> 'BitArray':
     result = BitArray.empty(len(permutation))

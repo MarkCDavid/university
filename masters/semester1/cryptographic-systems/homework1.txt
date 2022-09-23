@@ -1,0 +1,41 @@
+=== Task 1:
+Encode "AurimasSakalys" using A1Z26: 1 21 18 9 13 1 19 19 1 11 1 12 25 19
+Encode "AurimasSakalys" using ASCII: 65 117 114 105 109 97 115 83 97 107 97 108 121 115
+Convert "20185388" to Base2: 1 0 0 1 1 0 1 0 0 0 0 0 0 0 0 0 1 0 0 1 0 1 1 0 0
+Convert "20185388" to Base8: 1 1 5 0 0 0 4 5 4
+Convert "20185388" to Base16: 1 3 4 0 1 2 c
+Convert "20185388" to Base58: 2 m T Q v
+Convert "20185388" to Base64: B N A E s
+
+As it is not 100% clear, if Base64 is meant as a conversion or encoding, Base64 encoding is included.
+
+Encode "AurimasSakalys" using Base64: QXVyaW1hc1Nha2FseXM=
+
+
+=== Task 2:
+Encrypt "AurimasSakalys" using Caesar Cipher with key 20185388 mod 26: CWTKOCUUCMCNAU
+Decrypt "CWTKOCUUCMCNAU" using Caesar Cipher with key 20185388 mod 26: AURIMASSAKALYS
+
+I am unsure why a key that contains symbols that are not in the alphabet are required to use.
+To encrypt "VILNIUSGEDIMINASTECHNIKALUNIVERSITY" using Vigenere Cipher, will use "AurimasSakalys" as the key.
+
+Encrypt "VILNIUSGEDIMINASTECHNIKALUNIVERSITY" using Vigenere Cipher with key "AurimasSakalys": VCCVUUKYENIXGFAMKMOHFAKKLFLAVYIAUTQ
+Decrypt "VCCVUUKYENIXGFAMKMOHFAKKLFLAVYIAUTQ" using Vigenere Cipher with key "AurimasSakalys": VILNIUSGEDIMINASTECHNIKALUNIVERSITY
+
+
+=== Task 3:
+Converting "AurimasSakalys" to 64-bit block plaintext: 0100000101110101011100100110100101101101011000010111001101010011
+Converting "20185388" to 64-bit block key: 0000000000000000000000000000000000000001001101000000000100101100
+Encrypting "AurimasSakalys" using DES with key 0000000000000000000000000000000000000001001101000000000100101100: 1000011111010001000011110011010111101110010011101011110000011011
+
+Switching one bit (index 24) in plaintext: 0100000101110101011100101110100101101101011000010111001101010011
+Encrypting "AurimasSakalys" with one plaintext bit switched using DES with key 0000000000000000000000000000000000000001001101000000000100101100: 1000011111010001000011110011010111101110010011101011110000011011
+After a bit switch in the plaintext, 33 bits have changed.
+
+Switching one bit (index 12) in key: 0000000000001000000000000000000000000001001101000000000100101100
+Encrypting "AurimasSakalys" with one key bit switched using DES with key 0000000000000000000000000000000000000001001101000000000100101100: 1000011111010001000011110011010111101110010011101011110000011011
+After a bit switch in the key, 29 bits have changed.
+
+
+Bonus task:
+This task was done with DES algorithm that I have coded myself.

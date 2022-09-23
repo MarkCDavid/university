@@ -1,13 +1,6 @@
 from typing import List
-from bitarray import BitArray
-from deshelper import P56, P48, IP, IP_reverse, Expansion, Straight, S0, S1, S2, S3, S4, S5, S6, S7, from_blocks, to_blocks
-
-
-
-class DES:
-    pass
-
-
+from etc.bitarray import BitArray
+from etc.DES.deshelper import P56, P48, IP, IP_reverse, Expansion, Straight, S0, S1, S2, S3, S4, S5, S6, S7, from_blocks, to_blocks
 
 def _subkey(key: 'BitArray', shift: 'int') -> 'BitArray':
     key = P56(key)

@@ -1,5 +1,5 @@
-from bitarray import BitArray
-import sdes
+from etc.bitarray import BitArray
+import etc.DES.sdes as sdes
 
 # source: https://terenceli.github.io/assets/file/mimaxue/SDES.pdf
 
