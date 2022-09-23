@@ -9,10 +9,9 @@ class BitArray:
 
     @staticmethod
     def fromString(string: 'str', encoding: 'str') -> 'BitArray':
-        _bytes = string.encode(encoding)
-        bit_count = len(_bytes) * 8
+        _bytes = [int('{:08b}'.format(byte)[::-1], 2) for byte in string.encode(encoding)]
         bits = int.from_bytes(_bytes, "little")
-        return BitArray(bit_count, bits)
+        return BitArray(len(_bytes) * 8, bits)
 
     @staticmethod
     def fromBitString(string: 'str') -> 'BitArray':
@@ -26,11 +25,21 @@ class BitArray:
         return result 
 
     @staticmethod
+    def fromInteger(integer: 'int', bits: 'int') -> 'BitArray':
+        _bits = [(integer >> bit) & 1 for bit in range(bits)]
+        bitString = ''.join([str(bit) for bit in reversed(_bits)])
+        return BitArray.fromBitString(bitString)
+
+    @staticmethod
     def empty(size: 'int') -> 'BitArray':
         return BitArray(size, 0)
 
-    def split(self) -> 'Tuple[BitArray, BitArray]':
-        return self.left(), self.right()
+    def pad(self, amount: 'int') -> 'BitArray':
+        return BitArray.fromBitString(str(self) + '0' * amount)
+
+    def split(self, parts: 'int' = 2) -> 'Tuple[BitArray, BitArray]':
+        step = ceil(len(self) / parts)
+        return (self[index:index+step] for index in range(0, len(self), step))
 
     def middle(self) -> 'int':
         return ceil(len(self) / 2)
@@ -44,6 +53,10 @@ class BitArray:
     def swap_halves(self) -> 'BitArray':
         left, right = self.split()
         return right + left
+
+    def hex(self) -> 'bytes':
+        bits = str(self)
+        return ''.join(to_hex[bits[index: index + 4]] for index in range(0, len(bits), 4))
 
     def copy(self) -> 'BitArray':
         return BitArray(self.size, self.bits)
@@ -144,5 +157,46 @@ class BitArrayIterator:
         
         bit = self.bit_array[self.index]
         self.index += 1
+
         return bit
 
+
+
+
+from_hex = {
+    "0": "0000",
+    "1": "0001",
+    "2": "0010",
+    "3": "0011",
+    "4": "0100",
+    "5": "0101",
+    "6": "0110",
+    "7": "0111",
+    "8": "1000",
+    "9": "1001",
+    "A": "1010",
+    "B": "1011",
+    "C": "1100",
+    "D": "1101",
+    "E": "1110",
+    "F": "1111",
+}
+    
+to_hex = {
+    "0000": "0",
+    "0001": "1",
+    "0010": "2",
+    "0011": "3",
+    "0100": "4",
+    "0101": "5",
+    "0110": "6",
+    "0111": "7",
+    "1000": "8",
+    "1001": "9",
+    "1010": "A",
+    "1011": "B",
+    "1100": "C",
+    "1101": "D",
+    "1110": "E",
+    "1111": "F",
+}

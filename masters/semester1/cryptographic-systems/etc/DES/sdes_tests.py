@@ -25,14 +25,13 @@ def decrypt_test():
 
 def text_test():
     plaintext = BitArray.fromString("Hello, World!", "utf-8")
-    print(plaintext)
     key = BitArray.fromBitString("1100011110")
-    expected = BitArray.fromBitString("01100100110010000000110100001101101111110100011001111111011101111011111100111100000011010010101011011001")
+    expected = BitArray.fromBitString("10010010001000010101111101011111000000001100101110110010011000000000000001011100010111110100001111110000")
     got = sdes.encrypt(plaintext, key)
     testcase(expected, got)
 
 def text_decrypt_test():
-    ciphertext = BitArray.fromBitString("01100100110010000000110100001101101111110100011001111111011101111011111100111100000011010010101011011001")
+    ciphertext = BitArray.fromBitString("10010010001000010101111101011111000000001100101110110010011000000000000001011100010111110100001111110000")
     key = BitArray.fromBitString("1100011110")
     expected = BitArray.fromString("Hello, World!", "utf-8")
     got = sdes.decrypt(ciphertext, key)

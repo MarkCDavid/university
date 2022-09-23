@@ -1,4 +1,4 @@
-from typing import List, Callable
+from typing import List
 from bitarray import BitArray
 from sdeshelper import P10, P8, IP8, IP8_reverse, EP, P4, S0, S1, to_blocks, from_blocks
 

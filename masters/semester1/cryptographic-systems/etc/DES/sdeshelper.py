@@ -1,5 +1,4 @@
-from functools import reduce
-from typing import List, Callable
+from typing import List, Tuple
 from bitarray import BitArray
 
 def _permute(permutation: 'List[int]', bits: 'BitArray') -> 'BitArray':
