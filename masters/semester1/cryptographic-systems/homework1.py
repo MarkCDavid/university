@@ -52,29 +52,29 @@ print(f"=== Task 3:")
 plaintext_A = BitArray.fromString(A, "utf-8")[:64]
 key_B = BitArray.fromInteger(B, 64)
 
-print(f"Converting \"{A}\" to 64-bit block plaintext:", plaintext_A)
-print(f"Converting \"{B}\" to 64-bit block key:", key_B)
+print(f"Converting \"{A}\" to 64-bit block plaintext:", plaintext_A.hex())
+print(f"Converting \"{B}\" to 64-bit block key:", key_B.hex())
 
 ciphertext_A = des.encrypt(plaintext_A, key_B)
-print(f"Encrypting \"{A}\" using DES with key {key_B}:", ciphertext_A)
+print(f"Encrypting \"{A}\" using DES with key {key_B.hex()}:", ciphertext_A.hex())
 print()
 
 plaintext_A_switched = BitArray(plaintext_A.size, plaintext_A.bits)
 plaintext_A_switched[24] = (1 + plaintext_A_switched[24]) % 2
-print(f"Switching one bit (index 24) in plaintext:", plaintext_A_switched)
+print(f"Switching one bit (index 24) in plaintext:", plaintext_A_switched.hex())
 
 ciphertext_A_switched = des.encrypt(plaintext_A_switched, key_B)
-print(f"Encrypting \"{A}\" with one plaintext bit switched using DES with key {key_B}:", ciphertext_A)
+print(f"Encrypting \"{A}\" with one plaintext bit switched using DES with key {key_B.hex()}:", ciphertext_A_switched.hex())
 changed_bits = Counter([x == y for (x, y) in zip(ciphertext_A, ciphertext_A_switched)])[False]
 print(f"After a bit switch in the plaintext, {changed_bits} bits have changed.")
 print()
 
 key_B_switched = BitArray(key_B.size, key_B.bits)
 key_B_switched[12] = (1 + key_B_switched[24]) % 2
-print(f"Switching one bit (index 12) in key:", key_B_switched)
+print(f"Switching one bit (index 12) in key:", key_B_switched.hex())
 
 ciphertext_A_switched = des.encrypt(plaintext_A, key_B_switched)
-print(f"Encrypting \"{A}\" with one key bit switched using DES with key {key_B}:", ciphertext_A)
+print(f"Encrypting \"{A}\" with one key bit switched using DES with key {key_B_switched.hex()}:", ciphertext_A_switched.hex())
 changed_bits = Counter([x == y for (x, y) in zip(ciphertext_A, ciphertext_A_switched)])[False]
 print(f"After a bit switch in the key, {changed_bits} bits have changed.")
 
