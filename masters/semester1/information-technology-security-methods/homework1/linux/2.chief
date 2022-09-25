@@ -1,0 +1,5 @@
+default:group:sysadmin:rwx
+group:sysadmin:rwx
+
+default:group:chief:rwx
+group:chief:rwx

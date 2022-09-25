@@ -1,0 +1,11 @@
+default:group:sysadmin:rwx
+group:sysadmin:rwx
+
+default:group:chief:r--
+group:chief:r-x
+
+default:group:admin:r--
+group:admin:r-x
+
+default:group:manager:rwx
+group:manager:rwx

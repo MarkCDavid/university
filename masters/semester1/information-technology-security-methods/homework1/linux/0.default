@@ -1,0 +1,6 @@
+user::---
+group::---
+other:---
+default:user::rwx 
+default:group::r--
+default:other:---
