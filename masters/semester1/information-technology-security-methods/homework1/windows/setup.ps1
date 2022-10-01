@@ -30,9 +30,9 @@ function New-ITSMLocalGroup {
 }
 #endregion Identities
 
-#region ICE
+#region ACE
 
-function New-ICEFullControl {
+function New-ACEFullControl {
     param (
         [string]$Identifier
     )
@@ -45,7 +45,7 @@ function New-ICEFullControl {
         [AccessControlType]::Allow)
 }
 
-function New-ICEReadAndExecute {
+function New-ACEReadAndExecute {
     param (
         [string]$Identifier
     )
@@ -58,7 +58,7 @@ function New-ICEReadAndExecute {
         [AccessControlType]::Allow)
 }
 
-function New-ICEReadExecuteAndWrite {
+function New-ACEReadExecuteAndWrite {
     param (
         [string]$Identifier
     )
@@ -71,7 +71,33 @@ function New-ICEReadExecuteAndWrite {
         [AccessControlType]::Allow)
 }
 
-function New-ICEFullControlContainer {
+function New-ACESimpleReadAndWrite {
+    param (
+        [string]$Identifier
+    )
+
+    return New-Object FileSystemAccessRule(
+        $Identifier, 
+        ([FileSystemRights]::ReadData + [FileSystemRights]::WriteData), 
+        ([InheritanceFlags]::ContainerInherit + [InheritanceFlags]::ObjectInherit), 
+        [PropagationFlags]::None, 
+        [AccessControlType]::Allow)
+}
+
+function New-ACESimpleReadWriteAndAppend {
+    param (
+        [string]$Identifier
+    )
+
+    return New-Object FileSystemAccessRule(
+        $Identifier, 
+        ([FileSystemRights]::ReadData + [FileSystemRights]::WriteData + [FileSystemRights]::AppendData), 
+        ([InheritanceFlags]::ContainerInherit + [InheritanceFlags]::ObjectInherit), 
+        [PropagationFlags]::None, 
+        [AccessControlType]::Allow)
+}
+
+function New-ACEFullControlContainer {
     param (
         [string]$Identifier
     )
@@ -84,7 +110,7 @@ function New-ICEFullControlContainer {
         [AccessControlType]::Allow)
 }
 
-function New-ICEReadExecuteAndWriteContainer {
+function New-ACEReadExecuteAndWriteContainer {
     param (
         [string]$Identifier
     )
@@ -97,7 +123,7 @@ function New-ICEReadExecuteAndWriteContainer {
         [AccessControlType]::Allow)
 }
 
-function New-ICEReadAndExecuteContainer {
+function New-ACEReadAndExecuteContainer {
     param (
         [string]$Identifier
     )
@@ -110,7 +136,7 @@ function New-ICEReadAndExecuteContainer {
         [AccessControlType]::Allow)
 }
 
-#endregion ICE
+#endregion ACE
 
 #region ACL
 function Get-ACLDefault {
@@ -122,13 +148,13 @@ function Get-ACLDefault {
 
     $targetAcl.SetAccessRuleProtection($true, $false)
 
-    $creatorSystemIce = New-ICEFullControl -Identifier "NT AUTHORITY\SYSTEM"
-    $creatorAdministratorsIce = New-ICEFullControl -Identifier "BUILTIN\Administrators"
-    $creatorOwnerIce = New-ICEFullControl -Identifier "CREATOR OWNER"
+    $creatorSystemAce = New-ACEFullControl -Identifier "NT AUTHORITY\SYSTEM"
+    $creatorAdministratorsAce = New-ACEFullControl -Identifier "BUILTIN\Administrators"
+    $creatorOwnerAce = New-ACEFullControl -Identifier "CREATOR OWNER"
 
-    $targetAcl.AddAccessRule($creatorSystemIce)
-    $targetAcl.AddAccessRule($creatorAdministratorsIce)
-    $targetAcl.AddAccessRule($creatorOwnerIce)
+    $targetAcl.AddAccessRule($creatorSystemAce)
+    $targetAcl.AddAccessRule($creatorAdministratorsAce)
+    $targetAcl.AddAccessRule($creatorOwnerAce)
 
     return $targetAcl
 }
@@ -140,9 +166,9 @@ function Set-ACLRoot {
 
     $targetAcl = Get-ACLDefault -Path $Path
 
-    $sysadminAce = New-ICEFullControl -Identifier "sysadmin"
-    $chiefAce = New-ICEFullControl -Identifier "chief"
-    $employeeAce = New-ICEReadAndExecuteContainer -Identifier "employee"
+    $sysadminAce = New-ACEFullControl -Identifier "sysadmin"
+    $chiefAce = New-ACEFullControl -Identifier "chief"
+    $employeeAce = New-ACEReadAndExecuteContainer -Identifier "employee"
 
     $targetAcl.AddAccessRule($sysadminAce)
     $targetAcl.AddAccessRule($chiefAce)
@@ -159,11 +185,11 @@ function Set-ACLManager {
 
     $targetAcl = Get-ACLDefault -Path $Path
 
-    $sysadminAce = New-ICEFullControl -Identifier "sysadmin"
-    $chiefAce = New-ICEFullControl -Identifier "chief"
-    $adminAce = New-ICEReadAndExecute -Identifier "admin"
-    $managerRWXAce = New-ICEReadExecuteAndWriteContainer -Identifier "manager"
-    $managerRXAce = New-ICEReadAndExecute -Identifier "manager"
+    $sysadminAce = New-ACEFullControl -Identifier "sysadmin"
+    $chiefAce = New-ACEFullControl -Identifier "chief"
+    $adminAce = New-ACEReadAndExecute -Identifier "admin"
+    $managerRWXAce = New-ACEReadExecuteAndWriteContainer -Identifier "manager"
+    $managerRXAce = New-ACEReadAndExecute -Identifier "manager"
 
     $targetAcl.AddAccessRule($sysadminAce)
     $targetAcl.AddAccessRule($chiefAce)
@@ -181,10 +207,10 @@ function Set-ACLAdmin {
 
     $targetAcl = Get-ACLDefault -Path $Path
 
-    $sysadminAce = New-ICEFullControl -Identifier "sysadmin"
-    $chiefAce = New-ICEFullControl -Identifier "chief"
-    $adminRWXAce = New-ICEReadExecuteAndWriteContainer -Identifier "admin"
-    $adminRXAce = New-ICEReadAndExecute -Identifier "admin"
+    $sysadminAce = New-ACEFullControl -Identifier "sysadmin"
+    $chiefAce = New-ACEFullControl -Identifier "chief"
+    $adminRWXAce = New-ACEReadExecuteAndWriteContainer -Identifier "admin"
+    $adminRXAce = New-ACEReadAndExecute -Identifier "admin"
 
     $targetAcl.AddAccessRule($sysadminAce)
     $targetAcl.AddAccessRule($chiefAce)
@@ -200,8 +226,8 @@ function Set-ACLChief {
     )
     $targetAcl = Get-ACLDefault -Path $Path
 
-    $sysadminAce = New-ICEFullControl -Identifier "sysadmin"
-    $chiefAce = New-ICEFullControl -Identifier "chief"
+    $sysadminAce = New-ACEFullControl -Identifier "sysadmin"
+    $chiefAce = New-ACEFullControl -Identifier "chief"
 
     $targetAcl.AddAccessRule($sysadminAce)
     $targetAcl.AddAccessRule($chiefAce)
@@ -214,12 +240,11 @@ function Set-ACLShared {
         [string]$Path
     )
 
-    $originalAcl = Get-Acl -Path $Path
-    $targetAcl = Get-Acl -Path $Path
+    $targetAcl = Get-ACLDefault -Path $Path
     
     $targetAcl.SetAccessRuleProtection($true, $false)
 
-    $employeeAce = New-ICEFullControl -Identifier "employee"
+    $employeeAce = New-ACEFullControl -Identifier "employee"
     $targetAcl.AddAccessRule($employeeAce)
 
     $targetAcl | Set-Acl -Path $Path
@@ -231,21 +256,64 @@ function Set-ACLSpecial {
         [string[]]$Identifiers
     )
 
-    $originalAcl = Get-Acl -Path $Path
-    $targetAcl = Get-Acl -Path $Path
+    $targetAcl = Get-ACLDefault -Path $Path
     
     $targetAcl.SetAccessRuleProtection($true, $false)
 
-    $sysadminAce = New-ICEFullControl  -Identifier "sysadmin"
-    $chiefAce = New-ICEReadAndExecute  -Identifier "chief"
+    $sysadminAce = New-ACEFullControl  -Identifier "sysadmin"
+    $chiefAce = New-ACEReadAndExecute  -Identifier "chief"
 
     foreach($identifier in $Identifiers) {
-        $ace = New-ICEFullControl -Identifier $identifier
+        $ace = New-ACEFullControl -Identifier $identifier
         $targetAcl.AddAccessRule($ace)
     }
 
     $targetAcl | Set-Acl -Path $Path
 }
+
+
+function Set-ACLSupreme1 {
+    param (
+        [string]$Path
+    )
+
+    $targetAcl = Get-ACLDefault -Path $Path
+
+    $srw = New-ACESimpleReadAndWrite -Identifier "supreme1"
+
+    $targetAcl.AddAccessRule($srw)
+
+    $targetAcl | Set-Acl -Path $Path
+}
+
+function Set-ACLSupreme2 {
+    param (
+        [string]$Path
+    )
+
+    $targetAcl = Get-ACLDefault -Path $Path
+
+    $srwa = New-ACESimpleReadWriteAndAppend -Identifier "supreme2"
+
+    $targetAcl.AddAccessRule($srwa)
+
+    $targetAcl | Set-Acl -Path $Path
+}
+
+function Set-ACLManagerAdmin {
+    param (
+        [string]$Path
+    )
+
+    $targetAcl = Get-ACLDefault -Path $Path
+
+    $rwx = New-ACEReadExecuteAndWrite -Identifier "admin2"
+
+    $targetAcl.AddAccessRule($rwx)
+
+    $targetAcl | Set-Acl -Path $Path
+}
+
 #endregion ACL
 
 #region Directories
@@ -258,59 +326,159 @@ function New-ITSMDirectory {
 }
 #endregion Directories
 
-Remove-Item -Path "C:\Company\Chief"
-Remove-Item -Path "C:\Company\Admin"
-Remove-Item -Path "C:\Company\Manager"
-Remove-Item -Path "C:\Company\Shared"
-Remove-Item -Path "C:\Company\Special"
-Remove-Item -Path "C:\Company"
+#region Policies
+function Export-SecurityPolicy {
+    param (
+        [string]$Path
+    )
+    secedit /export /cfg $Path | Out-Null
+}
 
-Remove-LocalUser -Name "sysadmin1"
-Remove-LocalUser -Name "chief1"
-Remove-LocalUser -Name "admin1"
-Remove-LocalUser -Name "admin2"
-Remove-LocalUser -Name "manager1"
-Remove-LocalUser -Name "manager2"
-Remove-LocalUser -Name "manager3"
-Remove-LocalUser -Name "manager4"
-Remove-LocalUser -Name "supreme"
+function Apply-SecurityPolicy {
+    param (
+        [string]$Path
+    )
+    secedit /configure /db c:\windows\security\local.sdb /cfg $Path /areas SECURITYPOLICY | Out-Null
+}
 
-Remove-LocalGroup -Name "sysadmin"
-Remove-LocalGroup -Name "chief"
-Remove-LocalGroup -Name "admin"
-Remove-LocalGroup -Name "manager"
-Remove-LocalGroup -Name "employee"
+function Set-SecurityPolicy {
+    param (
+        [string]$Policy,
+        [string]$Value
+    )
 
-New-ITSMLocalGroup -Name "sysadmin" 
-New-ITSMLocalGroup -Name "chief" 
-New-ITSMLocalGroup -Name "admin" 
-New-ITSMLocalGroup -Name "manager"
-New-ITSMLocalGroup -Name "employee"
+    $configPath = "C:\Temp\SecurityPolicy.cfg"
+    Export-SecurityPolicy -Path $configPath
+    
+    [regex]$regex = [string]::format("(?m)^{0}.*$", $Policy)
+    $replacement = [string]::format("{0} = {1}", $Policy, $Value)
 
-New-ITSMLocalUser -Name "sysadmin1" -Groups "Administrators","sysadmin","employee"
-New-ITSMLocalUser -Name "chief1" -Groups "chief","employee"
-New-ITSMLocalUser -Name "admin1" -Groups "admin","employee"
-New-ITSMLocalUser -Name "admin2" -Groups "admin","employee"
-New-ITSMLocalUser -Name "manager1" -Groups "manager","employee"
-New-ITSMLocalUser -Name "manager2" -Groups "manager","employee"
-New-ITSMLocalUser -Name "manager3" -Groups "manager","employee"
-New-ITSMLocalUser -Name "manager4" -Groups "manager","employee"
-New-ITSMLocalUser -Name "supreme" -Groups "employee"
+    (Get-Content $configPath -Raw) -replace $regex,$replacement | Out-File $configPath
 
-New-ITSMDirectory -Path "C:\Company"
-Set-ACLRoot -Path "C:\Company"
+    Apply-SecurityPolicy $configPath
 
-New-ITSMDirectory -Path "C:\Company\Chief"
-Set-ACLChief -Path "C:\Company\Chief"
+    Remove-Item -Path $configPath -Force -Confirm:$False
+}
 
-New-ITSMDirectory -Path "C:\Company\Admin"
-Set-ACLAdmin -Path "C:\Company\Admin"
+function Configure-SecurityPolicy {
+    Export-SecurityPolicy -Path "C:\Temp\DefaultSecurityPolicy.cfg"
+    Set-SecurityPolicy -Policy "PasswordComplexity" -Value "1"
+    Set-SecurityPolicy -Policy "MinimumPasswordLength" -Value "12"
+    Set-SecurityPolicy -Policy "MaximumPasswordAge" -Value "60"
+    Set-SecurityPolicy -Policy "PasswordHistorySize" -Value "5"
+    Set-SecurityPolicy -Policy "AuditSystemEvents" -Value "3"
+    Set-SecurityPolicy -Policy "AuditLogonEvents" -Value "3"
+    Set-SecurityPolicy -Policy "AuditObjectAccess" -Value "3"
+    Set-SecurityPolicy -Policy "AuditPrivilegeUse" -Value "3"
+    Set-SecurityPolicy -Policy "AuditPolicyChange" -Value "3"
+    Set-SecurityPolicy -Policy "AuditAccountManage" -Value "3"
+    Set-SecurityPolicy -Policy "AuditProcessTracking" -Value "3"
+    Set-SecurityPolicy -Policy "AuditDSAccess" -Value "3"
+    Set-SecurityPolicy -Policy "AuditAccountLogon" -Value "3"
+}
 
-New-ITSMDirectory -Path "C:\Company\Manager"
-Set-ACLManager -Path "C:\Company\Manager"
+function Configure-GroupPolicy {
+    Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System" -Force -Type "DWord" -Name "NoDispCPL" -Value 1
+    Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System" -Force -Type "DWord" -Name "NoChangingWallpaper" -Value 1
+    Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows\RemovableStorageDevices" -Force -Type "DWord" -Name "Deny_All" -Value 1
+    Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Force -Type "DWord" -Name "HidePowerOptions" -Value 1
+}
 
-New-ITSMDirectory -Path "C:\Company\Shared"
-Set-ACLShared -Path "C:\Company\Shared"
+function Restore-GroupPolicy {
+    Remove-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System" -Name "NoDispCPL"
+    Remove-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System" -Name "NoChangingWallpaper"
+    Remove-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows\RemovableStorageDevices" -Name "Deny_All"
+    Remove-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Name "HidePowerOptions"
+}
 
-New-ITSMDirectory -Path "C:\Company\Special"
-Set-ACLSpecial -Path "C:\Company\Special" -Identifiers "admin2","manager3"
+
+function Restore-SecurityPolicy {
+    New-ITSMDirectory -Path "C:\Temp" 2>&1 | Out-Null
+    Apply-SecurityPolicy -Path "C:\Temp\DefaultSecurityPolicy.cfg"
+}
+#endregion Policies
+
+#region State
+function Restore-Machine {
+    Restore-GroupPolicy
+    Restore-SecurityPolicy
+
+    Remove-Item -Path "C:\Company\Chief"
+    Remove-Item -Path "C:\Company\Admin"
+    Remove-Item -Path "C:\Company\Manager"
+    Remove-Item -Path "C:\Company\Shared"
+    Remove-Item -Path "C:\Company\Special"
+    Remove-Item -Path "C:\Company"
+
+    Remove-LocalUser -Name "sysadmin1"
+    Remove-LocalUser -Name "chief1"
+    Remove-LocalUser -Name "admin1"
+    Remove-LocalUser -Name "admin2"
+    Remove-LocalUser -Name "manager1"
+    Remove-LocalUser -Name "manager2"
+    Remove-LocalUser -Name "manager3"
+    Remove-LocalUser -Name "manager4"
+    Remove-LocalUser -Name "supreme1"
+    Remove-LocalUser -Name "supreme2"
+
+    Remove-LocalGroup -Name "sysadmin"
+    Remove-LocalGroup -Name "chief"
+    Remove-LocalGroup -Name "admin"
+    Remove-LocalGroup -Name "manager"
+    Remove-LocalGroup -Name "employee"
+}
+
+function Configure-Machine {
+    New-ITSMLocalGroup -Name "sysadmin" 
+    New-ITSMLocalGroup -Name "chief" 
+    New-ITSMLocalGroup -Name "admin" 
+    New-ITSMLocalGroup -Name "manager"
+    New-ITSMLocalGroup -Name "employee"
+
+    New-ITSMLocalUser -Name "sysadmin1" -Groups "Administrators","sysadmin","employee"
+    New-ITSMLocalUser -Name "chief1" -Groups "chief","employee"
+    New-ITSMLocalUser -Name "admin1" -Groups "admin","employee"
+    New-ITSMLocalUser -Name "admin2" -Groups "admin","employee"
+    New-ITSMLocalUser -Name "manager1" -Groups "manager","employee"
+    New-ITSMLocalUser -Name "manager2" -Groups "manager","employee"
+    New-ITSMLocalUser -Name "manager3" -Groups "manager","employee"
+    New-ITSMLocalUser -Name "manager4" -Groups "manager","employee"
+    New-ITSMLocalUser -Name "supreme1" -Groups "employee"
+    New-ITSMLocalUser -Name "supreme2" -Groups "employee"
+
+    New-ITSMDirectory -Path "C:\Company"
+    Set-ACLRoot -Path "C:\Company"
+
+    New-ITSMDirectory -Path "C:\Company\Chief"
+    Set-ACLChief -Path "C:\Company\Chief"
+
+    New-ITSMDirectory -Path "C:\Company\Admin"
+    Set-ACLAdmin -Path "C:\Company\Admin"
+    Set-ACLSupreme1 -Path "C:\Company\Admin"
+
+    New-ITSMDirectory -Path "C:\Company\Manager"
+    Set-ACLManager -Path "C:\Company\Manager"
+    Set-ACLSupreme2 -Path "C:\Company\Manager"
+    Set-ACLManagerAdmin -Path "C:\Company\Manager"
+
+    New-ITSMDirectory -Path "C:\Company\Shared"
+    Set-ACLShared -Path "C:\Company\Shared"
+
+    New-ITSMDirectory -Path "C:\Company\Special"
+    Set-ACLSpecial -Path "C:\Company\Special" -Identifiers "admin2","manager3"
+
+    Configure-SecurityPolicy
+    Configure-GroupPolicy
+}
+
+#endregion State
+
+Restore-Machine
+Configure-Machine
+
+# Crashing 
+# https://stackoverflow.com/questions/4284913/force-crash-an-application
+# windbg -pn notepad.exe
+# 0:008> ~0s 
+# 0:000> rip=0
+# 0:000> qd
