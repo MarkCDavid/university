@@ -16,6 +16,3 @@ print("=== Task 2:")
 
 t2_result = extendedEuclidian(B, 661)
 print(f"Multiplicative inverse of {B} is {t2_result.bezout[0] % 661}")
-
-t3_result = extendedEuclidian(240, 17)
-print(t3_result)
