@@ -1,4 +1,4 @@
-
+using namespace System.Security.Principal;
 using namespace System.Security.AccessControl;
 
 #region Identities
@@ -214,10 +214,10 @@ function Set-ACLOwner {
         [string]$Owner
     )
 
-    $owner = Get-LocalUser -Name $Owner 
+    $ownerIdentity = New-Object NTAccount($Owner)
     $targetAcl = Get-ACLDefault -Path $Path
 
-    $targetAcl.SetOwner($owner)
+    $targetAcl.SetOwner($ownerIdentity)
 
     $targetAcl | Set-Acl -Path $Path
 }
@@ -600,8 +600,6 @@ function Configure-Machine {
 
 Restore-Machine
 Configure-Machine
-
-# Completion of additional task 3 is done here, although it does require a live demonstration.
 
 # Crashing 
 # https://stackoverflow.com/questions/4284913/force-crash-an-application
