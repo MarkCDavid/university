@@ -1,0 +1,11 @@
+-D
+-b 8192
+-f 1
+--backlog_wait_time 0
+
+-a exit,always -F arch=b32 -S execve -k all_exec
+-a exit,always -F arch=b64 -S execve -k all_exec
+-w /var/run/utmp -p wa -k session_info
+-w /var/log/btmp -p wa -k session_info
+-w /var/log/wtmp -p wa -k session_info
+-w /media/ -p rwxa -k external_media

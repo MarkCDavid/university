@@ -13,7 +13,7 @@ delete_group () {
   delgroup $groupname
 }
 
-# Creates a user in specified groups and expired the
+# Creates a user in specified groups and expires the
 # default password immediately.
 create_user () {
   local username=$1
@@ -74,6 +74,7 @@ run_as () {
 # Reset state
 
 cp common-password.default /etc/pam.d/common-password
+cp audit.rules.default /etc/audit/audit.rules
 
 delete_user sysadmin     
 delete_user chief    
@@ -126,6 +127,8 @@ create_file /company/admin/admin_secrets 0.supreme_file
 
 # Enable better password policy (task 3)
 cp common-password.best /etc/pam.d/common-password
+# Enable better auditing (task 5, 8)
+cp audit.rules.best /etc/audit/audit.rules
 
 # Providing write permissions for a management user to a chief directory (task 2)
 setfacl -m user:manager4:-w- /company/chief
