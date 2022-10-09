@@ -6,6 +6,7 @@ import socket
 import ssl
 from os.path import exists
 from OpenSSL import crypto
+from handler import Handler
 
 from cert import generate_certificate
 
@@ -49,7 +50,11 @@ def thread_function(connection: 'ssl.SSLSocket', address: 'Tuple[str, int]', ca_
         verify_certificate(client_certificate, ca_certificate)
         verify_revocation(client_certificate)
         print(f"User {client_certificate.get_subject().commonName} is valid!")
-        connection.close()
+        handler = Handler(client_certificate.get_subject().commonName, connection, address)
+        while not handler.is_finished():
+            data = connection.recv(2**16).decode("utf-8")
+            handler.handle(data)
+        
     except Exception as exception:
         connection.close()
         print(exception)
@@ -65,12 +70,13 @@ def main():
     context.load_cert_chain("server.pem", "server.key")
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as _socket:
-        _socket.bind(('localhost', 8006))
+        _socket.bind(('localhost', 8007))
         _socket.listen(5)
         with context.wrap_socket(_socket, server_side=True) as secure_socket:
-            connection, address = secure_socket.accept()
-            thread = threading.Thread(target=thread_function, args=(connection, address, ca_certificate))
-            thread.start()
+            while True:
+                connection, address = secure_socket.accept()
+                thread = threading.Thread(target=thread_function, args=(connection, address, ca_certificate))
+                thread.start()
 
 
 if __name__ == "__main__":
