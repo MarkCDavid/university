@@ -1,0 +1,143 @@
+{
+    "_type": "export",
+    "__export_format": 4,
+    "__export_date": "2022-10-09T18:22:08.503Z",
+    "__export_source": "insomnia.desktop.app:v2022.6.0",
+    "resources": [
+        {
+            "_id": "req_afc97f1b29e54f09b9e16067748a2703",
+            "parentId": "wrk_2452782bd0f348b1a179d5d1303e2881",
+            "modified": 1665339712268,
+            "created": 1665252714336,
+            "url": "localhost:8005/generate",
+            "name": "Generate Certificate",
+            "description": "",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n\t\"subject\": \"traktorius\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {},
+            "metaSortKey": -1665252714336,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "wrk_2452782bd0f348b1a179d5d1303e2881",
+            "parentId": null,
+            "modified": 1665252703941,
+            "created": 1665252703941,
+            "name": "SSLCustom",
+            "description": "",
+            "scope": "collection",
+            "_type": "workspace"
+        },
+        {
+            "_id": "req_1a84ba7a96ba4066aa802c5a771fbbf9",
+            "parentId": "wrk_2452782bd0f348b1a179d5d1303e2881",
+            "modified": 1665339710602,
+            "created": 1665311325462,
+            "url": "localhost:8005/recover",
+            "name": "Recover Certificate",
+            "description": "",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n\t\"subject\": \"mindaugas\",\n\t\"key\": \"KyVPp0wvDLzxkjnYyAZr1MBVm7l8l173mGEkBZxXv20qjMVWPe9Xg1Gr4BmjNzznvDpzEZxlo1jKpkG0R0xLg2r3vz123MNBV3RMxLN9ny2Z9AvWJl8EGLmznwN2mzxY21q7z6JYrZ4nB88PJn1OwoEZkxy3r5PXr2wkD0MJpkvVwpqPMDKLODgPnEV00y4kG5mmDMWRpkwmwkxdLywr4pRnJQ5A96zYNDogKOE3RJP4GqNp9KQgW2oOX856vkD1\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {},
+            "metaSortKey": -1657858610286,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_2610e7b3fadb40f0939b109c7adb1fbf",
+            "parentId": "wrk_2452782bd0f348b1a179d5d1303e2881",
+            "modified": 1665339711324,
+            "created": 1665312917226,
+            "url": "localhost:8005/revoked",
+            "name": "Check Certificate Revokal",
+            "description": "",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n\t\"certificate\": \"-----BEGIN CERTIFICATE-----\\nMIICojCCAYqgAwIBAgIEAxidvjANBgkqhkiG9w0BAQsFADASMRAwDgYDVQQDDAdJ\\nVFNNIENBMB4XDTIyMTAwOTEzNTczN1oXDTMyMTAwNjEzNTczN1owFDESMBAGA1UE\\nAwwJbWluZGF1Z2FzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAufqM\\nAO+tAg0Q+0eOoaFeYeaCVHjfwcwR6FLrsPb8LDf4DiBesvgI2bWue3Y/kJTZQD+U\\nIe7g3TB4cVuXgmscc3TFCgbvAtsrnBfYWbw7YjoqmyuQuNs2AnFk2J4gz+fLTRiJ\\nyM8swEfpDYN19zTaogo0iICFq7xGPb5SNAtgqqXJBH/ZkLZccwMlifNA9tnqf3Mg\\n8KXAlO3a8Iwtqnv4jnRDj5WtojrICf7DqhmVpc5wbbK1tNHaMQOL+HBZTwm1LG3b\\nSIE0DQfJL9NJm74NtQDNQW2C53Z2MVONzOur3CvxnPfD8hYbW2U6aw77vzW1624Z\\n9TRL6HBYHQj1cplzKwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQA4zxCZmQGlDdUp\\nfYAbImTkIeAHPh8mddV72i57JJ448fWmG8a58Yw1vN7JfoVWVTvWdbZJUNyTj4t3\\nA0VZka2JJtBvTiS3MCKCqS9VFzukfo+SYwwkOUgVRsquDJAiT+wOYObJSM0LGqE5\\nYqdWvoivmiemdOJeXtmKV+tZxjeQ96iZGOE6unU+RuaC3x7KbJLWV7KmjWux23Nd\\n9i4mAKxLtXL0/8IwG1ausAthOEO4GSK/V8ggUnfnQ/3iDEiFxajksaUJTuYDORvU\\nQczrdUGwAYOKvFH6Yk6Ga84PK5F6cpuqRNKudAXvF8WoS4nmuaPQw3ZoJWXmy3AK\\nEcqMcsPX\\n-----END CERTIFICATE-----\\n\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {},
+            "metaSortKey": -1654161558261,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "env_91748748a56ec5cab6a83494446bdc4f3314201a",
+            "parentId": "wrk_2452782bd0f348b1a179d5d1303e2881",
+            "modified": 1665252703979,
+            "created": 1665252703979,
+            "name": "Base Environment",
+            "data": {},
+            "dataPropertyOrder": null,
+            "color": null,
+            "isPrivate": false,
+            "metaSortKey": 1665252703979,
+            "_type": "environment"
+        },
+        {
+            "_id": "jar_91748748a56ec5cab6a83494446bdc4f3314201a",
+            "parentId": "wrk_2452782bd0f348b1a179d5d1303e2881",
+            "modified": 1665252703980,
+            "created": 1665252703980,
+            "name": "Default Jar",
+            "cookies": [],
+            "_type": "cookie_jar"
+        },
+        {
+            "_id": "spc_c5ce3009e4934163850a408f27c532ef",
+            "parentId": "wrk_2452782bd0f348b1a179d5d1303e2881",
+            "modified": 1665252703960,
+            "created": 1665252703960,
+            "fileName": "SSLCustom",
+            "contents": "",
+            "contentType": "yaml",
+            "_type": "api_spec"
+        }
+    ]
+}
