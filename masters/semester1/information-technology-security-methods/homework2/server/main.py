@@ -1,83 +1,80 @@
 import json
-import threading
 from typing import Tuple
-import requests
-import socket
 import ssl
 from os.path import exists
 from OpenSSL import crypto
+import requests
 from handler import Handler
+from certificate_generate import generate_certificate
+from itsmsocket import Socket
+from config import CA_CERT, SERVER_CERT, SERVER_KEY, HOSTNAME, PORT
 
-from cert import generate_certificate
+def load_ca_certificate():
+    if not exists(CA_CERT):
+        raise Exception(f"CA certificate \"{CA_CERT}\" does not exist. Impossible to verify identities!")
 
-def retrieve_certificate(connection: 'ssl.SSLSocket', address: 'Tuple[str, int]') -> 'crypto.X509':
-    try:
-        return crypto.load_certificate(crypto.FILETYPE_PEM, connection.recv(2**16))
-    except:
-        raise Exception(f"Could not load the certificate provided by \"{address[0]}:{address[1]}\"")
+    with open(CA_CERT) as cert_file:
+        return crypto.load_certificate(crypto.FILETYPE_PEM, cert_file.read())
 
-def verify_certificate(client_certificate: 'crypto.X509', ca_certificate: 'crypto.X509'):
+def check_certificate_validity(client_certificate: 'crypto.X509', ca_certificate: 'crypto.X509'):
     store = crypto.X509Store()  
     store.add_cert(ca_certificate)  
-
     ctx = crypto.X509StoreContext(store, client_certificate)
-
     try:
         ctx.verify_certificate()
     except:
         raise Exception(f"Could not verify that the certificate was given out by \"{ca_certificate.get_subject().commonName}\".")
 
-
-def verify_revocation(client_certificate: 'crypto.X509'):
+def check_certificate_revokal(client_certificate: 'crypto.X509'):
     url = "http://localhost:8005/revoked"
     certificate = crypto.dump_certificate(crypto.FILETYPE_PEM, client_certificate).decode("ascii")
     body = json.dumps({"certificate": certificate})
     response = requests.post(url, body).json()
+
     if response["revoked"]:
-        raise Exception(f"Certificate for \"{client_certificate.get_subject().commonName}\" was revoked by \"{client_certificate.get_issuer().commonName}\"")
-
-def load_ca_certificate():
-    if not exists("ca.crt"):
-        raise Exception("CA certificate \"ca.crt\" does not exist. Impossible to verify identities!")
-
-    with open("ca.crt") as cert_file:
-        return crypto.load_certificate(crypto.FILETYPE_PEM, cert_file.read())
+        subject = client_certificate.get_subject().commonName
+        issuer = client_certificate.get_issuer().commonName
+        raise Exception(f"Certificate for \"{subject}\" was revoked by \"{issuer}\"")
 
 
-def thread_function(connection: 'ssl.SSLSocket', address: 'Tuple[str, int]', ca_certificate: 'crypto.X509'):
+def retrieve_certificate(connection: 'ssl.SSLSocket', address: 'Tuple[str, int]', ca_certificate: 'crypto.X509') -> 'crypto.X509':
+    try:
+        client_certificate = crypto.load_certificate(crypto.FILETYPE_PEM, connection.recv(8192))
+    except:
+        raise Exception(f"Could not load the certificate provided by \"{address[0]}:{address[1]}\"")
+
+    check_certificate_validity(client_certificate, ca_certificate)
+    check_certificate_revokal(client_certificate)
+
+    return client_certificate
+
+def handler(connection: 'ssl.SSLSocket', address: 'Tuple[str, int]', ca_certificate: 'crypto.X509'):
     try: 
-        client_certificate = retrieve_certificate(connection, address)
-        verify_certificate(client_certificate, ca_certificate)
-        verify_revocation(client_certificate)
-        print(f"User {client_certificate.get_subject().commonName} is valid!")
-        handler = Handler(client_certificate.get_subject().commonName, connection, address)
+        subject = f"{address[0]}:{address[1]}"
+        client_certificate = retrieve_certificate(connection, address, ca_certificate)
+        subject = client_certificate.get_subject().commonName
+
+        print(f"{subject}: Authenticated")
+
+        handler = Handler(subject, connection, address)
         while not handler.is_finished():
-            data = connection.recv(2**16).decode("utf-8")
+            data = connection.recv(8192).decode("utf-8")
             handler.handle(data)
         
     except Exception as exception:
+        connection.write(f"server error: {exception}".encode("utf-8"))
         connection.close()
-        print(exception)
-
+        print(f"{subject}: {exception}")
 
 def main():
     ca_certificate = load_ca_certificate()
 
-    if not exists("server.pem") or not exists("server.key"):
+    if not exists(SERVER_CERT) or not exists(SERVER_KEY):
         generate_certificate()
 
-    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    context.load_cert_chain("server.pem", "server.key")
-
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as _socket:
-        _socket.bind(('localhost', 8007))
-        _socket.listen(5)
-        with context.wrap_socket(_socket, server_side=True) as secure_socket:
-            while True:
-                connection, address = secure_socket.accept()
-                thread = threading.Thread(target=thread_function, args=(connection, address, ca_certificate))
-                thread.start()
-
+    with Socket(HOSTNAME, PORT) as _socket:
+        while True:
+            _socket.delegate(ca_certificate, handler)
 
 if __name__ == "__main__":
     main()

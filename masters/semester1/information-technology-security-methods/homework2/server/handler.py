@@ -3,6 +3,7 @@ import ssl
 from typing import List, Tuple
 import os
 
+PATH_PREFIX = "server_users"
 
 class Handler:
     
@@ -14,8 +15,12 @@ class Handler:
 
         self.connection.write(f"Connected as \"{subject}\"!".encode("utf-8"))
 
-        if not os.path.exists(self.subject):
-            os.mkdir(self.subject)
+        if not os.path.exists(PATH_PREFIX):
+            os.mkdir(PATH_PREFIX)
+
+        path = f"{PATH_PREFIX}/{self.subject}"
+        if not os.path.exists(path):
+            os.mkdir(path)
         
     def is_finished(self) -> 'bool':
         return self.finished
@@ -39,26 +44,26 @@ class Handler:
     def handler_exit(self, arguments: 'List[str]'):
         self.connection.close()
         self.finished = True
-        print(f"Connection closed by \"{self.address[0]}:{self.address[1]}\"")
+        print(f"{self.subject}: Connection closed by \"{self.address[0]}:{self.address[1]}\"")
 
     def handler_write(self, arguments: 'List[str]'):
-        if len(arguments) != 2:
+        if len(arguments) < 2:
             self.connection.write(f"Usage: \"write\" <filename> <contents>".encode("utf-8"))
             return
 
         filename = arguments[0]
-        contents = arguments[1]
+        contents = ' '.join(arguments[1:])
 
         with open(f"{self.subject}/{filename}", "w") as file:
             file.write(contents)
 
         self.connection.write(f"Successfully written file {filename}".encode("utf-8"))
-        print(f"Writing file {filename} for {self.subject}")
+        print(f"{self.subject}: Writing file {filename}")
 
     def handler_list(self, arguments: 'List[str]'):
         files = '\n'.join(os.listdir(self.subject))
         self.connection.write(f"Files:\n{files}".encode("utf-8"))
-        print(f"Showing files for {self.subject}")
+        print(f"{self.subject}: Showing files")
 
     def handler_read(self, arguments: 'List[str]'):
         if len(arguments) != 1:
@@ -68,7 +73,6 @@ class Handler:
         filename = arguments[0]
         path = f"{self.subject}/{filename}"
 
-
         if not os.path.exists(path):
             self.connection.write(f"File \"{filename}\" does not exist!".encode("utf-8"))
             return
@@ -77,3 +81,4 @@ class Handler:
             contents = file.read()
 
         self.connection.write(contents.encode("utf-8"))
+        print(f"{self.subject}: Reading file {filename}")

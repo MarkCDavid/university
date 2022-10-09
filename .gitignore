@@ -1,2 +1,6 @@
 literature/
 __pycache__/
+venv/
+*.key
+*.db
+server_users/

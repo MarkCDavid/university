@@ -7,8 +7,8 @@ from OpenSSL import crypto
 
 class CertificateGenerator:
 
-    CERT_PATH = "ca.crt"
-    KEY_PATH = "ca.key"
+    CERT_PATH = "certs/ca.crt"
+    KEY_PATH = "certs/ca.key"
 
     def generate_ca_certificate(self, subject: 'str'):
         ca_key = crypto.PKey()

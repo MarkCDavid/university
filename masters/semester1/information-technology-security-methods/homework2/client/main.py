@@ -1,30 +1,44 @@
-import socket
-import ssl
 import sys
+from os.path import exists
+from itsmsocket import Socket
+
+def load_certificate(subject: 'str'):
+    cert_path = f"certs/{subject}.pem"
+    if not exists(cert_path):
+        raise Exception(f"Certificate for \"{subject}\" does not exist!")
+
+    with open(cert_path, "rb") as cert_file:
+        return cert_file.read().decode("utf-8")
+
+def parse_argv():
+    subject, hostname, port = None, "localhost", 8006
+
+    if len(sys.argv) > 1:
+        subject = sys.argv[1]
+
+    if len(sys.argv) > 2:
+        hostname = sys.argv[2]
+
+    if len(sys.argv) > 3:
+        port = sys.argv[3]
+
+    return subject, hostname, port
 
 def main():
-    context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-    context.load_verify_locations("server.pem")
-    context.check_hostname = False
+    subject, hostname, port = parse_argv()
+    certificate = load_certificate(subject)
 
-    certificate = sys.argv[1]
+    with Socket(certificate, hostname, port) as _socket:
+        while True:
+            _input = input(f"{subject} $ ")
+            _socket.send(_input)
 
-    with open(certificate, "rb") as file:
-        certificate = file.read()
+            if _input.strip() == "exit":
+                return
 
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as _socket:
-        with context.wrap_socket(_socket) as secure_socket:
-            secure_socket.connect(("localhost", 8007))
-            secure_socket.send(certificate)
-            print(secure_socket.recv(2**16).decode("utf-8"))
-            while True:
-                user_input = input()
-                secure_socket.write(user_input.encode("utf-8"))
-                if user_input == "exit":
-                    return
-                data = secure_socket.recv(2**16).decode("utf-8")
-                print(data)
-          
+            rows = _socket.receive()
+            for row in rows.split('\n'):
+                print("server >", row)
 
 if __name__ == "__main__":
     main()
