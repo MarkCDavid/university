@@ -21,6 +21,11 @@ class CertificateGenerator:
         ca_subj = ca_cert.get_subject()
         ca_subj.commonName = subject
 
+        ca_cert.add_extensions([
+            crypto.X509Extension("basicConstraints".encode("ascii"), False, "CA:TRUE".encode("ascii")),
+            crypto.X509Extension("keyUsage".encode("ascii"), False, "keyCertSign, cRLSign".encode("ascii")),
+        ])
+
         ca_cert.set_issuer(ca_subj)
         ca_cert.set_pubkey(ca_key)
 
