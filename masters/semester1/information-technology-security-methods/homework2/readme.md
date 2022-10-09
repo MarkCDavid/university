@@ -16,8 +16,8 @@ Request body:
 Response body:
 ```
 {
-	"cert_pem": "string",
-	"cert_recovery": "string"
+    "cert_pem": "string",
+    "cert_recovery": "string"
 }
 ```
 `cert_pem` - generated certificate in PEM format
@@ -37,8 +37,8 @@ Request body:
 Response body:
 ```
 {
-	"cert_pem": "string",
-	"cert_recovery": "string"
+    "cert_pem": "string",
+    "cert_recovery": "string"
 }
 ```
 `cert_pem` - generated certificate in PEM format
@@ -56,7 +56,7 @@ Request body:
 Response body:
 ```
 {
-	"revoked": "bool",
+    "revoked": "bool",
 }
 ```
 `revoked` - whether the certificate has already been revoked
