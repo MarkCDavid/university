@@ -39,6 +39,10 @@ class BitArray2:
     @staticmethod
     def empty(size: 'int') -> 'BitArray2':
         return BitArray2([0 for _ in range(size)])
+
+    @staticmethod
+    def fromIntegerArray(integerArray: 'List[int]') -> 'BitArray2':
+        return BitArray2([0 if i == 0 else 1 for i in integerArray])
         
     @staticmethod
     def fromBitArray(bitArray: 'BitArray2') -> 'BitArray2':
@@ -121,6 +125,9 @@ class BitArray2:
 
     def __repr__(self: 'BitArray2') -> 'str':
         return f"BitArray2({str(self.bits)})"
+        
+    def __hash__(self) -> int:
+        return hash(str(self))
 
     def __getitem__(self: 'BitArray2', coordinate: 'Union[int, slice]') -> 'Union[int, BitArray2]':
         if isinstance(coordinate, int):

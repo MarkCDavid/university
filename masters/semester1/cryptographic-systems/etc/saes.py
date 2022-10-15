@@ -1,162 +1,130 @@
-import numpy as np
-from typing import List, Tuple
+from typing import List
 from bitarray2 import BitArray2
 
-substitution_box = [
-    [BitArray2.fromBitString("1001"),
-    BitArray2.fromBitString("0100"),
-    BitArray2.fromBitString("1010"),
-    BitArray2.fromBitString("1011")],
-    [BitArray2.fromBitString("1101"),
-    BitArray2.fromBitString("0001"),
-    BitArray2.fromBitString("1000"),
-    BitArray2.fromBitString("0101")],
-    [BitArray2.fromBitString("0110"),
-    BitArray2.fromBitString("0010"),
-    BitArray2.fromBitString("0000"),
-    BitArray2.fromBitString("0011")],
-    [BitArray2.fromBitString("1100"),
-    BitArray2.fromBitString("1110"),
-    BitArray2.fromBitString("1111"),
-    BitArray2.fromBitString("0111")]
-]
+substitution_box = {
+    BitArray2.fromBitString("0000"): BitArray2.fromBitString("1001"),
+    BitArray2.fromBitString("0001"): BitArray2.fromBitString("0100"),
+    BitArray2.fromBitString("0010"): BitArray2.fromBitString("1010"),
+    BitArray2.fromBitString("0011"): BitArray2.fromBitString("1011"),
+    BitArray2.fromBitString("0100"): BitArray2.fromBitString("1101"),
+    BitArray2.fromBitString("0101"): BitArray2.fromBitString("0001"),
+    BitArray2.fromBitString("0110"): BitArray2.fromBitString("1000"),
+    BitArray2.fromBitString("0111"): BitArray2.fromBitString("0101"),
+    BitArray2.fromBitString("1000"): BitArray2.fromBitString("0110"),
+    BitArray2.fromBitString("1001"): BitArray2.fromBitString("0010"),
+    BitArray2.fromBitString("1010"): BitArray2.fromBitString("0000"),
+    BitArray2.fromBitString("1011"): BitArray2.fromBitString("0011"),
+    BitArray2.fromBitString("1100"): BitArray2.fromBitString("1100"),
+    BitArray2.fromBitString("1101"): BitArray2.fromBitString("1110"),
+    BitArray2.fromBitString("1110"): BitArray2.fromBitString("1111"),
+    BitArray2.fromBitString("1111"): BitArray2.fromBitString("0111")
+}
 
-round_constants = [
-    BitArray2.fromBitString("1000"),
-    BitArray2.fromBitString("0000"),
-    BitArray2.fromBitString("0011"),
-    BitArray2.fromBitString("0000")
-]
+class KeySchedule:
 
-def to_nibbles(bitArray: 'BitArray2') -> 'List[BitArray2]':
-    
-    return [
-        bitArray[0:4],
-        bitArray[8:12],
-        bitArray[4:8],
-        bitArray[12:16]
-    ]
+    def __init__(self: 'KeySchedule', key: 'BitArray2') -> None:
+        word1 = key[0:8]
+        word2 = key[8:16]
+        word3 = word1 ^ KeySchedule.round(word2, BitArray2.fromBitString("1000"))
+        word4 = word2 ^ word3
+        word5 = word3 ^ KeySchedule.round(word4, BitArray2.fromBitString("0011"))
+        word6 = word4 ^ word5
 
-def to_snibbles(bitArray: 'BitArray2') -> 'List[BitArray2]':
-    return [
-        bitArray[0:4],
-        bitArray[4:8],
-        bitArray[8:12],
-        bitArray[12:16]
-    ]
+        self.keys = [
+            word1 + word2,
+            word3 + word4,
+            word5 + word6
+        ]
 
-def from_nibbles(nibbles: 'List[BitArray2]') -> 'BitArray2':
-    return sum(nibbles, start=BitArray2.empty(0))
+    def key(self: 'KeySchedule', index: 'int') -> 'BitArray2':
+        return self.keys[index]
 
-def from_snibbles(nibbles: 'List[BitArray2]') -> 'BitArray2':
-    return nibbles[0] + nibbles[2] + nibbles[1] + nibbles[3]
+    @staticmethod
+    def round(word: 'BitArray2', constant: 'BitArray2'):
+        n0, n1 = word[:4], word[4:]
+        n0, n1 = substitution_box[n1], substitution_box[n0]
+        n0, n1 = n0 ^ constant, n1
+        return n0 + n1
 
-def row_col(nibble: 'BitArray2') -> 'Tuple[int, int]':
-    return 2 * nibble[0] + nibble[1], 2 * nibble[2] + nibble[3]
+class Nibbles:
+    @staticmethod
+    def fromBitArray(bitArray: 'BitArray2') -> 'Nibbles':
+        return Nibbles([bitArray[0:4], bitArray[4:8], bitArray[8:12], bitArray[12:16]])
 
-def sbox(nibble: 'BitArray2') -> 'BitArray2':
-    row, col = row_col(nibble)
-    return substitution_box[row][col]
+    def toBitArray(self: 'Nibbles') -> 'BitArray2':
+        return self.nibbles[0] + self.nibbles[1] + self.nibbles[2] + self.nibbles[3]
 
-def subkeys_g(word: 'BitArray2', iteration: 'int'):
-    n0, n1 = word[:4], word[4:]
-    n0, n1 = sbox(n1), sbox(n0)
-    n0, n1 = n0 ^ round_constants[iteration * 2 + 0], n1 ^ round_constants[iteration * 2 + 1]
-    return n0 + n1
+    def __init__(self: 'Nibbles', nibbles: 'List[BitArray2]') -> None:
+        self.nibbles: 'List[BitArray2]' = nibbles
 
-def resize(array, size):
-    _z = min(len(array), size)
-    result = np.zeros(size)
-    result[size - _z:size] = array[0: _z]
-    return result
+    def shift_row(self: 'Nibbles') -> 'Nibbles':
+        return Nibbles([
+            self.nibbles[0], 
+            self.nibbles[3], 
+            self.nibbles[2], 
+            self.nibbles[1]
+        ])
 
-def polynomial_multiplication_modulo(
-    left: 'BitArray2', 
-    right: 'BitArray2', 
-    modulo: 'BitArray2') -> 'BitArray2':
-    _, remainder = np.polydiv(np.polymul(left.toNumPyArray(), right.toNumPyArray()), modulo.toNumPyArray())
-    return np.mod(resize(remainder, 4), 2)
+    def substitute(self: 'Nibbles') -> 'Nibbles':
+        return Nibbles([
+            substitution_box[self.nibbles[0]], 
+            substitution_box[self.nibbles[1]], 
+            substitution_box[self.nibbles[2]], 
+            substitution_box[self.nibbles[3]]
+        ])
 
-def column_polynomial_multiplication_modulo(
-    left: 'Tuple[BitArray2, BitArray2]', 
-    right: 'Tuple[BitArray2, BitArray2]', 
-    modulo: 'BitArray2') -> 'BitArray2':
-    
-    pmm0 = polynomial_multiplication_modulo(left[0], right[0], modulo)
-    pmm1 = polynomial_multiplication_modulo(left[1], right[1], modulo)
-    return np.mod(pmm0 + pmm1, 2)
+    def mix_columns(self: 'Nibbles') -> 'Nibbles':
+        columns = self.toBitArray()
+        return Nibbles.fromBitArray(BitArray2.fromIntegerArray([
+                columns[0] ^ columns[6], 
+                columns[1] ^ columns[4] ^ columns[7], 
+                columns[2] ^ columns[4] ^ columns[5], 
+                columns[3] ^ columns[5],
+                
+                columns[2] ^ columns[4], 
+                columns[0] ^ columns[3] ^ columns[5], 
+                columns[0] ^ columns[1] ^ columns[6], 
+                columns[1] ^ columns[7],
 
-    
+                columns[8] ^ columns[14], 
+                columns[9] ^ columns[12] ^ columns[15], 
+                columns[10] ^ columns[12] ^ columns[13], 
+                columns[11] ^ columns[13],
 
-def mixcol(nibbles: 'List[BitArray2]') -> 'List[BitArray2]':
+                columns[10] ^ columns[12], 
+                columns[8] ^ columns[11] ^ columns[13], 
+                columns[8] ^ columns[9] ^ columns[14], 
+                columns[9] ^ columns[15]
+        ]))
 
-    mip = BitArray2.fromBitString("10011")
-    mcc_top = (BitArray2.fromBitString("1"), BitArray2.fromBitString("100"))
-    mcc_bot = (BitArray2.fromBitString("100"), BitArray2.fromBitString("1"))
-    
-    col1 = (nibbles[0], nibbles[2])
-    col2 = (nibbles[1], nibbles[3])
+    def __xor__(self: 'Nibbles', other: 'BitArray2') -> 'Nibbles':
+        return Nibbles.fromBitArray(self.toBitArray() ^ other)
 
-    mcol1 = (
-        BitArray2.fromNumPyArray(column_polynomial_multiplication_modulo(mcc_top, col1, mip)),
-        BitArray2.fromNumPyArray(column_polynomial_multiplication_modulo(mcc_bot, col1, mip))
-    )
-
-    mcol2 = (
-        BitArray2.fromNumPyArray(column_polynomial_multiplication_modulo(mcc_top, col2, mip)),
-        BitArray2.fromNumPyArray(column_polynomial_multiplication_modulo(mcc_bot, col2, mip))
-    )
-
-    return [mcol1[0], mcol2[0], mcol1[1], mcol2[1]]
-
-def subkeys(key: 'BitArray2'):
-    nibbles = to_nibbles(key)
-    words = {}
-    words[0] = nibbles[0] + nibbles[2]
-    words[1] = nibbles[1] + nibbles[3]
-    words[2] = words[0] ^ subkeys_g(words[1], 0)
-    words[3] = words[1] ^ words[2]
-    words[4] = words[2] ^ subkeys_g(words[3], 1)
-    words[5] = words[3] ^ words[4]
-
-    return [
-        words[0] + words[1], 
-        words[2][:4] + words[3][:4] + words[2][4:] + words[3][4:],
-        words[4][:4] + words[5][:4] + words[4][4:] + words[5][4:]]
+    def __str__(self: 'Nibbles') -> 'str':
+        return str(self.toBitArray())
+        
 
 def encrypt(plaintext: 'BitArray2', key: 'BitArray2') -> 'BitArray2':
-    _subkeys = subkeys(key)
-    plaintext ^= _subkeys[0]
-    nibbles = to_nibbles(plaintext)
-    nibbles[0] = sbox(nibbles[0])
-    nibbles[1] = sbox(nibbles[1])
-    nibbles[2] = sbox(nibbles[2])
-    nibbles[3] = sbox(nibbles[3])
-    nibbles[2], nibbles[3] = nibbles[3], nibbles[2]
-    nibbles = mixcol(nibbles)
-    ciphertext = from_nibbles(nibbles)
-    ciphertext ^= _subkeys[1]
-    nibbles = to_snibbles(ciphertext)
-    nibbles[0] = sbox(nibbles[0])
-    nibbles[1] = sbox(nibbles[1])
-    nibbles[2] = sbox(nibbles[2])
-    nibbles[3] = sbox(nibbles[3])
-    nibbles[2], nibbles[3] = nibbles[3], nibbles[2]
-    ciphertext = from_nibbles(nibbles)
-    ciphertext ^= _subkeys[2]
-    return from_snibbles(to_snibbles(ciphertext))
+    key_schedule: KeySchedule = KeySchedule(key)
+    nibbles: Nibbles = Nibbles.fromBitArray(plaintext)
+    nibbles ^= key_schedule.key(0)
+    nibbles = nibbles.substitute()
+    nibbles = nibbles.shift_row()
+    nibbles = nibbles.mix_columns()
+    nibbles ^= key_schedule.key(1)
+    nibbles = nibbles.substitute()
+    nibbles = nibbles.shift_row()
+    nibbles ^= key_schedule.key(2)
+    return nibbles.toBitArray()
 
 
 if __name__ == "__main__":
-
-    from saes_other import encryption
-
-    result = encryption("0110111101101011", "1010011100111011")
-
-    print(result)
-
     plaintext = BitArray2.fromBitString("0110111101101011")
     key = BitArray2.fromBitString("1010011100111011")
+    expected = BitArray2.fromBitString("0000011100111000")
 
     result = encrypt(plaintext, key)
-    print(result)
+
+    print(f"     Got: {result}")
+    print(f"Expected: {expected}")
+    print(f"    Pass: {result == expected}")
