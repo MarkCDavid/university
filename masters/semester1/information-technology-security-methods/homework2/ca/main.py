@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+import uvicorn
 from keys import CertificateGenerator 
 from database import Certificates
 from OpenSSL import crypto
@@ -12,7 +13,6 @@ cg = CertificateGenerator()
 
 
 def _generate_client_certificate(subject: 'str'):
-    
         ca_cert, ca_key = cg.load_ca_certificates()
         client_cert = cg.generate_client_certificate(subject, ca_cert, ca_key)
         recovery_key, recovery_hash = cg.generate_recovery_key(client_cert)
@@ -28,8 +28,26 @@ def _generate_client_certificate(subject: 'str'):
             "cert_recovery": recovery_key,
         }
 
+def _sign_server_certificate(certificate_signing_request: 'str'):
+    
+        ca_cert, ca_key = cg.load_ca_certificates()
+        client_cert = cg.sign_server_certificate(certificate_signing_request, ca_cert, ca_key)
+
+        Certificates.create(
+            subject=client_cert.get_subject().commonName,
+            serial=client_cert.get_serial_number(), 
+            keyhash=""
+        ).save()
+
+        return { 
+            "cert_pem": crypto.dump_certificate(crypto.FILETYPE_PEM, client_cert)
+        }
+
 class Generate(BaseModel):
     subject: str
+
+class Sign(BaseModel):
+    certificate_signing_request: str
 
 class Recover(BaseModel):
     subject: str
@@ -42,6 +60,13 @@ class Revoked(BaseModel):
 def generate_client_certificate(body: 'Generate'):
     try:
         return _generate_client_certificate(body.subject)
+    except Exception as exception:
+        return JSONResponse(content={'reason': str(exception)}, status_code=400)
+
+@app.post("/sign")
+def sign_server_certificate(body: 'Sign'):
+    try:
+        return _sign_server_certificate(body.certificate_signing_request)
     except Exception as exception:
         return JSONResponse(content={'reason': str(exception)}, status_code=400)
 
@@ -61,7 +86,10 @@ def check_certificate_revokal(body: 'Revoked'):
         }
     except Exception as exception:
         return JSONResponse(content={'reason': str(exception)}, status_code=400)
-    
-# @app.get("/items/{item_id}")
-# def read_item(item_id: int, q: Union[str, None] = None):
-#     return {"item_id": item_id, "q": q}
+
+if __name__ == '__main__':
+    uvicorn.run(
+        'main:app', port=8005, host='ca.itsm.local',
+        reload=False,
+        ssl_keyfile='./certs/api.key',
+        ssl_certfile='./certs/api.crt')
