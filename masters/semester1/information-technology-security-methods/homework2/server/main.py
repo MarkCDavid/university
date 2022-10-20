@@ -4,6 +4,7 @@ from pydantic import BaseModel
 import uvicorn
 from database import Todo
 
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from certificate import load_ca_certificate, check_certificate
 from fastapi import FastAPI
@@ -15,6 +16,13 @@ ca_cert = load_ca_certificate()
 app = FastAPI()
 
 app.add_middleware(HTTPSRedirectMiddleware)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class CertifiedBaseModel(BaseModel):
     certificate: str
@@ -29,7 +37,7 @@ class Delete(CertifiedBaseModel):
     id: str
 
 @app.post("/all")
-def add_todo(body: 'CertifiedBaseModel'):
+def all_todos(body: 'CertifiedBaseModel'):
     try:
         client_certificate = check_certificate(body.certificate, ca_cert)
         todos = [model_to_dict(todo) for todo in Todo.select().where(Todo.owner==client_certificate.get_subject().commonName)]
@@ -79,8 +87,8 @@ def delete_todo(body: 'Delete'):
 def _get_todo(id, certificate):
     try:
         return Todo.select().where(
-            Todo.id==id and 
-            Todo.owner==certificate.get_subject().commonName).get()
+            (Todo.id==id) & 
+            (Todo.owner==certificate.get_subject().commonName)).get()
     except:
         raise Exception(f"Todo with id {id} does not exist!")
 

@@ -24,10 +24,10 @@ def check_certificate_validity(client_certificate: 'crypto.X509', ca_certificate
         raise Exception(f"Could not verify that the certificate was given out by \"{ca_certificate.get_subject().commonName}\".")
 
 def check_certificate_revokal(client_certificate: 'crypto.X509'):
-    url = "http://localhost:8005/revoked"
+    url = "https://ca.itsm.local:8005/revoked"
     certificate = crypto.dump_certificate(crypto.FILETYPE_PEM, client_certificate).decode("ascii")
     body = json.dumps({"certificate": certificate})
-    response = requests.post(url, body).json()
+    response = requests.post(url, body, verify=False).json()
 
     if response["revoked"]:
         subject = client_certificate.get_subject().commonName
