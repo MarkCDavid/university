@@ -7,10 +7,12 @@ from OpenSSL import crypto
 
 class CertificateGenerator:
 
-    CERT_PATH = "certs/ca.crt"
-    KEY_PATH = "certs/ca.key"
+    CA_CERT_PATH = "certs/ca.crt"
+    CA_KEY_PATH = "certs/ca.key"
+    API_CERT_PATH = "certs/api.crt"
+    API_KEY_PATH = "certs/api.key"
 
-    def generate_ca_certificate(self, subject: 'str'):
+    def generate_ca_certificate(self, ca_subject: 'str', api_subject: 'str'):
         ca_key = crypto.PKey()
         ca_key.generate_key(crypto.TYPE_RSA, 2048)
 
@@ -19,7 +21,7 @@ class CertificateGenerator:
         ca_cert.set_serial_number(self.generate_serial())
 
         ca_subj = ca_cert.get_subject()
-        ca_subj.commonName = subject
+        ca_subj.commonName = ca_subject
 
         ca_cert.add_extensions([
             crypto.X509Extension("basicConstraints".encode("ascii"), False, "CA:TRUE".encode("ascii")),
@@ -34,7 +36,30 @@ class CertificateGenerator:
 
         ca_cert.sign(ca_key, 'sha256')
 
-        return ca_cert, ca_key
+        api_key = crypto.PKey()
+        api_key.generate_key(crypto.TYPE_RSA, 2048)
+
+        api_cert = crypto.X509()
+        api_cert.set_version(2)
+        api_cert.set_serial_number(self.generate_serial())
+
+        api_subj = api_cert.get_subject()
+        api_subj.commonName = api_subject
+
+        api_cert.add_extensions([
+            crypto.X509Extension("subjectAltName".encode("ascii"), False, f"DNS:{api_subject}".encode("ascii")),
+            crypto.X509Extension("keyUsage".encode("ascii"), False, "digitalSignature, keyEncipherment".encode("ascii")),
+        ])
+
+        api_cert.set_issuer(ca_subj)
+        api_cert.set_pubkey(api_key)
+
+        api_cert.gmtime_adj_notBefore(0)
+        api_cert.gmtime_adj_notAfter(10*365*24*60*60)
+
+        api_cert.sign(ca_key, 'sha256')
+
+        return ca_cert, ca_key, api_cert, api_key
 
     def generate_client_certificate(self, subject: 'str', ca_cert: 'crypto.X509', ca_key: 'crypto.PKey'):
         self.ensure_unique_subject(subject)
@@ -58,6 +83,31 @@ class CertificateGenerator:
 
         return client_cert
 
+    def sign_server_certificate(self, certificate_signing_request: 'str', ca_cert: 'crypto.X509', ca_key: 'crypto.PKey'):
+        
+        csr = crypto.load_certificate_request(crypto.FILETYPE_PEM, certificate_signing_request)
+        self.ensure_unique_subject(csr.get_subject().commonName)
+
+        client_cert = crypto.X509()
+        client_cert.set_version(2)
+        client_cert.set_serial_number(self.generate_serial())
+        
+        client_cert.set_subject(csr.get_subject())
+        client_cert.set_issuer(ca_cert.get_subject())
+        client_cert.set_pubkey(csr.get_pubkey())
+
+        client_cert.add_extensions([
+            crypto.X509Extension("subjectAltName".encode("ascii"), False, f"DNS:{csr.get_subject().commonName}".encode("ascii")),
+        ])
+
+        client_cert.gmtime_adj_notBefore(0)
+        client_cert.gmtime_adj_notAfter(10*365*24*60*60)
+
+        client_cert.sign(ca_key, 'sha256')
+
+        return client_cert
+        
+
     def revoke_client_certificate(self, subject: 'str', key: 'str'):
         try:
             certificate: Certificates = Certificates.get(Certificates.subject==subject)
@@ -74,8 +124,8 @@ class CertificateGenerator:
             raise Exception(f"Recovery key '{key}' invalid for subject '{subject}'!")
         
     def load_ca_certificates(self, cert_path: 'str' = None, key_path: 'str' = None):
-        cert_path = CertificateGenerator.CERT_PATH if cert_path is None else cert_path
-        key_path = CertificateGenerator.KEY_PATH if key_path is None else key_path
+        cert_path = CertificateGenerator.CA_CERT_PATH if cert_path is None else cert_path
+        key_path = CertificateGenerator.CA_KEY_PATH if key_path is None else key_path
 
         with open(cert_path, "rb") as file:
             ca_cert = crypto.load_certificate(crypto.FILETYPE_PEM, file.read())
@@ -100,6 +150,7 @@ class CertificateGenerator:
             if existing_count == 0:
                 return serial
 
+
     def is_revoked(self, pem_certificate: 'str'):
         certificate = crypto.load_certificate(crypto.FILETYPE_PEM, pem_certificate)
         serial = certificate.get_serial_number()
@@ -117,13 +168,19 @@ class CertificateGenerator:
 
 def main():
     cg = CertificateGenerator()
-    cert, key = cg.generate_ca_certificate("ITSM CA")
+    ca_cert, ca_key, api_cert, api_key = cg.generate_ca_certificate("ITSM CA", "ca.itsm.local")
     
-    with open(CertificateGenerator.CERT_PATH, "wb") as file:
-        file.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
+    with open(CertificateGenerator.CA_CERT_PATH, "wb") as file:
+        file.write(crypto.dump_certificate(crypto.FILETYPE_PEM, ca_cert))
 
-    with open(CertificateGenerator.KEY_PATH, "wb") as file:
-        file.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, key))
+    with open(CertificateGenerator.CA_KEY_PATH, "wb") as file:
+        file.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, ca_key))
+
+    with open(CertificateGenerator.API_CERT_PATH, "wb") as file:
+        file.write(crypto.dump_certificate(crypto.FILETYPE_PEM, api_cert))
+
+    with open(CertificateGenerator.API_KEY_PATH, "wb") as file:
+        file.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, api_key))
 
 if __name__ == "__main__":
     main()

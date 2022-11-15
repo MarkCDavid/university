@@ -4,10 +4,10 @@ import requests
 
 def main():
     _, subject = sys.argv
-    url = "http://localhost:8005/generate"
+    url = "https://ca.itsm.local:8005/generate"
    
     body = json.dumps({"subject": subject})
-    response = requests.post(url, body)
+    response = requests.post(url, body, verify=False)
     response_json = response.json()
 
     if not response.ok:

@@ -1,80 +1,100 @@
+import random
 import json
-from typing import Tuple
-import ssl
-from os.path import exists
-from OpenSSL import crypto
-import requests
-from handler import Handler
-from certificate_generate import generate_certificate
-from itsmsocket import Socket
-from config import CA_CERT, SERVER_CERT, SERVER_KEY, HOSTNAME, PORT
+from pydantic import BaseModel
+import uvicorn
+from database import Todo
 
-def load_ca_certificate():
-    if not exists(CA_CERT):
-        raise Exception(f"CA certificate \"{CA_CERT}\" does not exist. Impossible to verify identities!")
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
+from certificate import load_ca_certificate, check_certificate
+from fastapi import FastAPI
+from hashids import Hashids
+from fastapi.responses import JSONResponse, Response
+from playhouse.shortcuts import model_to_dict
 
-    with open(CA_CERT) as cert_file:
-        return crypto.load_certificate(crypto.FILETYPE_PEM, cert_file.read())
+ca_cert = load_ca_certificate()
+app = FastAPI()
 
-def check_certificate_validity(client_certificate: 'crypto.X509', ca_certificate: 'crypto.X509'):
-    store = crypto.X509Store()  
-    store.add_cert(ca_certificate)  
-    ctx = crypto.X509StoreContext(store, client_certificate)
+app.add_middleware(HTTPSRedirectMiddleware)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+class CertifiedBaseModel(BaseModel):
+    certificate: str
+
+class Add(CertifiedBaseModel):
+    value: str
+
+class Toggle(CertifiedBaseModel):
+    id: str
+
+class Delete(CertifiedBaseModel):
+    id: str
+
+@app.post("/all")
+def all_todos(body: 'CertifiedBaseModel'):
     try:
-        ctx.verify_certificate()
-    except:
-        raise Exception(f"Could not verify that the certificate was given out by \"{ca_certificate.get_subject().commonName}\".")
-
-def check_certificate_revokal(client_certificate: 'crypto.X509'):
-    url = "http://localhost:8005/revoked"
-    certificate = crypto.dump_certificate(crypto.FILETYPE_PEM, client_certificate).decode("ascii")
-    body = json.dumps({"certificate": certificate})
-    response = requests.post(url, body).json()
-
-    if response["revoked"]:
-        subject = client_certificate.get_subject().commonName
-        issuer = client_certificate.get_issuer().commonName
-        raise Exception(f"Certificate for \"{subject}\" was revoked by \"{issuer}\"")
-
-
-def retrieve_certificate(connection: 'ssl.SSLSocket', address: 'Tuple[str, int]', ca_certificate: 'crypto.X509') -> 'crypto.X509':
-    try:
-        client_certificate = crypto.load_certificate(crypto.FILETYPE_PEM, connection.recv(8192))
-    except:
-        raise Exception(f"Could not load the certificate provided by \"{address[0]}:{address[1]}\"")
-
-    check_certificate_validity(client_certificate, ca_certificate)
-    check_certificate_revokal(client_certificate)
-
-    return client_certificate
-
-def handler(connection: 'ssl.SSLSocket', address: 'Tuple[str, int]', ca_certificate: 'crypto.X509'):
-    try: 
-        subject = f"{address[0]}:{address[1]}"
-        client_certificate = retrieve_certificate(connection, address, ca_certificate)
-        subject = client_certificate.get_subject().commonName
-
-        print(f"{subject}: Authenticated")
-
-        handler = Handler(subject, connection, address)
-        while not handler.is_finished():
-            data = connection.recv(8192).decode("utf-8")
-            handler.handle(data)
-        
+        client_certificate = check_certificate(body.certificate, ca_cert)
+        todos = [model_to_dict(todo) for todo in Todo.select().where(Todo.owner==client_certificate.get_subject().commonName)]
+        return JSONResponse(content={'todos': todos})
     except Exception as exception:
-        connection.write(f"server error: {exception}".encode("utf-8"))
-        connection.close()
-        print(f"{subject}: {exception}")
+        return JSONResponse(content={'reason': str(exception)}, status_code=400)
 
-def main():
-    ca_certificate = load_ca_certificate()
+@app.post("/add")
+def add_todo(body: 'Add'):
+    try:
+        client_certificate = check_certificate(body.certificate, ca_cert)
+        id = Hashids(min_length=64).encode(random.randint(1, 10**64))
+        
+        todo = Todo.create(
+            id=id,
+            owner=client_certificate.get_subject().commonName,
+            value=body.value,
+            completed=False
+        )
+        todo.save()
+        return Response()
+    except Exception as exception:
+        return JSONResponse(content={'reason': str(exception)}, status_code=400)
 
-    if not exists(SERVER_CERT) or not exists(SERVER_KEY):
-        generate_certificate()
+@app.post("/toggle")
+def toggle_todo(body: 'Toggle'):
+    try:
+        client_certificate = check_certificate(body.certificate, ca_cert)
+        todo = _get_todo(body.id, client_certificate)
+        todo.completed = not todo.completed
+        todo.save()
 
-    with Socket(HOSTNAME, PORT) as _socket:
-        while True:
-            _socket.delegate(ca_certificate, handler)
+    except Exception as exception:
+        return JSONResponse(content={'reason': str(exception)}, status_code=400)
 
-if __name__ == "__main__":
-    main()
+
+@app.post("/delete")
+def delete_todo(body: 'Delete'):
+    try:
+        client_certificate = check_certificate(body.certificate, ca_cert)
+        todo = _get_todo(body.id, client_certificate)
+        todo.delete_instance()
+    except Exception as exception:
+        return JSONResponse(content={'reason': str(exception)}, status_code=400)
+
+
+def _get_todo(id, certificate):
+    try:
+        return Todo.select().where(
+            (Todo.id==id) & 
+            (Todo.owner==certificate.get_subject().commonName)).get()
+    except:
+        raise Exception(f"Todo with id {id} does not exist!")
+
+if __name__ == '__main__':
+    uvicorn.run(
+        'main:app', port=8006, host='server.itsm.local',
+        reload=False,
+        ssl_keyfile='./certs/server.key',
+        ssl_certfile='./certs/server.pem')
