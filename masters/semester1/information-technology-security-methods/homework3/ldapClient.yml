@@ -1,0 +1,119 @@
+---
+- hosts: all
+  become: yes
+
+  pre_tasks:
+  - name: Update apt cache if needed.
+    apt: 
+      update_cache: yes
+      cache_valid_time: 3600
+
+  tasks:
+  - name: Ensure dependency packages are installed.
+    apt:
+      name:
+        - python3
+        - python3-pip
+        - python3-setuptools
+
+        - debconf-utils
+      state: present
+
+  - name: Check debconf for ldap-auth-config entries
+    shell: (debconf-get-selections | grep -q -s ldap-auth-config); echo $?
+    register: ldap_auth_config_debconf
+    ignore_errors: yes
+    changed_when: false
+
+  - name: Setup unattended installation parameters for OpenLDAP installation.
+    debconf:
+      name: slapd
+      question: "{{ item.key }}"
+      vtype: "{{ item.type }}"
+      value: "{{ item.value }}"
+    with_items:
+      - key: ldap-auth-config/bindpw
+        type: password
+        value: password
+      - key: ldap-auth-config/rootbindpw
+        type: password
+        value: password
+      - key: ldap-auth-config/ldapns/base-dn
+        type: string
+        value: dc=itsm,dc=local
+      - key: ldap-auth-config/dbrootlogin
+        type: boolean
+        value: "true"
+      - key: ldap-auth-config/override
+        type: boolean
+        value: "true"
+      - key: ldap-auth-config/move-to-debconf
+        type: boolean
+        value: "true"
+      - key: ldap-auth-config/binddn
+        type: string
+        value: cn=admin,dc=itsm,dc=local
+      - key: ldap-auth-config/dblogin
+        type: boolean
+        value: "false"
+      - key: ldap-auth-config/ldapns/ldap-server
+        type: string
+        value: ldap://192.168.0.201
+      - key: ldap-auth-config/pam_password
+        type: string
+        value: clear
+      - key: ldap-auth-config/rootbinddn
+        type: string
+        value: cn=admin,dc=itsm,dc=local
+      - key: ldap-auth-config/ldapns/ldap_version
+        type: string
+        value: 3
+    when: "ldap_auth_config_debconf.stdout.find('0') == -1"
+
+    
+  - name: Ensure client LDAP packages are installed.
+    apt:
+      name:
+        - libpam-ldap
+        - nscd
+      state: present
+
+  - name: Update nsswitch.conf
+    replace:
+      path: /etc/nsswitch.conf
+      regexp: "{{ item.regexp }}"
+      replace: "{{ item.replace }}"
+    with_items:
+      - regexp: "passwd:         files systemd"
+        replace: "passwd:         files systemd ldap"
+      - regexp: "group:          files systemd"
+        replace: "group:          files systemd ldap"
+      - regexp: "shadow:         files"
+        replace: "shadow:         files ldap"
+
+    
+  - name: Update common-password configuration.
+    replace:
+      path: /etc/pam.d/common-password
+      regexp: "{{ item.regexp }}"
+      replace: "{{ item.replace }}"
+    with_items:
+      - regexp: "(.*'server','name',)(.*)(\\);)"
+        replace: "\\1'ISTM LDAP'\\3"
+      - regexp: "(.*'server','base',)(.*)(\\);)"
+        replace: "\\1array('dc=itsm,dc=local')\\3"
+      - regexp: "password \\[success\\=1 user_unknown\\=ignore default\\=die] pam_ldap.so use_authtok try_first_pass"
+        replace: "password [success=1 user_unknown=ignore default=die] pam_ldap.so try_first_pass"
+
+
+  - name: Append pam configuration to create homedir on login.
+    lineinfile:
+      path: /etc/pam.d/common-session
+      line: "session required        pam_mkhomedir.so skel=/etc/skel umask=0022"
+
+  - name: Restart nscd service
+    service: 
+      name: nscd
+      state: restarted
+
+      
