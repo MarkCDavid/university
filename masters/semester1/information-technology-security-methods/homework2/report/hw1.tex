@@ -21,6 +21,7 @@
     \item \textit{CA - Certificate Authority};
     \item \textit{CSR - Certificate Signing Request};
     \item \textit{JSON - JavaScript Object Notation};
+    \item \textit{HSM - Hardware Security Module};
     \item \textit{2FA - Two Factor Authentication}.
 \end{itemize}
 
@@ -68,6 +69,8 @@ Užduotis įgyvendinta sukuriant tris posistemes: \textit{CA}, serveris ir klien
 \subsection{\textit{CA} atsakomybės}
 \textit{CA} posistemė yra atsakinga už didžiąją dalį sistemos funkcionalumo. Visa komunikacija su \textit{CA} posistemiu yra atliekama naudojant \textit{HTTP RESTful API}.
 
+Prieš dislokuojant \textit{CA} posistemę, būtina sugeneruoti viešąjį ir privatų raktus, bei \textit{CA} sertifikatą. Šių objektų reikia, norint elektroniniu parašu pasirašyti vartotojams generuojamus sertifikatus, taip pat patvirtinti ir pasirašyti sistemai perduodamas \textit{CSR} užklausas. Praktiniu požiūriu, realioje \textit{CA} įmonėje, raktų generavimas ir pasirašymas vyktų \textit{HSM} prietaise. Vystomoje sistemoje raktai yra sugeneruojami prieš \textit{CA} sistemos dislokaciją, naudojantis pagalbiniais \textit{Python} skriptais.
+
 \begin{figure}[H]
 \begin{center}
     \includegraphics[height=5cm]{img/diagram.core.png}
@@ -93,6 +96,14 @@ Užduotis įgyvendinta sukuriant tris posistemes: \textit{CA}, serveris ir klien
 }
 \end{lstlisting}
 
+Generuojant vartotojo autentikacijos sertifikatą, užkraunami \textit{CA} sertifikatas ir privatus raktas, naudojantis šiais, yra sugeneruojamas galutinės esybės sertifikatas. Sugeneravus galutinės esybės sertifikatą, sugeneruojamas sertifikato atkūrimo raktas. 
+
+Sertifikato atkūrimo raktas generuojamas imant atsitiktinį skaičių iš pseudo-atsitiktinių skaičių generatoriaus, jį užkoduojant \textit{Hashid} bibliotekos pagalba. Būtent šis raktas yra pateikiamas vartotojui, kaip atkūrimo raktas.
+
+Prie gauto rezultato prijungiant subjekto vardą, gautas rezultatas išmaišomas naudojant \textit{SHA256} maišos funkcija ir išsaugomas į duomenų bazę.
+
+Tiek sugeneruotas sertifikatas, tiek sugeneruotas atkūrimo kodas yra perduodami \textit{JSON} formatu \parenreflst{lst:rec_post_res}.
+
 \subsubsection{Vartotojų sertifikatų atkūrimas}
 
 Ši funkcija atsakingą už vartotojų sertifikatų atkūrimą, naudojant sugeneruota sertifikato atkūrimo kodą \parenrefsec{section:cert_gen}. Vartotojas \textit{/recover} resursui išsiunčia \textit{POST} užklausą, pateikdamas subjekto vardą ir atkūrimo raktą \parenreflst{lst:rec_post_req}. Jei atkūrimo raktas jau buvo panaudotas, ar atkūrimo raktas nėra skirtas nurodytam subjektui, vartotojui pateikiamas atitinkamas klaidos pranešimas. Jei pateikti duomenys yra teisingi, gaunamas atsakymas su sugeneruotu sertifikatu \textit{cert\_pem} \textit{JSON} lauke bei sertifikato atkūrimo kodu \textit{cert\_recovery} \textit{JSON} lauke \parenreflst{lst:rec_post_res}.
@@ -100,7 +111,6 @@ Užduotis įgyvendinta sukuriant tris posistemes: \textit{CA}, serveris ir klien
 \textit{CA} serveris gavęs neklaidingus duomenis, jau išduotą sertifikatą paverčia negaliojančiu ir vartotojui sugeneruoja naują. Kadangi išduoti sertifikatai negali būti modifikuojami, sertifikato galiojimo nutraukimas yra įgyvendinamas įrašant sertifikatą į nebegaliojančių sertifikatų sąrašą.
 
 Atkuriant sertifikatą, būtinybė pateikti subjekto pavadinimą padidina atkūrimo saugą. Jei \textit{blogiečiai} sužino tik atkūrimo kodą, negali padaryti žalos, nes nežino subjekto vardo.
-
 \begin{lstlisting}[caption=Vartotojo sertifikato atkūrimo JSON užklausa,label={lst:rec_post_req},language=json]
 {
     "subject": "DidysisChungusas",
@@ -114,6 +124,16 @@ Atkuriant sertifikatą, būtinybė pateikti subjekto pavadinimą padidina atkūr
     "cert_recovery": "KyVP..."
 }
 \end{lstlisting}
+
+\textit{CA} sistemai gavus užklausą, duomenų bazėje, pagal subjekto vardą, randami sertifikato metaduomenys. Subjekto vardo ir atkūrimo rakto kombinacija yra sumaišoma naudojant \textit{SHA256} maišos funkciją, rezultatas yra palyginamas su metaduomenyse saugomu rezultatu. Jei rezultatai sutampa, dabartinis sertifikatas yra įrašomas į nebegaliojančių sertifikatų sąrašą ir yra sugeneruojamas naujas vartotojo sertifikatas ir atkūrimo raktas, naudojantis \ref{section:cert_gen} skyriuje aprašytu generavimo metodu.
+
+\subsubsection{Sertifikato galiojimo nutraukimas}
+
+Ši funkcija vystomoje \textit{CA} sistemoje tiesiogiai neegzistuoja, tačiau \ref{section:cert_gen} skyriuje aprašytame metode minima, jog prieš naujo sertifikato generavimą, yra nutraukiamas prieš tai buvusio sertifikato galiojimas. Šią funkciją būtų galima lengvai įgyvendinti sistemoje.
+
+Tiesiogiai nesant šiai funkcijai, šį funkcionalumą galima pasiekti pateikus sertifikato atkūrimo užklausą, neišsaugant \textit{CA} sistemos pateikiamo sertifikato ir atkūrimo rakto. Niekam neturint sugeneruoto sertifikato (\textit{CA} sistema saugo tik sertifikato metaduomenis) ir sertifikato atkūrimo rakto, sertifikatą būtų galima laikyti negaliojančiu.
+
+Iš \textit{CA} serverio pusės, sertifikato galiojimo nutraukimas būtų atliekamas į nebegaliojančių sertifikatų sąrašą įtraukiant sertifikatą, kurio galiojimą norima nutraukti. Vienas trūkumas dabartinėje sistemos būsenoje - vykdant sertifikato atkūrimą, nėra atsižvelgiama į tai, kad sertifikatas gali būti nebegaliojančių sertifikatų sąraše. Jei \textit{CA} įtraukė sertifikatą į negaliojančių sertifikatų sąrašą, o šis sertifikatas yra atkuriamas, staiga, atkurtas sertifikatas tampa galiojančiu. Norint nutraukti sertifikato galiojimą, kartu tektų sugadinti ar pašalinti to sertifikato metaduomenis duomenų bazėje, kadangi neturint sertifikato metaduomenų, sertifikato atkūrimas tampa neįmanomu.
 
 \subsubsection{Sertifikato galiojimo patikrinimas}
 
@@ -135,6 +155,8 @@ Galiojimo patikrinimas sistemos įgyvendinime vykdomas \textit{CA} serverio pus�
 }
 \end{lstlisting}
 
+Galiojimo patikrinimas atliekamas gavus sertifikatą. Atliekama šio sertifikato paieška nebegaliojančių sertifikatų sąraše. Atitinkamai, radus pateikiamas atsakymas, jog sertifikatas yra nebegaliojantis, neradus - jog galiojantis.
+
 \subsubsection{Sertifikato pasirašymas}
 
 Ši funkcija atsakingą už serverio sertifikatų pasirašymą. \textit{CA} serveris atlieka \ref{sec:csr} skyriuje aptartą \textit{CSR} pasirašymo mechanizmą. Sertifikatas pasirašomas tik \textit{SSL} ir \textit{SSL SAN} sertifikatams, norint užtikrinti, kad autentikuojantys serveriai negalėtų apsimesti vienas kitu.
@@ -152,6 +174,8 @@ Vartotojas \textit{/sign} resursui išsiunčia \textit{POST} užklausą, pateikd
     "cert_pem": "-----BEGIN CERTIFICATE-----..."
 }
 \end{lstlisting}
+
+\textit{CA} sistemai gavus \textit{CSR} užklausą, užkraunami \textit{CA} sertifikatas ir privatus raktas. Yra patikrinama, ar pateiktas subjektas yra unikalus. Į naująjį sertifikatą yra įrašomi pasirašančios \textit{CA} duomenys, taip pat nukopijuojami \textit{CSR} užklausoje pateikti duomenys, ir naujasis sertifikatas pasirašomas \textit{CA} privačiu raktu. Sugeneruotas sertifikatas pateikiamas užsakovui.
 
 \subsection{Serverio ir kliento autentikacija}
 
