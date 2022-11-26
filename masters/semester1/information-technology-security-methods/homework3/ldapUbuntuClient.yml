@@ -58,7 +58,7 @@
         value: "false"
       - key: ldap-auth-config/ldapns/ldap-server
         type: string
-        value: ldap://192.168.0.201
+        value: ldaps://192.168.0.201
       - key: ldap-auth-config/pam_password
         type: string
         value: clear
@@ -110,6 +110,12 @@
     lineinfile:
       path: /etc/pam.d/common-session
       line: "session required        pam_mkhomedir.so skel=/etc/skel umask=0022"
+
+  # Not a good solution, should try to see if I can make client accept the server certificate
+  - name: Do not validate server certificate.
+    lineinfile:
+      path: /etc/ldap/ldap.conf
+      line: "TLS_REQCERT allow"
 
   - name: Restart nscd service
     service: 

@@ -87,6 +87,11 @@
       rule: allow
       port: ldap
 
+  - name: Allow SSL OpenLDAP in the firewall.
+    ufw:
+      rule: allow
+      port: ldaps
+
   - name: Install phpLDAPadmin.
     apt:
       name: phpldapadmin
@@ -156,10 +161,71 @@
       bind_dn: cn=admin,dc=itsm,dc=local
       bind_pw: password
     with_items:
-      - cn: Mark David
-        uid: mdavid
+      - cn: Mark Davido
+        uid: mdavido
         uidNumber: 1000
         gidNumber: 500
         firstName: Mark
-        lastName: David
+        lastName: Davido
         password: password
+
+  - name: Generate an OpenSSL private key
+    openssl_privatekey:
+      path: /etc/ssl/private/ldap_server.key
+
+  - name: Generate an OpenSSL Certificate Signing Request
+    openssl_csr:
+      path: /etc/ssl/private/ldap_server.csr
+      privatekey_path: /etc/ssl/private/ldap_server.key
+      country_name: LT
+      locality_name: Vilnius
+      organization_name: VilniusTech
+      organizational_unit_name: ITSM
+      common_name: ldap.itsm.local
+      email_address: aurimas.sakalys@stud.vilniustech.lt
+
+  - name: Generate a Self Signed OpenSSL certificate
+    openssl_certificate:
+      path: /etc/ssl/private/ldap_server.crt
+      privatekey_path: /etc/ssl/private/ldap_server.key
+      csr_path: /etc/ssl/private/ldap_server.csr
+      provider: selfsigned
+
+  - name: Copy keys and certificates to /etc/ldap/sasl2
+    copy:
+      src: "{{ item.src }}"
+      dest: /etc/ldap/sasl2
+      remote_src: yes
+    with_items:
+      - src: /etc/ssl/private/ldap_server.key
+      - src: /etc/ssl/private/ldap_server.crt
+      - src: /etc/ssl/certs/ca-certificates.crt
+  
+  - name: Provide ownership of /etc/ldap/sasl2 to openldap user
+    file: 
+      dest: /etc/ldap/sasl2
+      owner: openldap
+      recurse: yes
+
+  - name: Configure TLS certificate locations for LDAP
+    community.general.ldap_attrs:
+      dn: cn=config
+      attributes:
+          olcTLSCACertificateFile: /etc/ldap/sasl2/ca-certificates.crt
+          olcTLSCertificateFile: /etc/ldap/sasl2/ldap_server.crt
+          olcTLSCertificateKeyFile: /etc/ldap/sasl2/ldap_server.key
+      state: exact
+
+  - name: Enable SSL LDAP
+    replace:
+      path: /etc/default/slapd 
+      regexp: "{{ item.regexp }}"
+      replace: "{{ item.replace }}"
+    with_items:
+      - regexp: "SLAPD_SERVICES.*"
+        replace: 'SLAPD_SERVICES="ldaps:/// ldapi:///"'
+
+  - name: Restart OpenLDAP daemon.
+    service: 
+      name: slapd
+      state: restarted
