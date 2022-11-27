@@ -122,4 +122,44 @@
       name: nscd
       state: restarted
 
+  - name: Ensure ALC groups exist
+    ansible.builtin.group:
+      name: "{{ item.name }}"
+      state: present
+      gid: "{{ item.gid }}"
+    with_items:
+      - name: manager
+        gid: 501
+      - name: finance
+        gid: 502
+
+  - name: Create directories
+    ansible.builtin.file:
+      path: "/{{ item.owner }}"
+      state: directory
+      recurse: yes
+      owner: root
+      group: "{{ item.owner }}"
+      mode: '770'
+    with_items:
+      - owner: manager
+      - owner: finance
+
+  - name: Create files
+    ansible.builtin.file:
+      path:  "{{ item.path }}"
+      state: touch
+      owner: root
+      group: "{{ item.owner }}"
+      mode: '770'
+    with_items:
+      - path: /manager/manager1.txt
+        owner: manager
+      - path: /manager/manager2.txt
+        owner: manager
+      - path: /finance/finance1.txt
+        owner: finance
+      - path: /finance/finance2.txt
+        owner: finance
+
       

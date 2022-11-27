@@ -60,7 +60,7 @@
     ansible.windows.win_regedit:
       path: HKLM:\SOFTWARE\pGina3
       name: 0f52390b-c781-43ae-bd62-553c77fa4cf7
-      data: 2 # a flag enabling authentication only for LDAP plugin
+      data: 10 # Auth + Gateway 
       type: dword
 
   - debug: msg={{nGinaPassword}}
@@ -90,10 +90,86 @@
       - name: SearchDN
         data: "cn=admin,dc=itsm,dc=local"
         type: string
+      - name: GroupDnPattern
+        data: "cn=%g,ou=groups,dc=itsm,dc=local"
+        type: string
       - name: SearchFilter
         data: "uid=%u"
         type: string
       - name: SearchPW
         data: "{{ nGinaPassword.output[0] }}"
         type: string
-      
+      - name: GroupGatewayRules
+        data: [manager0Manager, finance0Finance]
+        type: multistring
+    
+  - name: Create ACL groups
+    ansible.windows.win_group:
+      name: "{{ item.name }}"
+      description: "{{ item.description }}"
+      state: present
+    with_items:
+      - name: Manager
+        description: Manager group
+      - name: Finance
+        description: Finance group
+
+  - name: Create ACL directories
+    ansible.windows.win_file:
+      path: "{{ item.path }}"
+      state: directory
+    with_items:
+      - path: C:\Finance
+      - path: C:\Manager  
+      - path: C:\Authenticated
+
+  - name: Create ACL files
+    ansible.windows.win_file:
+      path: "{{ item.path }}"
+      state: touch
+    with_items:
+      - path: C:\Finance\finance1.txt
+      - path: C:\Finance\finance2.txt
+      - path: C:\Manager\manager1.txt
+      - path: C:\Manager\manager2.txt
+      - path: C:\Authenticated\authenticated1.txt
+      - path: C:\Authenticated\authenticated2.txt
+
+  - name: Disable inherited ACE's
+    ansible.windows.win_acl_inheritance:
+      path: "{{ item.path }}"
+      state: absent
+    with_items:
+      - path: C:\Finance
+      - path: C:\Manager  
+      - path: C:\Authenticated
+
+  - name: Add Authenticated Users group ACE to Authenticated folder
+    ansible.windows.win_acl:
+      path: C:\Authenticated
+      user: Authenticated Users
+      rights: FullControl
+      type: allow
+      state: present
+      inherit: ContainerInherit, ObjectInherit
+      propagation: 'None'
+
+  - name: Add Finance group ACE to Finance folder
+    ansible.windows.win_acl:
+      path: C:\Manager
+      user: Manager
+      rights: FullControl
+      type: allow
+      state: present
+      inherit: ContainerInherit, ObjectInherit
+      propagation: 'None'
+
+  - name: Add Finance group ACE to Finance folder
+    ansible.windows.win_acl:
+      path: C:\Finance
+      user: Finance
+      rights: FullControl
+      type: allow
+      state: present
+      inherit: ContainerInherit, ObjectInherit
+      propagation: 'None'

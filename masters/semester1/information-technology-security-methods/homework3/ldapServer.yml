@@ -134,8 +134,10 @@
       bind_dn: cn=admin,dc=itsm,dc=local
       bind_pw: password
     with_items:
-      - cn: user
-        gid: 500
+      - cn: manager
+        gid: 501
+      - cn: finance
+        gid: 502
 
   - name: Create users
     community.general.ldap_entry:
@@ -149,25 +151,110 @@
         uid: "{{ item.uid }}"
         uidNumber: "{{ item.uidNumber }}"
         gidNumber: "{{ item.gidNumber }}"
-
         givenName: "{{ item.firstName }}"
         sn: "{{ item.lastName }}"
-
         userPassword: "{{ item.password }}"
-
         homeDirectory: "/home/{{ item.uid }}"
         loginShell: "/bin/sh"
-
       bind_dn: cn=admin,dc=itsm,dc=local
       bind_pw: password
     with_items:
-      - cn: Mark Davido
-        uid: mdavido
-        uidNumber: 1000
-        gidNumber: 500
-        firstName: Mark
-        lastName: Davido
+      - cn: ManagerOne
+        uid: mone
+        uidNumber: 1001
+        gidNumber: 501
+        firstName: Manager
+        lastName: One
         password: password
+      - cn: Manager Two
+        uid: mtwo
+        uidNumber: 1002
+        gidNumber: 501
+        firstName: Manager
+        lastName: Two
+        password: password
+      - cn: Manager Three
+        uid: mthree
+        uidNumber: 1003
+        gidNumber: 501
+        firstName: Manager
+        lastName: Three
+        password: password
+      - cn: Manager Four
+        uid: mfour
+        uidNumber: 1004
+        gidNumber: 501
+        firstName: Manager
+        lastName: Four
+        password: password
+      - cn: Manager Five
+        uid: mfive
+        uidNumber: 1005
+        gidNumber: 501
+        firstName: Manager
+        lastName: Five
+        password: password
+      - cn: Finance One
+        uid: fone
+        uidNumber: 1011
+        gidNumber: 502
+        firstName: Finance
+        lastName: One
+        password: password
+      - cn: Finance Two
+        uid: ftwo
+        uidNumber: 1012
+        gidNumber: 502
+        firstName: Finance
+        lastName: Two
+        password: password
+      - cn: Finance Three
+        uid: fthree
+        uidNumber: 1013
+        gidNumber: 502
+        firstName: Finance
+        lastName: Three
+        password: password
+      - cn: Finance Four
+        uid: ffour
+        uidNumber: 1014
+        gidNumber: 502
+        firstName: Finance
+        lastName: Four
+        password: password
+      - cn: Finance Five
+        uid: ffive
+        uidNumber: 1015
+        gidNumber: 502
+        firstName: Finance
+        lastName: Five
+        password: password
+
+  - name: Add users to manager groups
+    community.general.ldap_attrs:
+      dn: cn=manager,ou=groups,dc=itsm,dc=local
+      attributes:
+        memberUid:
+          - mone
+          - mtwo
+          - mthree
+          - mfour
+          - mfive
+      bind_dn: cn=admin,dc=itsm,dc=local
+      bind_pw: password
+
+  - name: Add users to finance groups
+    community.general.ldap_attrs:
+      dn: cn=finance,ou=groups,dc=itsm,dc=local
+      attributes:
+        memberUid:
+          - fone
+          - ftwo
+          - fthree
+          - ffour
+          - ffive
+      bind_dn: cn=admin,dc=itsm,dc=local
+      bind_pw: password
 
   - name: Generate an OpenSSL private key
     openssl_privatekey:
@@ -223,7 +310,16 @@
       replace: "{{ item.replace }}"
     with_items:
       - regexp: "SLAPD_SERVICES.*"
-        replace: 'SLAPD_SERVICES="ldaps:/// ldapi:///"'
+        replace: 'SLAPD_SERVICES="ldap:/// ldaps:/// ldapi:///"'
+
+  - name: Configure TLS certificate locations for LDAP
+    community.general.ldap_attrs:
+      dn: cn=config
+      attributes:
+          olcTLSCACertificateFile: /etc/ldap/sasl2/ca-certificates.crt
+          olcTLSCertificateFile: /etc/ldap/sasl2/ldap_server.crt
+          olcTLSCertificateKeyFile: /etc/ldap/sasl2/ldap_server.key
+      state: exact
 
   - name: Restart OpenLDAP daemon.
     service: 
