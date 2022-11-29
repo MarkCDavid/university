@@ -21,3 +21,6 @@ def extendedEuclidian(a: 'int', b: 'int') -> 'ExtendedEuclidianResult':
         old_t, t = _next(old_t, t, quotient)
     
     return ExtendedEuclidianResult(old_r, (old_s, old_t), (s, t))
+
+def moduloInverse(x: 'int', modulo: 'int'):
+    return extendedEuclidian(x, modulo).bezout[0] % modulo
