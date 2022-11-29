@@ -3,6 +3,9 @@ import random
 import string
 from typing import Tuple
 
+def sha2_to_int(message: 'str'):
+    return int(sha2(message.encode('utf-8')), 16)
+
 def random_hex_string(length: 'int') -> 'str':
     alphabet = string.digits + "ABCDEF"
     return ''.join(random.choices(alphabet, k = length))

@@ -1,4 +1,5 @@
 from random import sample 
+from math import sqrt
 
 def primes(to):
     sieve = [False] * (to + 1)
@@ -10,6 +11,14 @@ def primes(to):
                 sieve[j] = True
     return primes
 
+def is_prime(p):
+    if p < 2: 
+        return False
+        
+    for x in range(2, int(sqrt(p)) + 1):
+        if p % x == 0:
+            return False
+    return True
 
 def factorize(n):
     return [i for i in range(1, n + 1) if n % i == 0]
