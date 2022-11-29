@@ -1,0 +1,219 @@
+A: 88 B: 20
+=== Task 1:
+
+== Choosing prime p
+Chosen prime p: 307
+
+== Factorizing φ(p - 1)
+Factorization of φ(p - 1) = φ(306) = [1, 2, 3, 6, 9, 17, 18, 34, 51, 102, 153, 306]
+
+== Choosing primitive root α
+
+Picking α = 205. Checking if it is a primitive root:
+GCD(205, 307) = 1.
+205 and 307 are relatively prime and as such, α = 205 could be a primitive root.
+
+== Checking if α = 205 is primitive root
+Calculating α^f mod p = 205^1 mod 307 = 205
+Calculating α^f mod p = 205^2 mod 307 = 273
+Calculating α^f mod p = 205^3 mod 307 = 91
+Calculating α^f mod p = 205^6 mod 307 = 299
+Calculating α^f mod p = 205^9 mod 307 = 193
+Calculating α^f mod p = 205^17 mod 307 = 306
+Calculating α^f mod p = 205^18 mod 307 = 102
+Calculating α^f mod p = 205^34 mod 307 = 1
+As 205^34 mod 307 = 1, α = 205 is not a primitive root!
+
+Picking α = 220. Checking if it is a primitive root:
+GCD(220, 307) = 1.
+220 and 307 are relatively prime and as such, α = 220 could be a primitive root.
+
+== Checking if α = 220 is primitive root
+Calculating α^f mod p = 220^1 mod 307 = 220
+Calculating α^f mod p = 220^2 mod 307 = 201
+Calculating α^f mod p = 220^3 mod 307 = 12
+Calculating α^f mod p = 220^6 mod 307 = 144
+Calculating α^f mod p = 220^9 mod 307 = 193
+Calculating α^f mod p = 220^17 mod 307 = 20
+Calculating α^f mod p = 220^18 mod 307 = 102
+Calculating α^f mod p = 220^34 mod 307 = 93
+Calculating α^f mod p = 220^51 mod 307 = 18
+Calculating α^f mod p = 220^102 mod 307 = 17
+Calculating α^f mod p = 220^153 mod 307 = 306
+None of the factor powers produced 1, as such α = 220 is a primitive root!
+
+== Calculating public component A
+Calculating α^A mod p = 220^88 mod 307 = 133
+
+== Calculating public component B
+Calculating α^B mod p = 220^20 mod 307 = 240
+
+Assumption of public parts exchange. A receives 240, B receives 133.
+
+== Calculating shared component
+Calculating PublicB^A mod p = 240^88 mod 307 = 209
+
+== Calculating shared component
+Calculating PublicA^B mod p = 133^20 mod 307 = 209
+
+Diffie-Hellman key exchange finished. Calculated shared key is 209.
+
+=== Task 2:
+
+== Choosing primes p, q
+Chosen primes (p, q): (443, 431)
+
+== Calculating RSA parameters n, φ(n)
+n = p * q = 443 * 431 = 190933
+φ(190933) = (p - 1) * (q - 1) = 190060
+
+== Choosing keys e, d
+
+Trying encryption key e = 38624. GCD(e, φ) = 68.
+GCD(e, φ) is not 1, e = 38624 is not valid as a private key.
+
+Trying encryption key e = 27516. GCD(e, φ) = 4.
+GCD(e, φ) is not 1, e = 27516 is not valid as a private key.
+
+Trying encryption key e = 5950. GCD(e, φ) = 170.
+GCD(e, φ) is not 1, e = 5950 is not valid as a private key.
+
+Trying encryption key e = 51288. GCD(e, φ) = 4.
+GCD(e, φ) is not 1, e = 51288 is not valid as a private key.
+
+Trying encryption key e = 131292. GCD(e, φ) = 4.
+GCD(e, φ) is not 1, e = 131292 is not valid as a private key.
+
+Trying encryption key e = 17168. GCD(e, φ) = 4.
+GCD(e, φ) is not 1, e = 17168 is not valid as a private key.
+
+Trying encryption key e = 65574. GCD(e, φ) = 2.
+GCD(e, φ) is not 1, e = 65574 is not valid as a private key.
+
+Trying encryption key e = 724. GCD(e, φ) = 4.
+GCD(e, φ) is not 1, e = 724 is not valid as a private key.
+
+Trying encryption key e = 165256. GCD(e, φ) = 52.
+GCD(e, φ) is not 1, e = 165256 is not valid as a private key.
+
+Trying encryption key e = 176508. GCD(e, φ) = 4.
+GCD(e, φ) is not 1, e = 176508 is not valid as a private key.
+
+Trying encryption key e = 135460. GCD(e, φ) = 260.
+GCD(e, φ) is not 1, e = 135460 is not valid as a private key.
+
+Trying encryption key e = 81484. GCD(e, φ) = 52.
+GCD(e, φ) is not 1, e = 81484 is not valid as a private key.
+
+Trying encryption key e = 77915. GCD(e, φ) = 5.
+GCD(e, φ) is not 1, e = 77915 is not valid as a private key.
+
+Trying encryption key e = 189369. GCD(e, φ) = 1.
+GCD(e, φ) is 1, e = 189369 is valid as a private key.
+Derived decryption key d = e^(-1) = 21729.
+
+Public key (189369, 190933), private key (21729, 190933).
+
+== Encrypting A = 88, using public key (189369, 190933).
+C = A^e mod n = 88^189369 mod 190933 = 139370.
+
+== Decrypting C = 139370, using private key (21729, 190933).
+M = C^e mod n = 139370^21729 mod 190933 = 88.
+
+RSA encryption/decryption performed successfully.
+Message = 88, Encrypted Message = 139370, Decrypted Message = 88.
+
+=== Task 3:
+
+== Using values that were generated during Task 1:
+p = 307, α = 220, private = 88, public = 133
+
+== Choosing ephemeral key:
+
+Trying ephemeral key k = 108. GCD(k, p - 1) = 18.
+GCD(k, p - 1) is not 1, k = 108 is not valid an ephemeral key.
+
+Trying ephemeral key k = 64. GCD(k, p - 1) = 2.
+GCD(k, p - 1) is not 1, k = 64 is not valid an ephemeral key.
+
+Trying ephemeral key k = 60. GCD(k, p - 1) = 6.
+GCD(k, p - 1) is not 1, k = 60 is not valid an ephemeral key.
+
+Trying ephemeral key k = 179. GCD(k, p - 1) = 1.
+GCD(k, p - 1) is 1, k = 179 is valid as an ephemeral key.
+Derived inverse ephemeral key k^(-1) = 53.
+
+== Signing message B = 20.
+S1 = α^k mod p = 220^179 mod 307 = 131
+S2 = k^(-1) * (B - private * S1) mod (p - 1) = 53 * (20 - 88 * 131) mod (306) = 240
+
+== Verifying signature (S1, S2) = (131, 240).
+V1 = α^B mod p = 220^20 mod 307 = 240
+V2 = public^S1 * S1^S2 mod p = 133^131 * 131^240 mod 307 = 240
+
+Signature (S1, S2) = (131, 240) verified successfully: V1 == V2 -> 240 == 240 (True)
+
+=== Bonus 1:
+NOTE: Given that solutions exist only for specific inputs, re-ran the code, until the parameter choices yielded an answer.
+
+== Using values that were generated during Task 1:
+p = 307, α = 220, private = 88, public = 133
+
+== Using values that were generated during Task 3:
+(Task3_S1, Task3_S2) = (131, 240), k = 179, k^(-1) = 53
+
+== Signing message M = 13.
+S1 = α^k mod p = 220^179 mod 307 = 131
+S2 = k^(-1) * (M - private * S1) mod (p - 1) = 53 * (13 - 88 * 131) mod (306) = 175
+
+== Attempting to recover ephemeral key
+  Recovery formula derived from https://crypto.stackexchange.com/a/1520
+  In addition, just having two ciphertexts that were signed using the same ephemeral key is not always enough.
+  As per https://crypto.stackexchange.com/a/1520, we only have a solution if GCD(Task3_S2 - S2, p - 1) = 1, as we are required to calculate inverse of (Task3_S2 - S2).
+GCD(Task3_S2 - S2, p - 1) = GCD(65, 306) = 1, as such ephemeral key can be recovered!
+k = (Task3_Message - Bonus_Message) * (Task3_S2 - S2)^(-1) mod (p - 1) = (20 - 13) * (240 - 175)^(-1) mod (306) = 179
+
+== Attempting to recover secret key
+  Recovery formula derived from https://crypto.stackexchange.com/a/1520
+  In addition, just having two ciphertexts that were signed using the same ephemeral key is not always enough.
+  As per https://crypto.stackexchange.com/a/1520, we only have a solution if GCD(S1, p - 1) = 1, as we are required to calculate inverse of S1.
+GCD(S1, p - 1) = GCD(131, 306) = 1, as such secret can be recovered!
+s = (M - k * S2) * S1^(-1) mod (p - 1) = (13 - 179 * 175) * 131^(-1) mod 306 = 88
+
+Ephemeral key was 179, recovered ephemeral key was 179.
+Secret was 88, recovered secret was 88.
+
+=== Bonus 2:
+We need to select a generator value in a multiplicative integer group.
+By Little Fermat Theorem, we have g^q = h^(r*q) = h^(p - 1) = 1 mod p.
+To do so, we start by picking a random prime q. Then we calculate r = 2, p = 2*q + 1 and check if it is prime.
+If p is prime, then our generator is calculated by picking a random value h and calulating g = h^2.
+If g is not equal to 1, g is a generator for multiplicative integer group of base p.
+
+== Choosing primes
+Chosen prime q: 97
+p = 2 * q + 1 = 2 * 97 + 1 = 195
+p = 195 is not a prime number.
+Chosen prime q: 89
+p = 2 * q + 1 = 2 * 89 + 1 = 179
+p = 179 is a prime number.
+
+== Choosing generator
+Chosen h: 72
+g = h^r mod p = 72^2 mod 179 = 172 
+g = 172 is a generator of multiplicative integer group of order 89.
+
+== Choosing keys
+Chosen private key x: 4
+Public key y = g^x = 172^4 = 50
+
+== Signing message B = 20
+Chosen ephemeral key k: 39
+S1 = H(M || g^k) = H(20 || 172^39) = H(20 || 27) = 0
+S2 = (k - xe) mod (q - 1) = (39 - 4 * 0) mod 88 = 39
+Signature of B = 20 is (0, 39).
+
+== Verifying signature (0, 39) of message B = 20
+V1 = g^S2 * y^S1 = 172^39 * 50^0 = 27
+V2 = H(M || r) = H(20 || 27) = 0
+Signature (S1, S2) = (0, 39) verified successfully: S1 == V2 -> 0 == 0 (True)

@@ -85,7 +85,7 @@ class Task1:
         print("== Calculating shared component")
 
         shared = powermod(public, private, self.prime)
-        print(f"Calculating (α^{public_name})^{private_name} mod p = {public}^{private} mod {self.prime} = {shared}")
+        print(f"Calculating {public_name}^{private_name} mod p = {public}^{private} mod {self.prime} = {shared}")
         return shared
 
 class Task2:
@@ -124,7 +124,7 @@ class Task2:
 
     def _choose_private_key(self):
         print()
-        print(f"== Choosing keys e, d)")
+        print(f"== Choosing keys e, d")
         for encrypytion_key in random.sample(range(1, self.totient), self.totient - 1):
             euclidian = extendedEuclidian(encrypytion_key, self.totient)
             print()
