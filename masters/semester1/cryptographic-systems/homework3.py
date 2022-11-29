@@ -7,7 +7,7 @@ from etc.extendedeuclidian import extendedEuclidian, moduloInverse
 A = 88 
 B = 20
 
-print(f"A: {A} B: {B} (note: I use the four digits that are not part of the date for my student registration code)")
+print(f"A: {A} B: {B}") 
 
 
 class Task1:
@@ -118,7 +118,7 @@ class Task2:
         print()
         print(f"== Calculating RSA parameters n, φ(n)")
         print(f"n = p * q = {self.prime_p} * {self.prime_q} = {n}")
-        print(f"φ({n}) = {totient}")
+        print(f"φ({n}) = (p - 1) * (q - 1) = {totient}")
 
         return (n, totient)
 
