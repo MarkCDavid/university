@@ -1,0 +1,19 @@
+location:
+    source_directories:
+        - /home
+        - /etc
+        - /var/log/syslog*
+    repositories:
+        - ssh://vagrant@192.168.0.202/var/local/backups/backup.borg
+        - ssh://vagrant@192.168.0.203/var/local/backups/backup.borg
+        - /var/local/backups/backup.borg
+
+storage:
+    encryption_passphrase: "encryption_password"
+    ssh_command: ssh -i /home/vagrant/.ssh/id_rsa -o StrictHostKeyChecking=accept-new
+
+retention:
+    keep_minutely: 60
+    keep_daily: 7
+    keep_monthly: 6
+    keep_yearly: 1

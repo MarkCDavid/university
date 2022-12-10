@@ -1,0 +1,46 @@
+---
+- name: Install borgmatic.
+  pip:
+    name: 
+      - borgmatic
+    virtualenv: /opt/borg_env
+  
+- name: Symlink borgmatic executable to /usr/local/bin.
+  file:
+    src: /opt/borg_env/bin/borgmatic
+    dest: /usr/local/bin/borgmatic
+    owner: root
+    group: root
+    mode: '0755'
+    state: link
+
+- name: Create bogmatic directory.
+  file:
+    path: /etc/borgmatic
+    state: directory
+    mode: '0700'
+    owner: root
+    group: root
+    recurse: yes
+
+- name: Install borgmatic configuration.
+  copy:
+    src: config.yaml
+    dest: /etc/borgmatic/config.yaml
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: Initialize repositories.
+  become: yes
+  command: 
+    cmd: borgmatic init --encryption repokey
+
+- name: Copy borgmatic cron.
+  ansible.builtin.copy:
+    src: borgmatic
+    dest: /etc/cron.d/borgmatic
+    owner: root
+    group: root
+    mode: '0755'
+

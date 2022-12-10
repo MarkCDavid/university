@@ -1,0 +1,27 @@
+---
+- name: Ensure python3 is installed.
+  apt:
+    name:
+      - python3
+      - python3-pip
+      - python3-virtualenv
+      - python3-setuptools
+    state: present
+
+- name: Create venv and upgrade installation tools.
+  pip:
+    name: 
+      - pip
+      - setuptools
+      - wheel
+    extra_args: --upgrade
+    virtualenv: /opt/borg_env
+    virtualenv_python: /usr/bin/python3
+
+- name: Recursively change ownership of venv.
+  ansible.builtin.file:
+    path: /opt/borg_env
+    state: directory
+    recurse: yes
+    owner: vagrant
+    group: vagrant

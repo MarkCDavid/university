@@ -1,0 +1,14 @@
+---
+- name: Ensure authorized_hosts file exists.
+  file:
+    path: /home/vagrant/.ssh/authorized_hosts
+    state: touch
+    mode: '0600'
+
+- name: Set authorized key defining key options
+  ansible.posix.authorized_key:
+    user: vagrant
+    state: present
+    key: "{{ lookup('file', '/tmp/ansible_borg_public_key') }}"
+    key_options: 'command="borg serve --restrict-to-path /var/local/backups/backup.borg",restrict'
+

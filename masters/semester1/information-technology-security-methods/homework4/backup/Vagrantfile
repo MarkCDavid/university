@@ -1,0 +1,29 @@
+require "yaml"
+
+current_directory = File.dirname(File.expand_path(__FILE__))
+yamlConfig = YAML.load_file("#{current_directory}/config.yml")
+
+Vagrant.configure("2") do |vagrantConfig|
+  vagrantConfig.vm.define "backupClient" do |backupClient|
+    backupClient.vm.box = "ubuntu/focal64"
+    backupClient.vm.network "public_network", ip: yamlConfig["ip_addresses"]["client"], bridge: yamlConfig["bridge"]
+    backupClient.vm.provision "ansible" do |backupClientAnsible|
+      backupClientAnsible.playbook = "playbooks/backupClient.yml"
+    end
+  end
+  vagrantConfig.vm.define "backupServer1" do |backupServer1|
+    backupServer1.vm.box = "ubuntu/focal64"
+    backupServer1.vm.network "public_network", ip: yamlConfig["ip_addresses"]["backup_1"], bridge: yamlConfig["bridge"]
+    backupServer1.vm.provision "ansible" do |backupServer1Ansible|
+      backupServer1Ansible.playbook = "playbooks/backupServer.yml"
+    end
+  end
+  vagrantConfig.vm.define "backupServer2" do |backupServer2|
+    backupServer2.vm.box = "ubuntu/focal64"
+    backupServer2.vm.network "public_network", ip: yamlConfig["ip_addresses"]["backup_2"], bridge: yamlConfig["bridge"]
+    backupServer2.vm.provision "ansible" do |backupServer2Ansible|
+      backupServer2Ansible.playbook = "playbooks/backupServer.yml"
+    end
+  end
+end
+

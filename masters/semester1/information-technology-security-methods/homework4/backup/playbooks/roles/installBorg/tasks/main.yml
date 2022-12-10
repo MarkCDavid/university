@@ -1,0 +1,37 @@
+---
+- name: Ensure borg installation dependencies are installed.
+  apt:
+    name:
+      - pkg-config
+      - libssl-dev
+      - libacl1-dev
+    state: present
+
+- name: Install borg.
+  pip:
+    name: 
+      - borgbackup
+    virtualenv: /opt/borg_env
+  
+- name: Symlink borg executable to /usr/local/bin.
+  file:
+    src: /opt/borg_env/bin/borg
+    dest: /usr/local/bin/borg
+    owner: root
+    group: root
+    mode: '0775'
+    state: link
+  
+- name: Create the directory for backups.
+  file:
+    path: /var/local/backups/backup.borg
+    state: directory
+    recurse: yes
+
+- name: Set permissions to vagrant for backup folder.
+  file:
+    path: /var/local/backups/backup.borg
+    owner: vagrant
+    group: vagrant
+    mode: '0775'
+    state: directory

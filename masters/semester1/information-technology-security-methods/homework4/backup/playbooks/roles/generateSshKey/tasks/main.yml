@@ -1,0 +1,19 @@
+---
+- name: Generate an OpenSSH keypair.
+  community.crypto.openssh_keypair:
+    path: /home/vagrant/.ssh/id_rsa
+
+- name: Set vagrant user as the owner of the generated keypair.
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    owner: vagrant
+    group: vagrant
+  with_items:
+    - path: /home/vagrant/.ssh/id_rsa
+    - path: /home/vagrant/.ssh/id_rsa.pub
+
+- name: Copy the public key for installation means.
+  fetch:
+    src: /home/vagrant/.ssh/id_rsa.pub
+    dest: /tmp/ansible_borg_public_key
+    flat: true
