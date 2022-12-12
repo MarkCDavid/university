@@ -1,0 +1,149 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex-dev)
+ restricted \write18 enabled.
+entering extended mode
+(./report.tex
+LaTeX2e <2022-06-01> pre-release-1 (develop 2022-8-21 branch)
+L3 programming layer <2022-08-05>
+(/home/markcdavid/texmf/tex/latex/vilniustech/vilniustech.cls
+Document Class: vilniustech 2022 Rašto darbo klasė (Vilnius Tech)
+(/usr/local/texlive/2022/texmf-dist/tex/latex-dev/base/article.cls
+Document Class: article 2022/07/02 v1.4n Standard LaTeX document class
+(/usr/local/texlive/2022/texmf-dist/tex/latex-dev/base/size12.clo))
+(/usr/local/texlive/2022/texmf-dist/tex/latex/kvoptions/kvoptions.sty
+(/usr/local/texlive/2022/texmf-dist/tex/latex-dev/graphics/keyval.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/generic/kvsetkeys/kvsetkeys.sty))
+(/usr/local/texlive/2022/texmf-dist/tex/latex-dev/base/inputenc.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex-dev/base/fontenc.sty
+(/usr/local/texlive/2022/texmf-dist/tex/latex/lithuanian/l7xenc.def
+(/usr/local/texlive/2022/texmf-dist/tex/latex/lithuanian/l7xenc.dfu)))
+(/usr/local/texlive/2022/texmf-dist/tex/generic/babel/babel.sty
+(/usr/local/texlive/2022/texmf-dist/tex/generic/babel/txtbabel.def)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/lithuanian/lithuanian.ldf))
+(/usr/local/texlive/2022/texmf-dist/tex/generic/babel/locale/lt/babel-lithuania
+n.tex) (/usr/local/texlive/2022/texmf-dist/tex/latex/psnfss/mathptmx.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/geometry/geometry.sty
+(/usr/local/texlive/2022/texmf-dist/tex/generic/iftex/ifvtex.sty
+(/usr/local/texlive/2022/texmf-dist/tex/generic/iftex/iftex.sty)))
+(/usr/local/texlive/2022/texmf-dist/tex/latex/ragged2e/ragged2e.sty
+(/usr/local/texlive/2022/texmf-dist/tex/latex/footmisc/footmisc.sty))
+(/usr/local/texlive/2022/texmf-dist/tex/latex-dev/tools/indentfirst.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/listings/listings.sty
+(/usr/local/texlive/2022/texmf-dist/tex/latex/listings/lstmisc.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/listings/listings.cfg))
+(/usr/local/texlive/2022/texmf-dist/tex/latex/xcolor/xcolor.sty
+(/usr/local/texlive/2022/texmf-dist/tex/latex/graphics-cfg/color.cfg)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/graphics-def/pdftex.def)
+(/usr/local/texlive/2022/texmf-dist/tex/latex-dev/graphics/mathcolor.ltx))
+(/usr/local/texlive/2022/texmf-dist/tex/latex/setspace/setspace.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/hyperref/hyperref.sty
+(/usr/local/texlive/2022/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+(/usr/local/texlive/2022/texmf-dist/tex/generic/infwarerr/infwarerr.sty))
+(/usr/local/texlive/2022/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/generic/pdfescape/pdfescape.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/hycolor/hycolor.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/letltxmacro/letltxmacro.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/auxhook/auxhook.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/hyperref/nameref.sty
+(/usr/local/texlive/2022/texmf-dist/tex/latex/refcount/refcount.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/generic/gettitlestring/gettitlestring.s
+ty)) (/usr/local/texlive/2022/texmf-dist/tex/latex/hyperref/pd1enc.def)
+(/usr/local/texlive/2022/texmf-dist/tex/generic/intcalc/intcalc.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/generic/etexcmds/etexcmds.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/hyperref/puenc.def)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/url/url.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/generic/bitset/bitset.sty
+(/usr/local/texlive/2022/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty))
+(/usr/local/texlive/2022/texmf-dist/tex/latex-dev/base/atbegshi-ltx.sty))
+(/usr/local/texlive/2022/texmf-dist/tex/latex/hyperref/hpdftex.def
+(/usr/local/texlive/2022/texmf-dist/tex/latex-dev/base/atveryend-ltx.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+
+(/usr/local/texlive/2022/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty
+))) (/usr/local/texlive/2022/texmf-dist/tex/latex/float/float.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/placeins/placeins.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/microtype/microtype.sty
+(/usr/local/texlive/2022/texmf-dist/tex/latex/etoolbox/etoolbox.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/microtype/microtype-pdftex.def)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/microtype/microtype.cfg))
+(/usr/local/texlive/2022/texmf-dist/tex/latex/was/icomma.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/csquotes/csquotes.sty
+(/usr/local/texlive/2022/texmf-dist/tex/latex/csquotes/csquotes.def)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/csquotes/csquotes.cfg))
+(/usr/local/texlive/2022/texmf-dist/tex/latex/titlesec/titlesec.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/biblatex/biblatex.sty
+(/usr/local/texlive/2022/texmf-dist/tex/latex/logreq/logreq.sty
+(/usr/local/texlive/2022/texmf-dist/tex/latex/logreq/logreq.def))
+(/usr/local/texlive/2022/texmf-dist/tex/latex-dev/base/ifthen.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/biblatex/blx-dm.def)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/biblatex-apa/apa.dbx)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/biblatex/blx-compat.def)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/biblatex/biblatex.def)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/biblatex/blx-natbib.def)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/biblatex-apa/apa.bbx
+(/usr/local/texlive/2022/texmf-dist/tex/latex/biblatex/bbx/standard.bbx))
+(/usr/local/texlive/2022/texmf-dist/tex/latex/biblatex-apa/apa.cbx)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/biblatex/biblatex.cfg)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/l3kernel/expl3.sty
+(/usr/local/texlive/2022/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def))
+(/usr/local/texlive/2022/texmf-dist/tex/latex/biblatex/blx-case-expl3.sty
+(/usr/local/texlive/2022/texmf-dist/tex/latex/l3packages/xparse/xparse.sty)))
+(/usr/local/texlive/2022/texmf-dist/tex/latex-dev/graphics/graphicx.sty
+(/usr/local/texlive/2022/texmf-dist/tex/latex-dev/graphics/graphics.sty
+(/usr/local/texlive/2022/texmf-dist/tex/latex-dev/graphics/trig.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/graphics-cfg/graphics.cfg)))
+(/usr/local/texlive/2022/texmf-dist/tex/latex/caption/caption.sty
+(/usr/local/texlive/2022/texmf-dist/tex/latex/caption/caption3.sty))
+(/usr/local/texlive/2022/texmf-dist/tex/latex/newfloat/newfloat.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/tabularray/tabularray.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/varwidth/varwidth.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/enumitem/enumitem.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/pdfpages/pdfpages.sty
+(/usr/local/texlive/2022/texmf-dist/tex/latex-dev/tools/calc.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/eso-pic/eso-pic.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/pdfpages/pppdftex.def))
+(/usr/local/texlive/2022/texmf-dist/tex/latex/tocloft/tocloft.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/totalcount/totalcount.sty))
+(/usr/local/texlive/2022/texmf-dist/tex/latex/psnfss/t1ptm.fd)
+(./aux/report.aux) (/usr/local/texlive/2022/texmf-dist/tex/latex/lm/l7xlmr.fd)
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+(/usr/local/texlive/2022/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+) (/usr/local/texlive/2022/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
+(/usr/local/texlive/2022/texmf-dist/tex/latex/grfext/grfext.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg))
+(./aux/report.out) (./aux/report.out)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/microtype/mt-ptm.cfg)
+(/home/markcdavid/texmf/tex/latex/vilniustech/lithuanian-apa.lbx
+(/usr/local/texlive/2022/texmf-dist/tex/latex/biblatex/lbx/lithuanian.lbx)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/biblatex/lbx/lithuanian.lbx))
+(./aux/report.bbl)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/ninecolors/ninecolors.sty)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/pdflscape/pdflscape.sty
+(/usr/local/texlive/2022/texmf-dist/tex/latex-dev/graphics/lscape.sty))
+[1{/usr/local/texlive/2022/texmf-var/fonts/map/pdftex/updmap/pdftex.map} </home
+/markcdavid/texmf/tex/latex/vilniustech/logo/vt_logo_lt.png>] (./aux/report.toc
+(/usr/local/texlive/2022/texmf-dist/tex/latex/psnfss/ot1ztmcm.fd)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/psnfss/omlztmcm.fd)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/psnfss/omsztmcm.fd)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/psnfss/omxztmcm.fd)
+(/usr/local/texlive/2022/texmf-dist/tex/latex/psnfss/ot1ptm.fd))
+No file report.lof.
+No file report.lol.
+[2] (/usr/local/texlive/2022/texmf-dist/tex/latex-dev/base/t1cmtt.fd) [3]
+(/usr/local/texlive/2022/texmf-dist/tex/latex/psnfss/ts1ptm.fd) [4] [5 <./img/a
+rchives.png>] [6 <./img/wazuh.png>] [7 <./img/log_aggregation.png> <./img/dir_c
+hecks.png> <./img/security_assesments.png>]
+
+LaTeX Warning: Empty bibliography on input line 163.
+
+(./aux/report.aux) ){/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/cm-supe
+r/cm-super-t1.enc}{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/base/8r.e
+nc}</usr/local/texlive/2022/texmf-dist/fonts/type1/public/cm-super/sftt1200.pfb
+></usr/local/texlive/2022/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/loc
+al/texlive/2022/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive
+/2022/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on ./aux/report.pdf (7 pages, 343769 bytes).
+SyncTeX written on ./aux/report.synctex.gz.
+Transcript written on ./aux/report.log.
