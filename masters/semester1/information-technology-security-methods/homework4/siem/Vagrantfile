@@ -1,0 +1,38 @@
+require "yaml"
+
+current_directory = File.dirname(File.expand_path(__FILE__))
+yamlConfig = YAML.load_file("#{current_directory}/config.yml")
+
+Vagrant.configure("2") do |vagrantConfig|
+  vagrantConfig.vm.define "wazuhServer" do |wazuhServer|
+    wazuhServer.vm.box = "ubuntu/focal64"
+    wazuhServer.vm.hostname = "wazuhServer"
+    wazuhServer.vm.network "public_network", ip: yamlConfig["ip_addresses"]["server"], bridge: yamlConfig["bridge"]
+    wazuhServer.vm.provider "virtualbox" do |wazuhServerProvider|
+      wazuhServerProvider.memory = 8192
+    end
+    wazuhServer.vm.provision "shell" do |wazuhServerShell|
+      sshPublicKey = File.readlines("#{Dir.home}/.ssh/id_ed25519.pub").first.strip
+      wazuhServerShell.inline = <<-SHELL
+        echo #{sshPublicKey} >> /home/vagrant/.ssh/authorized_keys
+        echo #{sshPublicKey} >> /root/.ssh/authorized_keys
+      SHELL
+    end
+  end
+  vagrantConfig.vm.define "wazuhAgent" do |wazuhAgent|
+    wazuhAgent.vm.box = "ubuntu/focal64"
+    wazuhAgent.vm.hostname = "wazuhAgent1"
+    wazuhAgent.vm.network "public_network", ip: yamlConfig["ip_addresses"]["agent"], bridge: yamlConfig["bridge"]
+    wazuhAgent.vm.provider "virtualbox" do |wazuhAgentProvider|
+      wazuhAgentProvider.memory = 4096
+    end
+    wazuhAgent.vm.provision "shell" do |wazuhAgentShell|
+      sshPublicKey = File.readlines("#{Dir.home}/.ssh/id_ed25519.pub").first.strip
+      wazuhAgentShell.inline = <<-SHELL
+        echo #{sshPublicKey} >> /home/vagrant/.ssh/authorized_keys
+        echo #{sshPublicKey} >> /root/.ssh/authorized_keys
+      SHELL
+    end
+  end
+end
+

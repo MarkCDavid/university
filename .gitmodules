@@ -1,0 +1,3 @@
+[submodule "masters/semester1/information-technology-security-methods/homework4/siem/wazuh-ansible"]
+	path = masters/semester1/information-technology-security-methods/homework4/siem/wazuh-ansible
+	url = git@github.com:wazuh/wazuh-ansible.git

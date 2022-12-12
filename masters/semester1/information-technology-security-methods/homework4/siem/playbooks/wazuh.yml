@@ -1,0 +1,58 @@
+---
+- hosts: server
+  roles:
+    - role: ../wazuh-ansible/roles/wazuh/wazuh-indexer
+      perform_installation: false
+  become: no
+  vars:
+    indexer_node_master: true
+    instances:
+      node1:
+        name: node-1
+        ip: 127.0.0.1
+        role: indexer
+  tags:
+    - generate-certs
+
+- hosts: server
+  become: yes
+  become_user: root
+  roles:
+    - role: ../wazuh-ansible/roles/wazuh/wazuh-indexer
+    - role: ../wazuh-ansible/roles/wazuh/wazuh-dashboard
+
+  vars:
+    single_node: true
+    indexer_network_host: 127.0.0.1
+    ansible_shell_allow_world_readable_temp: true
+    instances:
+      node1:
+        name: node-1
+        ip: 127.0.0.1
+        role: indexer
+
+- hosts: server
+  become: yes
+  become_user: root
+  roles:
+    - role: ../wazuh-ansible/roles/wazuh/ansible-wazuh-manager
+    - role: ../wazuh-ansible/roles/wazuh/ansible-filebeat-oss
+      filebeat_node_name: node-1
+      filebeat_output_indexer_hosts:
+      - "127.0.0.1"
+
+- hosts: agent
+  become: yes
+  become_user: root
+  roles:
+    - ../wazuh-ansible/roles/wazuh/ansible-wazuh-agent
+  vars:
+    wazuh_managers:
+      - address: 192.168.0.204
+        port: 1514
+        protocol: tcp
+        api_port: 55000
+        api_proto: 'http'
+        api_user: ansible
+        max_retries: 5
+        retry_interval: 5
