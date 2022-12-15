@@ -102,9 +102,10 @@
 # public_key_vector_of_polynomials = generate_vector_of_polynomials()
 # error_vector_of_polynomials = generate_vector_of_polynomials()
 
-from utility import Nonce
+from ntt import ntt
 from seed import generate_seed
 from a import generate_A_matrix
+from utility import Nonce, reduce
 from parameters import PARAMETERS
 from noise import generate_noise_polynomial
 
@@ -124,6 +125,8 @@ error = [
     in range(PARAMETERS.k)
 ]
 
+secret_key = [reduce(ntt(polynomial), PARAMETERS.q) for polynomial in secret_key]
+error = [ntt(polynomial) for polynomial in error]
 
 print(secret_key)
 print(error)

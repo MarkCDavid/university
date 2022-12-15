@@ -1,3 +1,5 @@
+from typing import List
+from bitarray import BitArray
 
 def to_unsigned_byte(value: 'int') -> 'int':
     return value & 0xFF
@@ -13,6 +15,8 @@ def to_signed_short(value: 'int') -> 'int':
     value = to_unsigned_short(value)
     return value if value < 2**15 else value - 2**16
 
+def reduce(polynomial: 'List[int]', modulo: 'int') -> 'List[int]':
+    return [coefficient % modulo for coefficient in polynomial]
 
 class Nonce:
     def __init__(self: 'Nonce', value: 'int' = 0) -> 'None':

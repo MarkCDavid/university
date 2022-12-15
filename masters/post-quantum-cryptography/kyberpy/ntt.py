@@ -1,4 +1,5 @@
-from utility import 
+from parameters import PARAMETERS
+from utility import to_signed_short
 
 NTT_ZETAS = [
     2285, 2571, 2970, 1812, 1493, 1422, 287, 202, 3158, 622, 1577, 182, 962,
@@ -24,7 +25,10 @@ NTT_ZETAS_INV = [
     829, 2946, 3065, 1325, 2756, 1861, 1474, 1202, 2367, 3147, 1752, 2707, 171,
     3127, 3042, 1907, 1836, 1517, 359, 758, 1441 ]
 
+def montgomery_reduce(a):
+    return a - (to_signed_short(a * PARAMETERS.inverse_q) * PARAMETERS.q) >> 16
 
+# TODO: Refactor/simplify
 def ntt(r):
     j = 0
     k = 1
@@ -36,9 +40,9 @@ def ntt(r):
             k = k + 1
             j = start
             while j < start + l:
-                t = modq_mul_mont(zeta, r[j + l])
-                r[j + l] = cast_to_short(r[j] - t)
-                r[j] = cast_to_short(r[j] + t)
+                t = montgomery_reduce(zeta * r[j + l])
+                r[j + l] = to_signed_short(r[j] - t)
+                r[j] = to_signed_short(r[j] + t)
                 j += 1
             start = j + l
         l >>= 1
