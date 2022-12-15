@@ -9,8 +9,7 @@ class KyberParameters:
         self.seed_size = 32 # KYBER_SYM_BYTES
 
         # controlls how big coefficients for small vectors can be
-        self.eta1 = 3 # KYBER_ETAK512, KYBER_ETAK768_1024
-        self.eta2 = 2 # KYBER_ETAK768_1024
+        self.eta = 3 # KYBER_ETAK512, KYBER_ETAK768_1024
 
         # controls how much (u,v) get compressed
         self.du = 10,

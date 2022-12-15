@@ -1,9 +1,11 @@
+from typing import List
 from Crypto.Hash import SHA3_512, SHAKE128, SHAKE256
 from Crypto.Random import get_random_bytes
 from itertools import permutations, chain
 from bitarray2 import BitArray2
 from bitarray import BitArray
 from parameters import PARAMETERS
+from utility import to_unsigned_byte
 # class KyberParams:
 
 #     def __init__(self):
@@ -264,37 +266,11 @@ def generate_prf_byte_array(l, key, nonce):
     hash = [ cast_to_byte(x) & 0xFF for x in hash ]
     return hash
 
-def get_noise_poly(seed, nonce, params_k):
-    """
-    generate a deterministic noise polynomial from a seed and nonce
-    :param seed: byte array
-    :param nonce: byte
-    :param params_k: int
-    :return: short array (poly)
-    """
-    l = None
-    if(params_k == 2):
-        l = KYBER_ETAK512 * KYBER_N // 4
-    else:
-        l = KYBER_ETAK768_1024 * KYBER_N // 4
-    p = generate_prf_byte_array(l, seed, nonce)
-    return cbd(p, params_k)
 
-def my_get_noise_poly(seed, nonce, params_k):
-    """
-    generate a deterministic noise polynomial from a seed and nonce
-    :param seed: byte array
-    :param nonce: byte
-    :param params_k: int
-    :return: short array (poly)
-    """
-    l = None
-    if(params_k == 2):
-        l = KYBER_ETAK512 * KYBER_N // 4
-    else:
-        l = KYBER_ETAK768_1024 * KYBER_N // 4
-    p = generate_prf_byte_array(l, seed, nonce)
-    return mycbd(p, params_k)
+
+
+
+
 
 def convert_byte_to_32_bit_unsigned_int(x):
     r = x[0] & 0xff # to mask negative values
@@ -308,6 +284,7 @@ def convert_byte_to_24_bit_unsigned_int(x):
     r |= (x[1] & 0xff) << 8
     r |= (x[2] & 0xff) << 16
     return r
+
 
 def cbd(buf, paramsK):
     r = [ 0 for x in range(0, KYBER_POLY_BYTES)]
@@ -332,27 +309,26 @@ def cbd(buf, paramsK):
                 r[8 * i + j] = (a - b)
     return r
 
-def mycbd(buffer, paramsK):
-    r = [ 0 for x in range(0, KYBER_POLY_BYTES)]
-    bits = BitArray.fromBytes(buffer)
-    
-    if paramsK == 2:
-        for i in range(0, KYBER_POLY_BYTES):
-            x = (i * 2 * KYBER_ETAK512)
-            a0 = bits[x + 0] + bits[x + 1] + bits[x + 2]
-            a1 = bits[x + 3] + bits[x + 4] + bits[x + 5]
-            r[i] = a0 - a1
-    else:
-        for i in range(0, KYBER_POLY_BYTES):
-            x = (i * 2 * KYBER_ETAK768_1024)
-            a0 = bits[x + 0] + bits[x + 1]
-            a1 = bits[x + 2] + bits[x + 3]
-            r[i] = a0 - a1
-    return r
-        
 
-z = get_noise_poly(PARAMETERS._static_bytes, 0, 4)
-zz = my_get_noise_poly(PARAMETERS._static_bytes, 0, 4)
+def get_noise_poly(seed, nonce, params_k):
+    """
+    generate a deterministic noise polynomial from a seed and nonce
+    :param seed: byte array
+    :param nonce: byte
+    :param params_k: int
+    :return: short array (poly)
+    """
+    l = None
+    if(params_k == 2):
+        l = KYBER_ETAK512 * KYBER_N // 4
+    else:
+        l = KYBER_ETAK768_1024 * KYBER_N // 4
+    p = generate_prf_byte_array(l, seed, nonce)
+    return cbd(p, params_k)
+
+
+z = get_noise_poly(PARAMETERS._static_bytes, 0, 2)
+zz = calulate_noise_polynomial(PARAMETERS._static_bytes, 0)
 
 for x, y in zip(z, zz):
     if x != y:
