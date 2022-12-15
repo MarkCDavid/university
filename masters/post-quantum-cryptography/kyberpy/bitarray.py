@@ -32,10 +32,13 @@ class BitArray:
     def __getitem__(self: 'BitArray', index: 'int') -> 'int':
         return self.bits >> index & 1
 
-    # def __getitem__(self: 'BitArray', _slice: 'slice') -> 'BitArray':
-    #     value = self.bits >> _slice.start
-    #     mask = ~(n_1_bits(self.bits.bit_length()) << (_slice.stop - _slice.start))
-    #     return BitArray(value & mask)
+    def slice(self: 'BitArray', start: 'int', count: 'int') -> 'BitArray':
+        value = self.bits >> start
+        mask = ~(n_1_bits(self.bits.bit_length()) << count)
+        return BitArray(value & mask)
 
     def __and__(self: 'BitArray', mask: 'int') -> 'BitArray':
         return BitArray(self.bits & mask)
+
+    def __len__(self: 'BitArray') -> 'int':
+        return self.bits.bit_length()

@@ -1,8 +1,44 @@
-from kmath import montgomery_reduce
-from polynomialbase import PolynomialBase
-from parameters import PARAMETERS
-from typing import Iterable
 import numpy as np
+from typing import Iterable
+from parameters import PARAMETERS
+from kmath import montgomery_reduce
+
+class PolynomialBase:
+
+    def __init__(self: 'PolynomialBase', coefficients: 'Iterable[np.int16]') -> 'None':
+        self.coefficients = list(coefficients)
+    
+    def __getitem__(self: 'PolynomialBase', index: 'int') -> 'np.int16':
+        return self.coefficients[index]
+    
+    def __len__(self: 'PolynomialBase') -> 'int':
+        return len(self.coefficients)
+
+    def __str__(self: 'PolynomialBase') -> 'str':
+        return f"[{', '.join(str(coefficient) for coefficient in self.coefficients)}]"
+
+    def __repr__(self: 'PolynomialBase') -> 'str':
+        return f"Polynomial({self})"
+
+    def __iter__(self) -> 'PolynomialIterator':
+        return PolynomialIterator(self)
+
+class PolynomialIterator:
+
+    def __init__(self: 'PolynomialIterator', polynomial: 'PolynomialBase') -> 'None':
+        self.polynomial = polynomial
+        self.index = 0
+    
+    def __next__(self: 'PolynomialIterator') -> 'np.int16':
+        if self.index == len(self.polynomial):
+            raise StopIteration
+        
+        coefficient = self.polynomial[self.index]
+        self.index += 1
+        return coefficient
+
+    def __iter__(self) -> 'PolynomialIterator':
+        return self
 
 
 class Polynomial(PolynomialBase):
@@ -25,16 +61,3 @@ class Polynomial(PolynomialBase):
 
     def __init__(self: 'PolynomialBase', coefficients: 'Iterable[np.int16]') -> 'None':
         super().__init__(coefficients)
-
-KYBER_Q_INV = 62209
-KYBER_Q = 3329
-def cast_to_short(x):
-    y = x & 0xffff
-    if y >= 2**15:
-        y -= 2**16
-    return y
-
-
-
-for x in range(-7000, 7000, 343):
-    print(x, montgomery_reduce(x), ((x + KYBER_Q // 2) % KYBER_Q))

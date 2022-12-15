@@ -9,7 +9,7 @@ from utility import to_unsigned_byte
 # subtracting another `eta` bits from the generated noise.
 #
 # `eta` limits the size of the polynomial coefficients.
-def calulate_noise_polynomial(seed, nonce):
+def generate_noise_polynomial(seed, nonce):
     noise = get_noise(seed, nonce)
     return [
         sum_consecutive_bits_by_signs(BitArray.fromBytes(noise), offset, get_signs()) 
