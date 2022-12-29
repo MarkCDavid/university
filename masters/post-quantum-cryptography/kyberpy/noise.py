@@ -55,7 +55,7 @@ def get_noise_length() -> 'int':
 # Expanding the example into Python 'bits' of the bit array would have
 # values [1, 0, 1, 1, 0, 0] and 'signs' would have values [1, 1, 1, -1, -1, -1].
 # This way, the first 3 bits are added, and the next 3 bits are subtracted.
-def sum_consecutive_bits_by_signs(bits: 'BitArray', offset: 'int', signs: 'List[int]'):
+def sum_consecutive_bits_by_signs(bits: 'BitArray', offset: 'int', signs: 'List[int]') -> 'int':
     return sum(
         bits[offset + index] * sign 
         for index, sign

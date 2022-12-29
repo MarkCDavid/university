@@ -1,7 +1,13 @@
 class KyberParametersBase:
     def __init__(self):
         self.seed_size = 32 # KYBER_SYM_BYTES
-        self.polynomial_coefficient_count = 384
+        # IMPORTANT(Aurimas): polynomial_coefficient_count indicated the size of vector required after
+        #                     applying NTT. The maximum degree for polynomial is defined with parameter 
+        #                     'n', which for given parameter sets is always 256. 
+        # IMPORTANT(Aurimas): This might still be incorrect! NTT transformation leaves us with vector of
+        #                     size 256.
+        self.polynomial_coefficient_count = 384 
+        self.montgomery = 2285
         self._static_seed = [68, 17, 101, 2, -4, -78, -21, 4, -72, 25, -39, 126, -58, -3, -94, 37, 126, -53, 37, 68, 77, -48, -74, -26, 86, -24, 36, -67, 16, -7, 123, -11]
         self._static = False
 

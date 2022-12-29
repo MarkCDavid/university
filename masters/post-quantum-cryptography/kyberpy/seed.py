@@ -1,7 +1,7 @@
-from typing import List, Tuple
-from Crypto.Hash import SHA3_512
-from parameters import PARAMETERS
 from utility import to_signed_byte
+from typing import List, Tuple
+from parameters import PARAMETERS
+from Crypto.Hash import SHA3_512
 from Crypto.Random import get_random_bytes
 
 def random_bytes() -> 'bytes':

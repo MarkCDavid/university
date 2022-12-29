@@ -1,5 +1,11 @@
 from parameters import PARAMETERS
 from utility import to_signed_short
+import numpy as np
+from extendedeuclidian import moduloInverse
+
+# PARAMETERS.n - size
+# PARAMETERS.q - prime number modulo
+
 
 NTT_ZETAS = [
     2285, 2571, 2970, 1812, 1493, 1422, 287, 202, 3158, 622, 1577, 182, 962,
@@ -25,8 +31,8 @@ NTT_ZETAS_INV = [
     829, 2946, 3065, 1325, 2756, 1861, 1474, 1202, 2367, 3147, 1752, 2707, 171,
     3127, 3042, 1907, 1836, 1517, 359, 758, 1441 ]
 
-def montgomery_reduce(a):
-    return a - (to_signed_short(a * PARAMETERS.inverse_q) * PARAMETERS.q) >> 16
+# def montgomery_reduce(a):
+#     return a - (to_signed_short(a * PARAMETERS.inverse_q) * PARAMETERS.q) >> 16
 
 # TODO: Refactor/simplify
 def ntt(r):
@@ -47,3 +53,80 @@ def ntt(r):
             start = j + l
         l >>= 1
     return r
+
+def montgomery_reduce(a):
+    """
+    :param a: big integer (i.e. long)
+    :return: a reduced (16 bit signed short)
+    """
+    u = to_signed_short(a * 62209)
+    t = (u * 3329)
+    if u >= 2**31:
+        u -= 2**32
+    t = a - t
+    t >>= 16
+    return t
+
+
+def polynomial_modulo_division(top, bot, modulo):
+    remainder = top[::1]
+    result = []
+    inverse = moduloInverse(bot[0], modulo)
+    for i in range(len(remainder) - len(bot) + 1):
+        multiplier = (remainder[i] * inverse) % modulo
+        result.append(multiplier)
+        for j in range(len(bot)):
+            remainder[i + j] = (remainder[i + j] - (bot[j] * multiplier % modulo)) % modulo
+    return result, remainder[len(result):]
+
+
+
+ZETA = 17
+
+
+ZETAS = [((17**i) % PARAMETERS.q) for i in range(128)]
+# ZETAS2 = [((17**i) * 2285) % PARAMETERS.q for i in range(128)]
+
+# TREE = [
+#   0, 64, 32, 96, 16, 80, 48, 112, 8, 72, 40, 104, 24, 88, 56, 120,
+#   4, 68, 36, 100, 20, 84, 52, 116, 12, 76, 44, 108, 28, 92, 60, 124,
+#   2, 66, 34, 98, 18, 82, 50, 114, 10, 74, 42, 106, 26, 90, 58, 122,
+#   6, 70, 38, 102, 22, 86, 54, 118, 14, 78, 46, 110, 30, 94, 62, 126,
+#   1, 65, 33, 97, 17, 81, 49, 113, 9, 73, 41, 105, 25, 89, 57, 121,
+#   5, 69, 37, 101, 21, 85, 53, 117, 13, 77, 45, 109, 29, 93, 61, 125,
+#   3, 67, 35, 99, 19, 83, 51, 115, 11, 75, 43, 107, 27, 91, 59, 123,
+#   7, 71, 39, 103, 23, 87, 55, 119, 15, 79, 47, 111, 31, 95, 63, 127
+# ];
+
+# ZETAS3 = [ZETAS2[x] for x in TREE]
+
+# print(ZETAS)
+# print(ZETAS2)
+# print(ZETAS3)
+
+def ntt_recursive(P, k):
+    n = len(P)
+    if n == 1:
+        return P
+    Pe, Po = P[0::2], P[1::2]
+    ye, yo = ntt_recursive(Pe, k + 1), ntt_recursive(Po, k + 1)
+    y = [0] * n
+    for j in range(n//2):
+        y[j] = ye[j] + ZETAS[k]*yo[j] 
+        y[j + n//2] = ye[j] - ZETAS[k]*yo[j]
+    return y
+
+
+def ntt2(signal):
+    N = len(signal)
+    zeta = 17
+    zeta_powers = [((zeta ** x) % PARAMETERS.q) for x in range(N)]
+    return [
+        sum(
+            signal[n] * zeta_powers[(n * f) % N]
+            for n 
+            in range(N)
+        ) 
+        for f 
+        in range(N)
+    ]

@@ -21,13 +21,6 @@ class BitArray:
             bits = bits >> 1
         return result
 
-    def str_max(self: 'BitArray', count: 'int') -> 'str':
-        bits = self.bits
-        result = ''
-        for _ in range(count):
-            result += str(bits & 1)
-            bits = bits >> 1
-        return result
 
     def __getitem__(self: 'BitArray', index: 'int') -> 'int':
         return self.bits >> index & 1
@@ -36,6 +29,9 @@ class BitArray:
         value = self.bits >> start
         mask = ~(n_1_bits(self.bits.bit_length()) << count)
         return BitArray(value & mask)
+
+    def slice_bytes(self: 'BitArray', start: 'int', count: 'int') -> 'BitArray':
+        return self.slice(start * 8, count * 8)
 
     def __and__(self: 'BitArray', mask: 'int') -> 'BitArray':
         return BitArray(self.bits & mask)
