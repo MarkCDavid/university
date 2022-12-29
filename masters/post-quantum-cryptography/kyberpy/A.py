@@ -7,11 +7,11 @@ from symetricprimitives.XOF import XOF
 # Given a byte stream, generate matrix A in NTT domain.
 # Transposed matrix is generated simply by providing
 # the indexes to the XOF in a different order.
-def generate_A(seed: "List[int]"):
+def generate(seed: "List[int]"):
     return [[parse_polynomial(XOF(seed, j, i)) for j in range(0, PARAMETERS.k)] for i in range(0, PARAMETERS.k)]
 
 
-def generate_A_transposed(seed: "List[int]"):
+def generate_transposed(seed: "List[int]"):
     return [[parse_polynomial(XOF(seed, i, j)) for j in range(0, PARAMETERS.k)] for i in range(0, PARAMETERS.k)]
 
 

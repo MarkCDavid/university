@@ -22,7 +22,8 @@ class KyberParameters512(KyberParametersBase):
         self.inverse_q = 62209 # KYBER_Q_INV
 
         # controlls how big coefficients for small vectors can be
-        self.eta = 3 # KYBER_ETAK512, KYBER_ETAK768_1024
+        self.eta1 = 3
+        self.eta2 = 2
 
         # controls how much (u,v) get compressed
         self.du = 10,
@@ -38,7 +39,8 @@ class KyberParameters768(KyberParametersBase):
         self.inverse_q = 62209 # KYBER_Q_INV
 
         # controlls how big coefficients for small vectors can be
-        self.eta = 2 # KYBER_ETAK512, KYBER_ETAK768_1024
+        self.eta1 = 2
+        self.eta2 = 2
 
         # controls how much (u,v) get compressed
         self.du = 10,
@@ -54,7 +56,8 @@ class KyberParameters1024(KyberParametersBase):
         self.inverse_q = 62209 # KYBER_Q_INV
 
         # controlls how big coefficients for small vectors can be
-        self.eta = 2 # KYBER_ETAK512, KYBER_ETAK768_1024
+        self.eta1 = 2
+        self.eta2 = 2
 
         # controls how much (u,v) get compressed
         self.du = 11,
