@@ -1,4 +1,4 @@
-from typing import List
+from typing import Iterator, List
 from bitarray import BitArray
 
 
@@ -19,10 +19,24 @@ def to_signed_short(value: "int") -> "int":
     value = to_unsigned_short(value)
     return value if value < 2**15 else value - 2**16
 
-
 def reduce(polynomial: "List[int]", modulo: "int") -> "List[int]":
     return [coefficient % modulo for coefficient in polynomial]
 
+def recenter(polynomial: "List[int]", modulo: "int") -> "List[int]":
+    return [
+        coefficient - modulo if coefficient > modulo // 2 else coefficient
+        for coefficient 
+        in reduce(polynomial, modulo)
+    ]
+
+def scale(polynomial: "List[int]", scale: "int") -> "List[int]":
+    return [coefficient * scale for coefficient in polynomial]
+
+def chunk(polynomial: "List[int]", size: "int") -> "Iterator[List[int]]":
+    start = 0
+    while start <= len(polynomial):
+        yield polynomial[start : start + size]
+        start = start + size
 
 class BitStream:
     def __init__(self: "BitStream", bits: "BitArray") -> "None":
