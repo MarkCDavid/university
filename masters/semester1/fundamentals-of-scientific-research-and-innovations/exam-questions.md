@@ -40,7 +40,8 @@ Dėsnių ir teorijų apibendrinta visuma, įgyjama taikant mokslinį metodą, si
 
 * Intuicija
   * Veiksmas arba procesas, nukreiptas į žinias ar tikrumą be samprotavimų arba išvadų darymo;
-  * Paremta pateisinimais kaip "man atrodo teisinga", "aš tikiu"; ![Atskleista sapne](img/revealed_in_a_dream.png)
+  * Paremta pateisinimais kaip "man atrodo teisinga", "aš tikiu";
+  * ![Atskleista sapne](img/revealed_in_a_dream.png)
   * Nėra mechanizmo atskirti tikslias ir netikslias žinias.
 * Autoritetas
   * Kito asmens informacijos ar faktų priėmimas, nes asmuo yra gerbiamas šaltinis;
@@ -210,7 +211,6 @@ Empirinis tyrimas, kurio metu įtraukiami keli duomenų šaltiniai, siekiant iš
   * Pateikiama išsamus atvejo aprašymas.
 * Rezultatų interpretavimas
   * Pateikiamos tyrimo išvados, atskleisti nauji reiškinio aspektai.
-
 
 ## Argumentas, argumentavimas, argumentacija
 
