@@ -323,7 +323,9 @@ Modeliavimas yra modelio kūrimas, simuliacija - to modelio vykdymas laiko tėkm
 
 ### Kuo koncepcinis modelis skiriasi nuo simuliacinio modelio?
 
-> ❗ Reikia papildyti
+> ⚠️ Išvestas atsakymas (ISBN 9786094762802, p. 243-245)
+
+Koncepcinis modelis negali būti vykdomas laike, tačiau jis nurodo koks turėtų būti simuliacinis modelis.
 
 ### Kokie yra modelių tipai?
 
@@ -374,7 +376,11 @@ Modeliavimas yra modelio kūrimas, simuliacija - to modelio vykdymas laiko tėkm
 
 ### Ką reiškia patikimi duomenys simuliacijos kontekste?
 
-> ❗ Reikia papildyti
+> ⚠️ Išvestas atsakymas (ISBN 9786094762802, p. 252)
+
+Patikimi duomenys, tai tokie duomenys kurie yra teisingi norint atlikti simuliacijos kūrimą, jos validavimą ir verifikaciją.
+
+Neturint patikimų duomenų ir negalint patikrinti simuliacijos modelio, simuliacija praranda savo vertę ir negali būti naudojama tyrimams.
 
 ### Kokie yra simuliacinio modelio verifikavimo būdai? 
 
@@ -408,4 +414,4 @@ Pagal P. Axelrod yra septyni simuliacijos vaidmenys moksliniuose tyrimuose:
 
 ### Kaip vyksta simuliacija grindžiamas teorijos kūrimas?
 
-> ❗ Reikia papildyti
+> ❗ Reikia papildyti (ISBN 9786094762802, p. 259-267)
