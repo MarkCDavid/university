@@ -1,18 +1,51 @@
 # Egzaminui „Mokslinių tyrimų ir inovacijų pagrindai“
 
-## Mokslinis tyrimas:
+## Mokslinis tyrimas
 
-### Mokslinio tyrimo apibrėžimai:
+### Mokslinio tyrimo apibrėžimai
 
 Tai tyrimas, atliekamas sisteminiais ir apgalvotais moksliniais metodais duomenims gauti, analizuoti ir aiškinti.
 
-### Mokslinio tyrimo tikslas;
-### Apibrėžti1 mokslinio tyrimo teorinį ir empirinį lygmenis;
-### Apibrėžti mokslinio tyrimo formą – indukciją;
-### Apibrėžti mokslinio tyrimo formą – dedukciją;
+### Mokslinio tyrimo tikslas
+
+Mokslinio tyrimo metu siekiama prisidėti prie mokslo sistemingai kuriant mokslo žinias apie tam tikrus realaus pasaulio reiškinius arba objektus.
+
+### Apibrėžti mokslinio tyrimo teorinį ir empirinį lygmenis
+
+* **Teorinis lygmuo** - siekiama plėtoti abstrakčias sąvokas apie pasirinktą reiškinį, šių sąvokų ryšius (t. y. kurti teorijas)
+* **Empirinis lygmuo** - siekiama išbandyti teorines sąvokas ir ryšius, siekiant įsitikinti, ar jie atspindi stebėjimus tikrovėje. 
+
+### Apibrėžti mokslinio tyrimo formą – indukciją
+
+Tai samprotavimo procesas, apimantis perėjimą nuo specifinio prie bendrojo. 
+
+Indukcinio tyrimo metu, tyrėjo tikslas yra iš stebėtų duomenų išvesti sąvokas ir modelius.
+
+### Apibrėžti mokslinio tyrimo formą – dedukciją
+
+Tai samprotavimo procesas, apimantis perėjimą nuo bendrojo prie specifinio.
+
+Dedukcinio tyrimo metu, tyrėjo tikslas yra išbandyti savokas ir modelius, žinomus teorijoje.
+
 ### Kas yra mokslinės žinios?
-### Mokslinio tyrimo ciklas;
-### Išvardyti mokslinių žinių išgavimo būdus ir mokėti trumpai juos paaiškinti.
+
+Dėsnių ir teorijų apibendrinta visuma, įgyjama taikant mokslinį metodą, siekiant paaiškinti dominantį reiškinį arba elgesį.
+
+### Mokslinio tyrimo ciklas
+
+![Mokslinio tyrimo ciklas](img/mokslinio_tyrimo_ciklas.png)
+
+
+### Išvardyti mokslinių žinių išgavimo būdus ir mokėti trumpai juos paaiškinti
+
+* Intuicija
+  * Veiksmas arba procesas, nukreiptas į žinias ar tikrumą be samprotavimų arba išvadų darymo;
+  * Paremta pateisinimais kaip "man atrodo teisinga", "aš tikiu"; ![Atskleista sapne](img/revealed_in_a_dream.png)
+  * Nėra mechanizmo atskirti tikslias ir netikslias žinias.
+* Autoritetas
+* Racionalizmas
+* Empirizmas
+
 ## Inovacijos ir jas apibrėžiantys dokumentai;
 ### Inovacijos apibrėžimas;
 ### Kas yra Fraskati vadovas, kas jame pateikiamas?
