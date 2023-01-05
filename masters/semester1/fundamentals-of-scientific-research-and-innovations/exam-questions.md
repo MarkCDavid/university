@@ -245,29 +245,100 @@ Procesas, kurio metu mokslininkai, remdamiesi savo ar kitų moksliniais tyrimais
 * **Užnugaris** - dokumentas nurodantis kodėl reikia tikėti bendrąja garantijos reiškiama taisykle.
 * **Įvertinimas** - apibendrinimas, kuriama pateikiama, kaip tezės teisingumu yra įsitikinęs siuntėjas ir kiek jis už ją garantuoja.
 
-## Mokslinio tyrimo etika:
-### Etikos apibrėžimas;
-### Kokie etiniai principai yra nusistovėję mokslo bendruomenėje? Mokėti paaiškinti kiekvieną iš jų;
-### Apibrėžkite empirinio tyrimo etinius principus;
+## Mokslinio tyrimo etika
+
+### Etikos apibrėžimas
+
+Atitiktis tam tikros profesijos ar grupės elgesio standartams.
+
+### Kokie etiniai principai yra nusistovėję mokslo bendruomenėje? Mokėti paaiškinti kiekvieną iš jų
+
+* Savanoriškas dalyvavimas ir nekenksmingumas
+  * Tyrimo dalyviai tyrime dalyvauja savo noru ir gali iš jo bet kada pasitraukti.
+* Anonimiškuams ir konfidencialumas
+  * Yra saugomas tyrimo dalyvių anonimiškumas ir konfidencialumas - iš tyrimo rezultatų negali būti įmanoma įdentifikuoti tam tikrų asmenų.
+* Atskleidimas
+  * Įprastai, tyrimo dalyviams turi būti atskleidžiama informacija apie tyrimą, prieš jam sutinkant jame dalyvauti. Jei to padaryti negalima (atskleidimas pakentų tyrimo rezultams), ši informacija turi būti atskleidžiama iškart gavus reikiamus rezultatus.
+* Analizė ir ataskaitos
+  * Netikėtos ir neigiamos išvados turėtų būti visiškai atskleistos, net jei kelia abejonių dėl tyrimo projekto ar išvadų.
+
+
+### Apibrėžkite empirinio tyrimo etinius principus
+
+* Tyrimo dalyviai turi duoti informuoto asmenst sutikimą dalyvauti tyrime.
+* Mokslinis tyrimas turi turėti mokslinę vertę.
+* Tyrėjai turi imtis visų įmanomų priemonių siekiant užtikrinti neskelbtinos informacijos konfidencialumą.
+* Atliekamo tyrimo nauda turi viršyti tyrimo metu patiriamą rizikos ar žalos dydį.
+
 ### Ką apibrėžia mokslininko etikos kodeksas?
+
+Nusako svarbiausius mokslininko elgsenos bendrąsias nuostatas ir normas.
+
 ## Plagijavimas:
-### Apibrėžkite kas yra plagiatas;
-### Kuo skiriasi idėjos ir tekto plagiatas?
-### Paaiškinkite ką reiškia savęs plagijavimas;
+
+### Apibrėžkite kas yra plagiatas
+
+Atradimo, išradimo, mokslo, meno, literatūros veikalo ar jo dalies autorystės pasisavinimas ir paskelbimas savo vardu ar slapyvardžiu, pasinaudojimas be autoriaus leidimo.
+
+### Kuo skiriasi idėjos ir teksto plagiatas?
+
+* **Idėjos plagijavimas** - idėjos pasisavinimas visiškai, arba iš dalies, su paviršutiniškomis modifikacijomis, nepripažįstant jos sumanytojo.
+* **Teksto plagijavimas** - tai teksto iš kito šalitnio kopijavimas, nepripažįstant jo autoriaus ir jo necituojant.
+
+### Paaiškinkite ką reiškia savęs plagijavimas
+
+Autorius naujame darbe naudoja/kopijuoja savo anksčiau paraštą darbą ar duomenis naujame darbe, nepranešdamas skaitytojui, kad ši medžiaga jau yra publikuota kitur.
+
 ### Pateikite plagijavimo vengimo rekomendacijas (12 punktų)
-## Modeliavimas ir simuliacija:
-### Apibrėžkite kas yra modelis;
+
+1. **Koncepcija** - sukurkite originalią hipotezę;
+2. **Mokslinio tyrimo projektavimas** - iš anksto pasiruoškite, suplanuokite ir pagrįskite mokslinius tyrimus;
+3. **Kruopšti literatūros paieška**
+4. **Pradėkite rašyti rankraštį** - atlikus paiešką ir tyrimus, pradėkite rašyti savo židžiais, nežiūrėdami į kitus šaltinius.
+5. **Griežtai laikykitės mokslinio darbo struktūros**
+6. Jei reikia kopijuoti:
+   1. Tekstą pateikite kabutėse, pacituokite šaltinį;
+   2. Aprašykite visus informacijos šaltinius;
+   3. Padekokite;
+   4. Pateikite išnašas.
+7. Jei reikia kopijuoti savo tekstą iš anksčiau paskelbto straipsnio, reikia gauti leidėjo sutikimą;
+8. Jeigu norite naudoti paveikslus / lenteles / iliustracijas:
+   1. turi būti gautas autorių sutikimas;
+   2. turi būti nurodytas tiesioginis šaltinis;
+   3. kai kurie paveikslai turi leidimą būti kopijuojami.
+9. **Dubliavimas** - venkite vienu metu rašyti panašius straipsnius ir pateikti juos įvairiems žurnalams;
+10. **Naudokite automatinio plagijavimo aptikimo įrankius**
+11. **Segmentavimo prevencija** - ankstesnės publikacijos turi būti nurodytos vėlesnėse susijusiose publikacijose.
+12. **Autorių teisės** - būtinai susipažinkite su pagrindiniais autorių teisių įstatymo elementais.
+
+## Modeliavimas ir simuliacija
+
+### Apibrėžkite kas yra modelis
+
 ### Kuo skiriasi modeliavimas ir simuliacija?
+
 ### Kuo koncepcinis modelis skiriasi nuo simuliacinio modelio?
+
 ### Kokie yra modelių tipai?
+
 ### Pagal ką modeliai skirstomi į tipus?
-### Kokie yra pagrindiniai modeliavimo ir simuliacijos trūkumai? 
-### Kokie yra pagrindiniai modeliavimo ir simuliacijos žingsniai? 
+
+### Kokie yra pagrindiniai modeliavimo ir simuliacijos trūkumai?
+
+### Kokie yra pagrindiniai modeliavimo ir simuliacijos žingsniai?
+
 ### Ką reiškia pakankamai tikslus simuliacinis modelis?
+
 ### Kas yra simuliacinio modelio validavimas ir verifikavimas?
+
 ### Kokie yra simuliacinio modelio validavimo būdai?
+
 ### Ką reiškia patikimi duomenys simuliacijos kontekste?
+
 ### Kokie yra simuliacinio modelio verifikavimo būdai? 
+
 ### Kokie verslo proceso modeliavimo elementai apibūdina verslo proceso aspektus?
+
 ### Koks yra simuliacijos vaidmuo moksliniuose tyrimuose?
+
 ### Kaip vyksta simuliacija grindžiamas teorijos kūrimas?
