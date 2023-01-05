@@ -315,30 +315,96 @@ Autorius naujame darbe naudoja/kopijuoja savo anksčiau paraštą darbą ar duom
 
 ### Apibrėžkite kas yra modelis
 
+Aiškiai nusakytą tikslinę paskirtį turintis supaprastintas sistemos, proceso, reiškinio ar kokio nors kito originalo analogas, tapatus tam originalui modeliavimo tikslų požiūriu.
+
 ### Kuo skiriasi modeliavimas ir simuliacija?
+
+Modeliavimas yra modelio kūrimas, simuliacija - to modelio vykdymas laiko tėkmėje.
 
 ### Kuo koncepcinis modelis skiriasi nuo simuliacinio modelio?
 
+> ❗ Reikia papildyti
+
 ### Kokie yra modelių tipai?
+
+> ❗ Reikia papildyti
 
 ### Pagal ką modeliai skirstomi į tipus?
 
+* Pagal kintamųjų tipą
+  * **Deterministiniai** - įeigos ir išeigos kintamieji yra fiksuoti;
+  * **Stochastinius** - kai bent vienas įeigos arba išeigos kintamasis yra tikimybinis.
+* Pagal laiko sąvoką
+  * **Statiniai** - kai laiko aspektas nėra svarbus;
+  * **Dinaminiai** - kai atsižvelgiama į kintamųjų ir laiko sąveiką.
+
 ### Kokie yra pagrindiniai modeliavimo ir simuliacijos trūkumai?
+
+* Nepakankamas išsamumas
+  * Modelyje neįmanoma atvaizduoti visų realaus fenomeno savybių;
+* Aproksimacijos
+  * Apytiksliai duomenys naudojami modeliuose nėra tikslūs, todėl gaunamos progrnozės gali skirtis nuo realybės;
+* Nepankamas tikslumas
+  * Modeliai supaprastinami, prarandamas tikslumas
+* Neaiškus rezultatų interpretavimas
 
 ### Kokie yra pagrindiniai modeliavimo ir simuliacijos žingsniai?
 
+![Modeliavimo schema](img/modeliavimo_schema.png)
+
 ### Ką reiškia pakankamai tikslus simuliacinis modelis?
+
+> ❗ Reikia papildyti
 
 ### Kas yra simuliacinio modelio validavimas ir verifikavimas?
 
+* **Verifikavimas** - klaidų identifikavimas ir pašalinimas iš simuliacinio modelio, lyginant su realaus pasaulio rezultatais.
+* **Validavimas** - užtikrinimas, kad simuliacinis modelis yra naudingas realaus pasaulio problemai spręsti.
+
 ### Kokie yra simuliacinio modelio validavimo būdai?
+
+* Subjektyvus vertinimas
+  * Modelis tikrinamas jį kūrusios komandos
+* Nepriklausomas vertinimas
+  * Modelis tikrinamas trečios, nepriklausomos šalies
+* Bendras vertinimas
+  * Į modelio vertinimą įtraukiami ir būsimi modelio vartotojai
+* Kriterinis vertinimas
+  * Modelio įvertinimui yra naudojami kriterijai
 
 ### Ką reiškia patikimi duomenys simuliacijos kontekste?
 
+> ❗ Reikia papildyti
+
 ### Kokie yra simuliacinio modelio verifikavimo būdai? 
+
+* Statinis testavimas
+  * Modelis yra analizuojamas naudojant metodus kaip struktūrinis perėjimas, teisingumo įrodymas ir stuktūrinių savybių nagrinėjimas sukurtame modelye.
+* Dinaminis testavimas
+  * Modelis yra vykdomas esant skirtingoms sąlygoms, gauti rezultatai naudojami nustatyti, ar modelis įgyvendintas teisingai.
 
 ### Kokie verslo proceso modeliavimo elementai apibūdina verslo proceso aspektus?
 
+* Elgesio aspektas
+  * Apibrėžia proceso valdymo srautą kaip veiklų seką.
+* Funkcinis aspektas
+  * Nurodo veiklas, kurios gali būti vykdomos verslo procese, tačiau šios veiklos nėra išsamiai apibrėžiamos.
+* Informacinis aspektas
+  * Apibrėžia duomenų objektus, naudojamas saugojimo vietas, duomenis, kurie yra įeigos ir išeigos.
+* Organizacinis aspektas
+  * Apibūdina resursus, vykdančius veiklas arba jose dalyvaujančius.
+
 ### Koks yra simuliacijos vaidmuo moksliniuose tyrimuose?
 
+Pagal P. Axelrod yra septyni simuliacijos vaidmenys moksliniuose tyrimuose:
+
+* Prognozavimas
+* Vykdymas
+* Mokymas
+* Pramoga
+* Švietimas
+* Įrodymui
+* Teorijos atradimui
+
 ### Kaip vyksta simuliacija grindžiamas teorijos kūrimas?
+
