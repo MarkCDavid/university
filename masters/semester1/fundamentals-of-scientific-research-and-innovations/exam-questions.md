@@ -98,13 +98,17 @@ Kūrybiškas ir sistemingas darbas, atliekamas plėsti turimas žinias, taip pat
 
 ### Žinoti kuriai mokslo sričiai ir krypčiai priklauso jūsų studijų programa
 
-> ❗ Reikia papildyti
+> ❗ Reikia papildyti (mokslo sritis)
 
 Informatikos inžinerijos kryptis.
 
 ### Apibrėžti ką reiškia pasakymas – mokslinis tyrimas pagrįstas metodologiškai
 
-> ❗ Reikia papildyti
+Metodologiškai pagrįstas mokslinis tyrimas turi būti:
+  * Korektiškai suformuluota tema
+  * Aptarta tyrimo koncepcija
+  * Aptarta hipotezė
+  * Parinkti ir aptarti tyrimo metodai
 
 ### Mokslinių tyrimų klasifikavimas pagal: taikomus metodus, tyrimo metodiką, keliamus tikslus, organizavimo tipą.
 
@@ -120,34 +124,53 @@ Informatikos inžinerijos kryptis.
 
 Skirtingų metodų ar informacijos šaltinių derinimas, skirtas tik kokybiniams arba tik kiekybiniams duomenims rinkti bei analizuoti.
 
-> ❗ Reikia papildyti
+* Laiko atžvilgiu
+* Vietos atžvilgiu
+* Stebėtojų atžvilgiu
+  * Tyrimas atliekamas kelių stebėtojų. Jei jų rezultatai sutampa, rezultatai yra pakankamai objektyvūs.
+* Individualūs ir grupiniai
+* Teorijų trianguliacija
+  * Tiriama remiantis keliomis teorijomis
 
 ### Kuo skiriasi teoriniai ir empiriniai darbai?
 
-> ❗ Reikia papildyti
+Teoriniuose darbuose naudojamasi teorijomis, norint rasti racionalų atsakymą į rūpimą klausimą (dirbama deduktyviai).
+
+Empiriniuose darbuose naudojamasi stebėjimais ir duomenimis, išeities taškas - realusis pasaulis (dirbama induktyviai).
 
 ### Kas yra teorija? Kas yra empirija?
 
-> ❗ Reikia papildyti
+* **Teorija** - tam tikros mokslo srities taisyklių sistema, apibūdinanti, aiškinanti ar prognozuojanti tos srities reiškinius ir padedanti tos srities suvokimo pagrindus.
+* **Empirija** - medžiaga, kuri yra tyrimo objektas, kurą galima aprašyti (stebėjimai, duomenys ir pan.)
 
 ### Dedukcinių metodų veikimo principas
 
-> ❗ Reikia papildyti
+Teorija → Hipotezė → Stebėjimas → Patvirtinimas
 
 ### Indukcinių metodų veikimo principas
 
-> ❗ Reikia papildyti
+Stebėjimas → Modelis → Eksperimentinė hipotezė → Teorija
 
 ### Kas yra eksperimentas? Išvardykite eksperimentinio tyrimo etapus
 
 Eksperimentas - empirinis tyrimas, skirtas planingai valdant proceso ar reiškinio sąlygas patikrinti hipotezes apie ryšį tarp priežastinių reiškinių. 
 
-* Eksperimento eiga
+* Eksperimento eiga (pagal vadovėlį)
   * Apimties nustatymas
   * Planavimas
   * Eksperimento vykdymas
   * Duomenų analizė ir interpretavimas
   * Rezultatų pristatymas ir programinis realizavimas
+
+* Eksperimento eiga (pagal skaidres)
+  * Apsibrežiama tyrimo problema
+  * Suformuluojama tyrimo hipotezė
+  * Pasirenkamas poveikio būdas
+  * Atsižvelgiama į populiaciją
+  * Apgalvojama, kas gali iškreipti tyrimo rezultatus
+  * Atliekami preliminarūs tyrimai
+  * Laikomasi numatytų tyrimo procedūrų
+  * Išanalizuojami eksperimento duomenys
 
 ### Kas yra hipotezė?
 
@@ -157,11 +180,36 @@ Preliminarus teiginys, kuris turi būti įrodytas arba paneigtas.
 
 Eksperimente būna dviejų tipų kintamieji: nepriklausomi ir priklausomi. Eksperimento metu ***nepriklausomi*** kitamieji yra keičiami ir yra stebimas jų poveikis ***priklausomam*** kintamajam. Paprasčiau tariant - keičiami tyrimo įvesties kintamieji, stebima, kaip tai paveiks eksperimento išvestį.
 
+Eksperimente galima išskirti dvi pagrindines, eksperimentinė ir kontrolinė, grupės. ***Eksperimentinei*** grupei yra taikomas tam tikri metodai, galimai keičiantys rezultatą, o ***kontrolinė*** grupė naudojama eksperimento gautų duomenų palyginimui.
+
 ### Eksperimentinių tyrimų rūšys: preliminarieji, skerspjūvio, longitudiniai, tikrieji eksperimentiniai tyrimai, kvazi-eksperimentiniai tyrimai
+
+ * Preliminarusis tyrimas
+ * Skerspjūvio tyrimas
+   * Nustatoma požymių situacija tam tikru laiko ***momentu***
+ * Longitudinis (ilgalaikis) tyrimas
+   * Tyrimas, kurio metu reiškinys yra stebimas ir tiriamas ilgą laiką, naudojant tą pačią metodiką ir sąlygas.
+ * Tikrasis eksperimentis tyrimas
+   * Naudojamos eksperimentinės ir kontrolinės grupės, jos suburiamos atsitiktinai, grupių parametrai yra pilnai suvienodinti.
+ * Kvazi-eksperimentinis tyrimas
+   * Eksperimentas, kurio metu eksperimentinių ir kontrolinių grupių parametrai negali būti pilnai suvienodinti.
+
+> ❗ Reikia papildyti (Preliminarusis tyrimas)
 
 ### Atvejo analizės (angl. case study) apibrėžimas
 
+Empirinis tyrimas, kurio metu įtraukiami keli duomenų šaltiniai, siekiant ištirti vieną (arba nedidelį kiekį) atskirą atvejį, realiame kontekste, ypač kai riba tarp reiškinio ir konteksto negali būti aiškiai nustatyta.
+
 ### Atvejo analizės atlikimo etapai
+
+* Atvejo (atvejų) identifikavimas ir ribų nustatymas
+  * Apibrežiama kad yra laikoma *atveju*, nustatomos jo ribos
+* Duomenų rinkimas
+  * Renkama detali informacija, ji aprašoma naudojantis visais galimais šaltiniais.
+* Duomenų analizė
+  * Pateikiama išsamus atvejo aprašymas.
+* Rezultatų interpretavimas
+  * Pateikiamos tyrimo išvados, atskleisti nauji reiškinio aspektai.
 
 
 ## Argumentas, argumentavimas, argumentacija
