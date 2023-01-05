@@ -35,7 +35,6 @@ Dėsnių ir teorijų apibendrinta visuma, įgyjama taikant mokslinį metodą, si
 
 ![Mokslinio tyrimo ciklas](img/mokslinio_tyrimo_ciklas.png)
 
-
 ### Išvardyti mokslinių žinių išgavimo būdus ir mokėti trumpai juos paaiškinti
 
 * Intuicija
@@ -215,8 +214,37 @@ Empirinis tyrimas, kurio metu įtraukiami keli duomenų šaltiniai, siekiant iš
 ## Argumentas, argumentavimas, argumentacija
 
 ### Kuo skiriasi argumentacija ir argumentavimas?
+
+Argumentavimas - racionalus ir etiškas argumentų pateikimas, įrodinėjimas, skirtas savo įsitikinmams bei vertybėms pagrįsti ir daryti įtaką kitų žmonių mąstymui bei veiklai.
+
+Argumentacija - teiginio teisingumo prgrindimo procedūra; teiginio pagrindimas, siekiant įtikinti jo teisingumu.
+
+> ❗ Reikia papildyti (labai panašūs terminai)
+
 ### Mokslinio argumentavimo apibrėžimas;
+
+Procesas, kurio metu mokslininkai, remdamiesi savo ar kitų moksliniais tyrimais, nustato kitų argumentų silpnybes ir apribojimus.
+
 ### Sudaryti Toulmino argumentų modelį ir mokėti paaiškinti kiekvieną jo elementą, t.y. kas yra pagrindas, tezė, įvertinimas, garantija, užnugaris ir prieštaravimas.
+
+![Toulmino argumentų modelis](img/toulmino_modelis.png)
+
+* Privalomos modelio dalys
+  * Tezė;
+  * Pagrindas;
+  * Garantija.
+* Neprivalomos modelio dalys
+  * Prieštaravimas;
+  * Užnugaris;
+  * Įvertinimas.
+
+* **Tezė** - nuomonė, kuriai autorius ieško pritarimo;
+* **Pagrindas** - tezę pagrindžianti konkreti informacija;
+* **Garantija** - tezę ir pagrindą siejantis bendras požiūris, kuris leidžia suformuluoti ir pagrįsti tezę.
+* **Prieštaravimas** - Tai išlygos, kurios daromos dėl garantijos teisingumo, kai bendrasis garantijos autoritetas neveikia;
+* **Užnugaris** - dokumentas nurodantis kodėl reikia tikėti bendrąja garantijos reiškiama taisykle.
+* **Įvertinimas** - apibendrinimas, kuriama pateikiama, kaip tezės teisingumu yra įsitikinęs siuntėjas ir kiek jis už ją garantuoja.
+
 ## Mokslinio tyrimo etika:
 ### Etikos apibrėžimas;
 ### Kokie etiniai principai yra nusistovėję mokslo bendruomenėje? Mokėti paaiškinti kiekvieną iš jų;
