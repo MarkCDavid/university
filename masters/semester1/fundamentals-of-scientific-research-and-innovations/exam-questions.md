@@ -408,3 +408,4 @@ Pagal P. Axelrod yra septyni simuliacijos vaidmenys moksliniuose tyrimuose:
 
 ### Kaip vyksta simuliacija grindžiamas teorijos kūrimas?
 
+> ❗ Reikia papildyti
