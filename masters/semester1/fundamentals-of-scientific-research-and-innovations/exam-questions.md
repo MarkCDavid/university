@@ -55,13 +55,42 @@ Dėsnių ir teorijų apibendrinta visuma, įgyjama taikant mokslinį metodą, si
   * Naudojant ***tik*** empirizmą, kyla pavojus - laikui bėgant gali pasikeisti požiūris į patirtį, įvykių atmintis nėra pastovi, žmonės pamištra, arba jų atsiminimai išsikraipo;
   * Norint naudoti empirizmą, tyrimai ir jų stebėjimai turi būti atliekami kontroliuojamomis sąlygomis, bandant sumažinti tyrėjų šališkumą ir padidinti objektyvumą.
 
-## Inovacijos ir jas apibrėžiantys dokumentai;
+## Inovacijos ir jas apibrėžiantys dokumentai
+
 ### Inovacijos apibrėžimas;
-### Kas yra Fraskati vadovas, kas jame pateikiamas?
+
+Naujas arba patobulintas produktas ar procesas (ar jų derinys), kuris itin skiriasi nuo ankstesnių produktų ar procesų ir kuris yra prieinamas potencialiems naudotojams arba kuris yra naudojamas.
+
+### Kas yra Fraskati vadovas, kas jame pateikiama?
+
+Ekonominio bendradarbiavimo ir plėtros organizacijos (EBPO) ir nacionaliniais mokslinių tyrimų ir eksperimentinės plėtros (MTEP) ekspertų parengtas dokumentas - oficialusis standartinės praktikos mokslinių tyrimų ir eksperimentinės plėtros statistiniams tyrimams atlikti vadovas.
+
+Vadove pateikti tarptautiniu mastu pripažinti MTEP apibrėžimai ir jų komponentų veiklos klasifikacijos.
+
 ### Kas yra Oslo vadovas, kas jame pateikiama?
+
+Tai yra tarptautinis informacinis standartas, skirtas inovacijoms konceptualizuoti ir matuoti.
+
+Jame pateikiamos mokslinės, technologinės ir inovacinės veiklos matavimo, duomenų apie inovacijas rinkitmo ir naudojimo gairės.
+
 ### Apibrėžti inovacijų rūšis: produktų ir verslo procesų inovacijas;
-### Kas yra MTEP ir jo apibrėžimas;
+
+### Kas yra MTEP ir jo apibrėžimas
+
+Kūrybiškas ir sistemingas darbas, atliekamas plėsti turimas žinias, taip pat žinias apie žmoniją, kultūrą ir visuomenę, ir rasti naujų tokių žinių pritaikymo būdų.
+
 ### Kokias veiklos rūšis apima MTEP?
+
+* Fundamentiniai tyrimai
+  * Taikomoji/teorinė veikla vykdoma siekiant įgyti naujų žinių apie reiškinio esmę ir stebimus faktus;
+  * pvz.: bendrųjų algoritmų, naudojamų dideliam duomenų kiekiui tvarkyti realiuoju laiku, savybių tyrimai.
+* Taikomieji tyrimai
+  * Originalus tyrimas atliekamas naujoms žinioms įgyti, nukreiptas į specifinių praktinių pasiekimą ar uždavinių įgyvendinimą.
+  * pvz.: tyrimas, kuriuo siekiama rasti būdų mažinti brukalų (spam) srautą ir suprasti bendrą brukalų struktūrą ar verslo modelį, juos siunčiančių asmenų funkcijas ir motyvus.
+* Eksperimentinė plėtra
+  * Mokslinių tyrimų ir praktinės patirties pagrindu sukauptu pažinimu pagrįsta sisteminga veiklas, leidžianti įgyti papildomų žinių, tiesiogiai prisidenčių kuriant naujus produktus ar procesus, ar juos tobulinant;
+  * pvz.: startuolis pasinaudoja tyrėjų sukurtu kodu ir parengia verslo planą, pritaikytą programų sistemos produktui, užtikrinančiam geresnę internetinę rinkodarą.
+
 ## Mokslinių tyrimų tipai ir tyrimo metodai;
 ### Žinoti kuriai mokslo sričiai ir krypčiai priklauso jūsų studijų programa;
 ### Apibrėžti ką reiškia pasakymas – mokslinis tyrimas pagrįstas metodologiškai;
