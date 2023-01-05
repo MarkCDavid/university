@@ -57,7 +57,7 @@ Dėsnių ir teorijų apibendrinta visuma, įgyjama taikant mokslinį metodą, si
 
 ## Inovacijos ir jas apibrėžiantys dokumentai
 
-### Inovacijos apibrėžimas;
+### Inovacijos apibrėžimas
 
 Naujas arba patobulintas produktas ar procesas (ar jų derinys), kuris itin skiriasi nuo ankstesnių produktų ar procesų ir kuris yra prieinamas potencialiems naudotojams arba kuris yra naudojamas.
 
@@ -73,7 +73,10 @@ Tai yra tarptautinis informacinis standartas, skirtas inovacijoms konceptualizuo
 
 Jame pateikiamos mokslinės, technologinės ir inovacinės veiklos matavimo, duomenų apie inovacijas rinkitmo ir naudojimo gairės.
 
-### Apibrėžti inovacijų rūšis: produktų ir verslo procesų inovacijas;
+### Apibrėžti inovacijų rūšis: produktų ir verslo procesų inovacijas
+
+* **Produkto inovacija** - nauja arba patobulinta prekė ar paslauga, kuri itin skiriasi nuo ankstesnių įmonės prekių ar paslaugų ir kuri yra pateikta rinkai.
+* **Verslo proceso inovacija** - yra naujas arba patobulintas vienai ar kelioms verslo funkcijoms skirtas verslo procesas, kuris itin skiriasi nuo ankstesnių įmonės verslo procesų ir kurį įmonė naudoja.
 
 ### Kas yra MTEP ir jo apibrėžimas
 
@@ -91,22 +94,78 @@ Kūrybiškas ir sistemingas darbas, atliekamas plėsti turimas žinias, taip pat
   * Mokslinių tyrimų ir praktinės patirties pagrindu sukauptu pažinimu pagrįsta sisteminga veiklas, leidžianti įgyti papildomų žinių, tiesiogiai prisidenčių kuriant naujus produktus ar procesus, ar juos tobulinant;
   * pvz.: startuolis pasinaudoja tyrėjų sukurtu kodu ir parengia verslo planą, pritaikytą programų sistemos produktui, užtikrinančiam geresnę internetinę rinkodarą.
 
-## Mokslinių tyrimų tipai ir tyrimo metodai;
-### Žinoti kuriai mokslo sričiai ir krypčiai priklauso jūsų studijų programa;
-### Apibrėžti ką reiškia pasakymas – mokslinis tyrimas pagrįstas metodologiškai;
+## Mokslinių tyrimų tipai ir tyrimo metodai
+
+### Žinoti kuriai mokslo sričiai ir krypčiai priklauso jūsų studijų programa
+
+> ❗ Reikia papildyti
+
+Informatikos inžinerijos kryptis.
+
+### Apibrėžti ką reiškia pasakymas – mokslinis tyrimas pagrįstas metodologiškai
+
+> ❗ Reikia papildyti
+
 ### Mokslinių tyrimų klasifikavimas pagal: taikomus metodus, tyrimo metodiką, keliamus tikslus, organizavimo tipą.
+
+* Pagal tikslą
+  * Žvalgomieji
+    * Atliekami naujose srityje, tikintis išsiaiškinti proceso mastą, sukurti pirmines įdėjas arba patikrinti įvykdomumą;
+  * Aprašomieji
+    * Siekiama kuopščiai ištirti ir išsamiai aprašyti dominantį reiškinį. Šie stebėjimai turi būti pagrįsti moksliniu tyrimų metodu.
+  * Aiškinamieji
+    * Siekiama paaiškinti pastebėtus reiškinius, objektus arba procesus. Bandoma "sujungti taškus", nustatant reiškinio priežastinius veiksnius ir rezultatus.
+
 ### Kas yra trianguliacija? Kokie galimi trianguliacijos būdai?
+
+Skirtingų metodų ar informacijos šaltinių derinimas, skirtas tik kokybiniams arba tik kiekybiniams duomenims rinkti bei analizuoti.
+
+> ❗ Reikia papildyti
+
 ### Kuo skiriasi teoriniai ir empiriniai darbai?
+
+> ❗ Reikia papildyti
+
 ### Kas yra teorija? Kas yra empirija?
-### Dedukcinių metodų veikimo principas;
-### Indukcinių metodų veikimo principas;
-### Kas yra eksperimentas? Išvardykite eksperimentinio tyrimo etapus;
+
+> ❗ Reikia papildyti
+
+### Dedukcinių metodų veikimo principas
+
+> ❗ Reikia papildyti
+
+### Indukcinių metodų veikimo principas
+
+> ❗ Reikia papildyti
+
+### Kas yra eksperimentas? Išvardykite eksperimentinio tyrimo etapus
+
+Eksperimentas - empirinis tyrimas, skirtas planingai valdant proceso ar reiškinio sąlygas patikrinti hipotezes apie ryšį tarp priežastinių reiškinių. 
+
+* Eksperimento eiga
+  * Apimties nustatymas
+  * Planavimas
+  * Eksperimento vykdymas
+  * Duomenų analizė ir interpretavimas
+  * Rezultatų pristatymas ir programinis realizavimas
+
 ### Kas yra hipotezė?
-### Eksperimento kintamieji ir grupės;
-### Eksperimentinių tyrimų rūšys: preliminarieji, skerspjūvio, longitudiniai, tikrieji eksperimentiniai tyrimai, kvazi-eksperimentiniai tyrimai;
-### Atvejo analizės (angl. case study) apibrėžimas.
-### Atvejo analizės atlikimo etapai;
-## Argumentas, argumentavimas, argumentacija:
+
+Preliminarus teiginys, kuris turi būti įrodytas arba paneigtas.
+
+### Eksperimento kintamieji ir grupės
+
+Eksperimente būna dviejų tipų kintamieji: nepriklausomi ir priklausomi. Eksperimento metu ***nepriklausomi*** kitamieji yra keičiami ir yra stebimas jų poveikis ***priklausomam*** kintamajam. Paprasčiau tariant - keičiami tyrimo įvesties kintamieji, stebima, kaip tai paveiks eksperimento išvestį.
+
+### Eksperimentinių tyrimų rūšys: preliminarieji, skerspjūvio, longitudiniai, tikrieji eksperimentiniai tyrimai, kvazi-eksperimentiniai tyrimai
+
+### Atvejo analizės (angl. case study) apibrėžimas
+
+### Atvejo analizės atlikimo etapai
+
+
+## Argumentas, argumentavimas, argumentacija
+
 ### Kuo skiriasi argumentacija ir argumentavimas?
 ### Mokslinio argumentavimo apibrėžimas;
 ### Sudaryti Toulmino argumentų modelį ir mokėti paaiškinti kiekvieną jo elementą, t.y. kas yra pagrindas, tezė, įvertinimas, garantija, užnugaris ir prieštaravimas.
