@@ -43,8 +43,17 @@ Dėsnių ir teorijų apibendrinta visuma, įgyjama taikant mokslinį metodą, si
   * Paremta pateisinimais kaip "man atrodo teisinga", "aš tikiu"; ![Atskleista sapne](img/revealed_in_a_dream.png)
   * Nėra mechanizmo atskirti tikslias ir netikslias žinias.
 * Autoritetas
+  * Kito asmens informacijos ar faktų priėmimas, nes asmuo yra gerbiamas šaltinis;
+  * Asmens pateikiama informacija ar žinios gali būti netikslūs;
+  * Naudojama norint įvertinti, ar keliama hipotezė yra patikrinama ir ar nagrinėjamas svarbus klausimas. 
 * Racionalizmas
+  * Žinios gaunamos naudojant samprotavimus ir daroma prielaida, jog pagrįstos žinios yra įgyjamos naudojant teisingą samprotavimo procesą;
+  * Didžiausias racionalizmo trūkumų - du sąžiningi asmenys gali padaryti skirtingas išvadas;
+  * Moksle samprotavimas naudojamas keliant hipotezes ar nustatant rezultatus, kurie parodytų hipotezių teisingumą ar klaidingumą.
 * Empirizmas
+  * Žinių įgyjimo būdas per patirtį;
+  * Naudojant ***tik*** empirizmą, kyla pavojus - laikui bėgant gali pasikeisti požiūris į patirtį, įvykių atmintis nėra pastovi, žmonės pamištra, arba jų atsiminimai išsikraipo;
+  * Norint naudoti empirizmą, tyrimai ir jų stebėjimai turi būti atliekami kontroliuojamomis sąlygomis, bandant sumažinti tyrėjų šališkumą ir padidinti objektyvumą.
 
 ## Inovacijos ir jas apibrėžiantys dokumentai;
 ### Inovacijos apibrėžimas;
