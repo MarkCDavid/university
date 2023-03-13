@@ -4,3 +4,5 @@ venv/
 *.key
 *.db
 server_users/
+out/
+*.log
