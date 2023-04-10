@@ -1,0 +1,407 @@
+\documentclass{vilniustech-en}
+\vilniustechsetup{
+    university={Vilnius Gediminas technical university},
+    faculty={Faculty of Fundamental Sciences},
+    cathedral={Department of Information Systems},
+    workTitle={Malware Analysis Methods},
+    workType={Laboratory Work 2},
+    workAuthorName={Aurimas Šakalys},
+    workAuthorGroup={ITSfm-22},
+    workRecipient={lecturer Vitalijus Gurčinas}
+}
+\addbibresource{bibliography.bib}
+\VTDocumentBegin
+
+
+\section{Setup}
+
+\subsection{Data introduction and extradition} \label{sec:data_moving}
+
+As mentioned in the previous report, I wanted to tighten the security and provide a better configuration for introducing malware into the lab and extraditing generated data from the lab.
+
+In \textit{VirtualBox} I have configured a new host network \textit{vboxnet0} (\autoref{fig:host_only_network}) that will act as a bridge between the host and guest machines.
+
+\VTImage
+{img/host_only_network.png}
+{\textit{vboxnet0} network in \textit{VirtualBox}}
+{fig:host_only_network}
+{7cm}
+
+Using this new interface, I would assign a host-only network on the malware analysis guest (\autoref{fig:host_only_assignment}). With the interface assigned, we head to the lab \textit{VM} and configure a static IP address for that interface (\autoref{fig:guest_static_ip_address}), so that we would be able to reach the machine from the host.
+
+\VTImage
+{img/host_only_assignment.png}
+{\textit{vboxnet0} assignment to the guest machine}
+{fig:host_only_assignment}
+{7cm}
+
+\VTImage
+{img/guest_static_ip_address.png}
+{Static IP assignment for the \textit{vboxnet0} interface}
+{fig:guest_static_ip_address}
+{16cm}
+
+
+Additionally, we install \textit{OpenSSH} server on the guest machine (\autoref{fig:guest_openssh}). This will allow us to use the \textit{scp} protocol (\autoref{fig:example_scp}) to both introduce data or malware into the guest machine, as well as to extradite any data generated within the machine.
+
+\VTImage
+{img/guest_openssh.png}
+{\textit{OpenSSH} service running on the guest}
+{fig:guest_openssh}
+{16cm}
+
+\VTWrappedImage{r}
+{img/ufw_configuration_simple.png}
+{Applied \textit{ufw} rules}
+{fig:ufw_configuration_simple}
+{8cm}
+
+On the host machine, we will use the \textit{uncomplicated firewall} (\textit{ufw}) to set up the routing rules. The rules (\autoref{fig:ufw_configuration_simple}) disallow any network traffic on \textit{vboxnet0} interface, only allowing outgoing (traffic initiated by the host) \textit{ssh} (port 22) traffic. As the firewall used is stateful (\textit{ufw} uses \textit{iptables} under the hood), this allows us to initiate an \textit{ssh} connection to the guest, and allow the guest to send packets back only on this connection. If the guest tries connecting to the host using port 22, their packets will be dropped, as the connection/session originates from the guest (\autoref{fig:example_ssh}).
+
+\VTImage
+{img/example_ssh.png}
+{\textit{ssh} connection examples}
+{fig:example_ssh}
+{14cm}
+
+\VTImage
+{img/example_scp.png}
+{\textit{scp} example}
+{fig:example_scp}
+{12cm}
+
+\subsection{Internet connectivity}
+
+\VTWrappedImage{r}
+{img/nat_adapter.png}
+{\textit{NAT} adapter on the guest machine}
+{fig:nat_adapter}
+{5cm}
+
+As we need to analyze malware samples with network behavior, we might need to provide internet connectivity to the guest machine. To do it in a safe manner, without exposing the local network to the guest, we simply add a \textit{NAT} adapter (\autoref{fig:nat_adapter}), which would only allow the guest to reach the internet and not local network. 
+
+Here, we could introduce additional security mechanisms, like \textit{VLAN} only for the malware analysis guest, but as we will be running older types of malware, they are unlikely to manage to break through an updated hypervisor.
+
+\section{Required Malware behaviors}
+
+The task requires for the analyzed malware samples to exhibit specific host behaviors - component installation, persistance, protective mechanisms, directives, and network behavior, with possible credential stealing behavior. 
+
+Each of the behaviors are described further, to indicate the understanding of the behaviors and what we will be looking for in the dynamic analysis.
+
+\subsection{Malware component installation}
+
+These are behaviors, where the malware installs components that it requires to work into the target system. This could be a malware that uses an installer to install a malicious payload or that decrypts some payload that it stores within resources or downloads a payload from an online source.
+
+\subsection{Malware persistence}
+
+These are behaviors, where the malware tries to persist in the target system, to hinder any removal actions. This could be done by modifying registry keys, to get itself to launch on startup, or launch after some time (scheduled tasks or through services). It could hide itself in a hard to reach directory in the file system, infect another executable, and launch itself when that executable launches. 
+
+If it infects thumb drives, it could modify \textit{autorun.inf} to launch itself when a thumb drive is plugged in. 
+
+\subsection{Malware protective mechanism}
+
+These are behaviors, where the malware tries to hinder any analysis of the malware itself. It could be encrypted, but as the malware would have to have the key to decrypt itself, this could be overcome pretty easily by the malware analyst. 
+
+It could be obfuscated, where it would be practically impossible to discern any behavior by performing static analysis. Additionally, obfuscation could work as an anti-debugging/anti-disassembly measure, to prevent users to debug or disassemble the malware. This could be done by checking if the malware is running with a debugger attached, or by exploiting weaknesses in disassemblers, to make them fail during the disassembly process. 
+
+Additionally, checking for \textit{VM}/sandbox environments could be performed, such that the malware would not exhibit any malicious behavior when run in such environments.
+
+\subsection{Malware directive}
+
+A behavior that is a bit easier to understand, but a directive is a mode of operation for the malware, where it has some specific task, to steal some specific information, to damage specific devices and etc. (e.g. only activate on computers with specific \textit{MAC} addresses, or on devices that has \textit{Discord} installed). These directives could be hard coded in the malware from the beginning or it could receive these directives from a \textit{command and control} (\textit{C2}) server.
+
+\subsection{Network behavior}
+Malware should exhibit network behaviors - fetching of additional data, payload or data extradition, where data is sent to outside, communication with a \textit{C2} server, etc.
+
+\subsection{Credential stealing behavior}
+
+Related to the network behavior, the malware should try to search for stored credentials and extradite this data to the outside. If the malware only searches for credentials, but does not perform the extradition, it would not be classified as credential stealing behavior, which is where relation to network behavior comes from.
+
+\section{Analysis}
+
+\subsection{Setup} \label{analysis_setup}
+
+Before the analysis, we have set up a snapshot in VirtualBox, where we already have multiple dynamic analysis software open, that allows us to perform the analysis of the malware that is already running. This saves us significant amount of time, as now we can start analysis of a new sample by simply restoring the snapshot, introducing the malware sample (using \textit{scp}, as described in \autoref{sec:data_moving}), making a new snapshot, where the malware sample was introduced and begin the analysis. By introducing a snapshot just after the malware is introduced into the lab, we cut down some additional time, where we do not require to reintroduce the malware samples again and we can go back to the samples at any time, even if we have removed the malware sample from the host machine.
+
+Additionally, we use the \textit{OBS} software to record the analysis of the malware in the guest. This allows us to review the footage of the analysis, to discern any changes that we might not have noticed and allows us to focus on the analysis, as we do not need to remember to take screengrabs for any future reports.
+
+\VTImage
+{img/setup_window_1.png}
+{Desktop 1 - dynamic data}
+{fig:setup_window_1}
+{16cm}
+
+The first desktop (\autoref{fig:setup_window_1}) contains software that shows us more dynamic data and would require us to look for changes when the malware is running, while the second one (\autoref{fig:setup_window_2}) shows us data that is not as dynamic and could be analyzed after the run of the malware.
+
+\VTImage
+{img/setup_window_2.png}
+{Desktop 2 - static data}
+{fig:setup_window_2}
+{16cm}
+
+\subsection{\textit{GravityRAT}}
+
+The first (and only) malware sample that we will try, will be \textit{GravityRAT} (\autoref{fig:malware_zoo_gravity_rat}). As it is a remote access trojan, it should provide us with some of the required behaviors, especially directives, network behavior and hopefully credential stealing behavior. We expect these behaviors to be present, as the \textit{RAT} malware should communicate with a \textit{C2} server, get commands from the server and extradite data to the \textit{C2} server on demand.
+
+\VTImage
+{img/malware_zoo_gravity_rat.png}
+{\textit{GravityRAT} in \textit{theZoo}}
+{fig:malware_zoo_gravity_rat}
+{16cm}
+
+\subsection{First Run} \label{first_run}
+
+After running \textit{GravityRAT}, we notice that the malware does not exhibit complex behavior immediately. One thing that we notice is that some weird DNS resolution requests are made within the \textit{FakeNet-ng} software (\autoref{fig:support_urls}), to addresses that seem to try to impersonate \textit{Microsoft} support.
+
+\VTImage
+{img/support_urls.png}
+{Strange \textit{DNS} resolution requests}
+{fig:support_urls}
+{10cm}
+
+Apart the weird DNS resolution requests, the malware does not seem to be showing any more interesting behavior. Analyzing the possible persistence vectors gives us nothing, we find that the malware does not modify the registry in a great manner. 
+
+\textit{Process Explorer} shows us that the malware seems to still be running. We do a check on the status of the main thread of the malware and we can see that it is in a wait state (\autoref{fig:thread_stopped}). This means that the malware is currently sleeping for an indeterminate amount of time (future static analysis will show that it has stopped completely). 
+
+\VTImage
+{img/thread_stopped.png}
+{Status of the main thread of the malware}
+{fig:thread_stopped}
+{7cm}
+
+As we do not know for how long it is paused, this could indicate that the malware has either stopped completely or is simply trying to employ anti-analysis measures by waiting for some time before attempting to perform any malicious behavior.
+
+
+\VTImage
+{img/c2_hosts.png}
+{Possible \textit{C2} hosts within the malware}
+{fig:c2_hosts}
+{7cm}
+
+Using \textit{Process Explorer} we can take a look at the strings that are available in the malware sample and we can find some of the \textit{URLs} that the malware tried reaching during the initial launch. We can assume that these are possibly \textit{C2} server \textit{URLs}.
+
+\subsection{\textit{dnSpy} reverse engineering}
+
+As the behavior in \autoref{first_run} is the only behavior that the malware exhibited, we shall try to apply some reverse engineering efforts, as the malware is a \textit{.NET} executable (\autoref{fig:dnspy_decomp}), and we have some experience working with \textit{.NET} executables. We shall use the \textit{dnSpy} software to decompile the malware, perform both static analysis of the decompiled code, as well as perform some debugging to understand the behavior of the malware.
+
+\VTImage
+{img/dnspy_decomp.png}
+{Decompilation of the main method of the \textit{GravityRAT} malware}
+{fig:dnspy_decomp}
+{7cm}
+
+We will not go into great detail of the efforts of the static and debugging analysis of the malware, it was relatively lengthy process. We will present the results of the behavior of the malware that we have managed to discern.
+
+In the diagram below (\autoref{fig:gravityrat_behavior}), we can see the behavior of the malware on it's happy path, where all malware prerequisites are met. The main work is performed by the \textit{Manager.TaskJobs} function, as it starts a schedule task of fetching commands from the \textit{C2} server and executing them. This will not happen if at any point in the execution tree, the malware fails to contact the \textit{C2} server. If it does not get an answer or if the \textit{C2} server fails to respond with expected data, the malware will go into sleep forever.
+
+\VTImage
+{img/gravityrat_behavior.drawio.png}
+{Behavior graph of the \textit{GravityRAT} malware}
+{fig:gravityrat_behavior}
+{13cm}
+
+From this analysis, we can already determine which required behaviors the malware fails to meet. These are persistance and protective mechanism. All other behaviors are met, even if partially. We will address these later in the report, in \autoref{compliance}.
+
+\subsection{Preparing the \textit{C2} server}
+
+As we know that the malware requires a \textit{C2} server to be present, we will need to prepare a simple \textit{C2} server for the malware to communicate with. The "finalized" version of the \textit{C2} server is available for review at \url{https://github.com/MarkCDavid/university/blob/main/masters/semester2/mam/lab2/c2server.py}.
+
+As the malware tries to contact the \textit{C2} server using \textit{URLs}, we should be able to insert a \textit{DNS} record to direct the malware to connect to our \textit{C2} server. To simplify this, we shall add an entry in the \textit{/etc/hosts} file (\autoref{fig:hosts}), that would redirect the malware to connect to localhost, as we will be running the \textit{C2} server on the infected guest \footnote{This setup would allow us to run the \textit{C2} server outside of the infected host, but it is significantly simpler to run the \textit{C2} server on the infected host}.
+
+\VTImage
+{img/hosts.png}
+{\textit{/etc/hosts} modification}
+{fig:hosts}
+{7cm}
+
+The behavior of out \textit{C2} server is to respond with an appropriate response ofr any \textit{GET} request. For root we simply provide an empty response, to indicate to the malware, that the requested \textit{C2} server is alive. After that, the malware performs a \textit{GET} request to the \textit{/GetActiveDomains.php} endpoint and expects the \textit{C2} server to provide additional \textit{URLs} where other \textit{C2} servers might be available. Here, we simply respond with the same \textit{URL} that we had written into the \textit{/etc/hosts} file.
+
+With this done, the malware has met all the prerequisites and is now capable of exhibiting the malicious behavior.
+
+In this state, the malware contacts the \textit{C2} server with \textit{POST} requests to the \textit{/GX/GX-Server.php} endpoint. The initial request comes from the \textit{Jobs.RootJob} (\autoref{fig:gravityrat_behavior}) branch, and it registers the infected host with the \textit{C2} server. Further requests comes from the \textit{Manager.TaskJobs} (\autoref{fig:gravityrat_behavior}) branch, which sends a request every 5 minutes. The \textit{C2} server is supposed to provide any scheduled tasks to the infected host.
+
+Our \textit{C2} server is capable of registering tasks to be sent out to the infected host by running a \textit{\textbf{task <hash> <tasks>}} command. This stores the tasks for that specific infected host and when the host sends a scheduled \textit{POST} request, these commands are sent to the malware.
+
+With this server prepared we can now make a second attempt and dynamic analysis of the malware.
+
+\subsection{Second run}
+
+On the second run, we shall launch the malware with our \textit{C2} server running (\autoref{fig:c2_running})\footnote{As mentioned before (\autoref{analysis_setup}), we are running \textit{OBS} software to record the analysis of the malware runs. As most of the screengrabs are provided from the recording, and the recording is not of highest quality, the screengrabs are a little grainy.}.
+Additionally, we launch the malware through a \textit{dnSpy} debugger (\autoref{fig:debugger_run}), so that we could modify the time interval that the malware spends between contacting the \textit{C2} server, as waiting for 5 minutes before first connection is wasteful of time.
+
+\VTImage
+{img/c2_running.png}
+{Running \textit{C2} server}
+{fig:c2_running}
+{7cm}
+
+\VTImage
+{img/debugger_run.png}
+{Running the malware through a debugger}
+{fig:debugger_run}
+{7cm}
+
+As we can see, the malware performs the initial \textit{GET} requests to establish availability of \textit{C2} server and then immediately registers the infected host with it by sending out data about the host. 
+
+\VTImage
+{img/c2_initial_gets.png}
+{Initial \textit{GET} requests and host registration}
+{fig:c2_initial_gets}
+{12cm}
+
+We can run the command \textit{\textbf{read <hash>}} for our \textit{C2} server to provide us with the information about the infected host (\autoref{fig:read_available_infectiosn}). Here we can see the information that the malware managed to collect about the infected host. Additionally, we can see that the malware managed to identify that the malware host is running within a \textit{VM} (\textit{VMNOTES} field). This would allow the controllers of the \textit{C2} server to simply ignore such infections.
+
+\VTImage
+{img/read_available_infectiosn.png}
+{Output of the \textit{\textbf{read}} command}
+{fig:read_available_infectiosn}
+{12cm}
+
+To test out that the infected host is capable of fetching the commands from the \textit{C2} server, we queue a command that would launch the calculator app on the infected host (\autoref{fig:run_calc_exe}). As we can see, the infected host has launched the calculator app, as expected (\autoref{fig:run_calc_result}).
+
+\VTImage
+{img/run_calc_exe.png}
+{Command to schedule a task to run the calculator application}
+{fig:run_calc_exe}
+{12cm}
+
+\VTImage
+{img/run_calc_result.png}
+{The result of the executed task}
+{fig:run_calc_result}
+{12cm}
+
+Next, we shall schedule commands to perform a port scan and a drive scan (\autoref{fig:scan_commands}). Once the infected host fetches these tasks, it executes them and sends the results back to the \textit{C2} server (\autoref{fig:port_scan_results}). 
+
+\VTImage
+{img/scan_commands.png}
+{Command to schedule PortScan and DriveScan tasks on the infected host}
+{fig:scan_commands}
+{12cm}
+
+\VTImage
+{img/port_scan_result.png}
+{The result of the PortScan}
+{fig:port_scan_result}
+{12cm}
+
+While the result of the port scan is sent out in plaintext, the result of the drive scan is sent out as an encrypted file (\autoref{fig:encrypted_value}). These files, additionally are stored in the application data folder for this malware as well (\autoref{fig:files_scan}). 
+
+\VTImage
+{img/encrypted_value.png}
+{The encrypted result of the DriveScan}
+{fig:encrypted_value}
+{12cm}
+
+\VTImage
+{img/files_scan.png}
+{The encrypted files of the execution of multiple tasks}
+{fig:files_scan}
+{12cm}
+
+Fortunately for us, the malware uses symmetric encryption (\textit{AES}) (\autoref{fig:AES}), which means that both encryption and decryption is performed using the same key. What this means, is that key must be available to the malware (and in turn - available to us) within the malware binary and after looking around a little we manage to find it (\autoref{fig:key}). 
+
+\VTImage
+{img/AES.png}
+{\textit{AES} encrypted files}
+{fig:AES}
+{12cm}
+
+\VTImage
+{img/key.png}
+{The key for the \textit{AES} encryption}
+{fig:key}
+{8cm}
+
+This will be the end of our journey into cryptography of this malware sample. Having this information, we could now decrypt the data that \textit{C2} server receives, but this would require us to properly parse the data, extract \textit{IV} values, prepare decryption primitives and implement the decryption functionality. This is left as homework to the reader.
+
+As we are in control of the malware and are capable of debugging it, we can actually see what kind of data the malware sends out to the \textit{C2} server before it is encrypted.
+
+Additionally, the malware stores encrypted information about the infected host in the application data storage and it send it out as well, for the \textit{C2} server to have most recent data about the infected device. Alongside this data, the malware stores data about the execution of different commands on a settings files (\autoref{fig:files_config}) in the application data storage, which it uses to maintain some state (\autoref{fig:initial_user_config}) and modifies it after certain tasks are run (\autoref{fig:different_user_config}).
+
+\VTImage
+{img/files_config.png}
+{Configuration file}
+{fig:files_config}
+{12cm}
+
+\VTImage
+{img/initial_user_config.png}
+{Configuration file data after initial run}
+{fig:initial_user_config}
+{12cm}
+
+\VTImage
+{img/different_user_config.png}
+{Configuration file data after some commands have been run}
+{fig:different_user_config}
+{12cm}
+
+\subsection{Compliance with required behaviors} \label{compliance}
+
+We have performed a significant amount of analysis on this malware sample. How well does it fare in regards to the behaviors that we are required to present?
+
+\subsubsection{Malware component installation}
+This behavior is partially present, as the malware installs configuration files for each host that it requires to function properly. 
+
+Additionally, the presence of the \textit{RunCmd} task presents us with the opportunity to provide a command to the host to silently download additional malware, which would provide full compliance with this behavior requirement.
+
+\subsubsection{Malware persistance}
+Unfortunately, this malware sample has no persistence mechanisms and will not run again if the host resets their device. 
+
+As before, because the malware allows us to run arbitrary commands on the infected host, after initial infection, we could decide whether we would like for our malware to persist on the host (e.g. ignore persistance on identified \textit{VM} hosts) and issue a command that would, for example, register our executable as an \textit{autoruns} entry.
+
+\VTImage
+{img/example_persistance_command.png}
+{An example command that would allow the malware to achieve persistance}
+{fig:example_persistance_command}
+{16cm}
+
+This could be done in a more secure manner, where the malware could be copied to some deep folder, renamed, etc. and for this new entry to reference it. Regardless of the protection for the malware, the point still stands, that we would still be capable of achieving persistance by usage of this task.
+
+\subsubsection{Malware protective mechanism}
+The malware does not have any protective mechanisms, as we are capable of decompiling and analysing it using \textit{dnSpy} tool. This could be easily overcome by using some type of \textit{.NET} obfuscator, like the ones mentioned in \url{https://github.com/NotPrab/.NET-Obfuscator}. 
+
+This would make it significantly harder for analysis of the code itself and would probably entail significant debugging/reverse engineering effort, taking this from an analysis that could be completed in a couple of hours, to analysis that would have to performed over several days.
+
+Although the malware does not exhibit this type of behavior it would be rather easy to provide some protection and obfuscation. We have chosen to use \textit{Pheonix Protector} software to provide protection to the malware sample (\autoref{fig:pheonix_protector}).
+
+\VTImage
+{img/pheonix_protector.png}
+{\textit{Pheonix Protector} protecting the \textit{.NET} executable}
+{fig:pheonix_protector}
+{12cm}
+
+Once the protection has been performed, we can open the protected malware sample in \textit{dnSpy} and we can see that the binary has changed significantly, making the analysis of the malware a little more difficult (\autoref{fig:obfuscated_dnspy}). Additionally, running the protected malware, we can see that it still tries to contact the \textit{C2} server, which indicates that the behavior (at least on the surface) of the malware has not changed (\autoref{fig:still_works}).
+
+\VTImage
+{img/obfuscated_dnspy.png}
+{Obfuscated executable of the \textit{GravityRAT} malware}
+{fig:obfuscated_dnspy}
+{12cm}
+
+\VTImage
+{img/still_works.png}
+{Protected malware exhibiting the same behavior as unprotected one}
+{fig:still_works}
+{12cm}
+
+\subsubsection{Malware directive}
+
+This malware complies with requirement of this behavior, as we are able to send commands to infected hosts and provide different behavior based on specific conditions (e.g. do not send anything to infected \textit{VM} hosts).
+
+\subsubsection{Network behavior}
+
+This malware complies with requirement of this behavior, as it communicates with a \textit{C2} server via the network.
+
+\subsubsection{Credential stealing behavior}
+This behavior is partially present, as the malware scans the files of the infected hosts and if there are some files that might contain stored credentials, these files could be sent out to the \textit{C2} server. 
+
+Unfortunately, this mechanism does not target cached browser credentials and things like these directly, so these files could be sent over to the \textit{C2} server purely coincidentally. As such, we can only classify this malware as partially exhibiting this type of behavior.
+
+\section{Results}
+
+We analyzed \textit{GravityRAT} malware sample in depth and have found several behaviors that matches the ones that we were looking for. We combined multiple types of analysis, both static and dynamic, analyzed the malware by both decompiling and debugging. 
+We provided the malware with an environmental requirement it needed to perform its' actions (C2 server). While the malware sample did not have all of the desired behaviors directly, we showed that these behaviors could be provided dynamically (component installation/persistence) or with minimal work (protection/obfuscation).
+
+\VTDocumentEnd
