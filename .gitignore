@@ -6,3 +6,5 @@ venv/
 server_users/
 out/
 *.log
+slides/
+ignore/

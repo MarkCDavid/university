@@ -151,7 +151,7 @@ The first (and only) malware sample that we will try, will be \textit{GravityRAT
 
 \subsection{First Run} \label{first_run}
 
-After running \textit{GravityRAT}, we notice that the malware does not exhibit complex behavior immediately. One thing that we notice is that some weird DNS resolution requests are made within the \textit{FakeNet-ng} software (\autoref{fig:support_urls}), to addresses that seem to try to impersonate \textit{Microsoft} support.
+After running \textit{GravityRAT}, we notice that the malware does not exhibit complex behavior immediately. One thing that we notice is that some weird \textit{DNS} resolution requests are made within the \textit{FakeNet-ng} software (\autoref{fig:support_urls}), to addresses that seem to try to impersonate \textit{Microsoft} support.
 
 \VTImage
 {img/support_urls.png}
@@ -159,7 +159,7 @@ After running \textit{GravityRAT}, we notice that the malware does not exhibit c
 {fig:support_urls}
 {10cm}
 
-Apart the weird DNS resolution requests, the malware does not seem to be showing any more interesting behavior. Analyzing the possible persistence vectors gives us nothing, we find that the malware does not modify the registry in a great manner. 
+Apart the weird \textit{DNS} resolution requests, the malware does not seem to be showing any more interesting behavior. Analyzing the possible persistence vectors gives us nothing, we find that the malware does not modify the registry in a great manner. 
 
 \textit{Process Explorer} shows us that the malware seems to still be running. We do a check on the status of the main thread of the malware and we can see that it is in a wait state (\autoref{fig:thread_stopped}). This means that the malware is currently sleeping for an indeterminate amount of time (future static analysis will show that it has stopped completely). 
 
@@ -178,7 +178,7 @@ As we do not know for how long it is paused, this could indicate that the malwar
 {fig:c2_hosts}
 {7cm}
 
-Using \textit{Process Explorer} we can take a look at the strings that are available in the malware sample and we can find some of the \textit{URLs} that the malware tried reaching during the initial launch. We can assume that these are possibly \textit{C2} server \textit{URLs}.
+Using \textit{Process Explorer} we can take a look at the strings that are available in the malware sample and we can find some of the \textit{URLs} that the malware tried reaching during the initial launch. We can assume that these are possibly \textit{C2} server \textit{URLs} (\autoref{fig:c2_hosts}).
 
 \subsection{\textit{dnSpy} reverse engineering}
 
@@ -214,7 +214,7 @@ As the malware tries to contact the \textit{C2} server using \textit{URLs}, we s
 {fig:hosts}
 {7cm}
 
-The behavior of out \textit{C2} server is to respond with an appropriate response ofr any \textit{GET} request. For root we simply provide an empty response, to indicate to the malware, that the requested \textit{C2} server is alive. After that, the malware performs a \textit{GET} request to the \textit{/GetActiveDomains.php} endpoint and expects the \textit{C2} server to provide additional \textit{URLs} where other \textit{C2} servers might be available. Here, we simply respond with the same \textit{URL} that we had written into the \textit{/etc/hosts} file.
+The behavior of out \textit{C2} server is to respond with an appropriate response for any \textit{GET} request. For root we simply provide an empty response, to indicate to the malware, that the requested \textit{C2} server is alive. After that, the malware performs a \textit{GET} request to the \textit{/GetActiveDomains.php} endpoint and expects the \textit{C2} server to provide additional \textit{URLs} where other \textit{C2} servers might be available. Here, we simply respond with the same \textit{URL} that we had written into the \textit{/etc/hosts} file.
 
 With this done, the malware has met all the prerequisites and is now capable of exhibiting the malicious behavior.
 
@@ -241,7 +241,7 @@ Additionally, we launch the malware through a \textit{dnSpy} debugger (\autoref{
 {fig:debugger_run}
 {7cm}
 
-As we can see, the malware performs the initial \textit{GET} requests to establish availability of \textit{C2} server and then immediately registers the infected host with it by sending out data about the host. 
+As we can see, the malware performs the initial \textit{GET} requests to establish availability of \textit{C2} server and then immediately registers the infected host with it by sending out data about the host (\autoref{fig:c2_initial_gets}). 
 
 \VTImage
 {img/c2_initial_gets.png}
@@ -271,7 +271,7 @@ To test out that the infected host is capable of fetching the commands from the 
 {fig:run_calc_result}
 {12cm}
 
-Next, we shall schedule commands to perform a port scan and a drive scan (\autoref{fig:scan_commands}). Once the infected host fetches these tasks, it executes them and sends the results back to the \textit{C2} server (\autoref{fig:port_scan_results}). 
+Next, we shall schedule commands to perform a port scan and a drive scan (\autoref{fig:scan_commands}). Once the infected host fetches these tasks, it executes them and sends the results back to the \textit{C2} server (\autoref{fig:port_scan_result}). 
 
 \VTImage
 {img/scan_commands.png}

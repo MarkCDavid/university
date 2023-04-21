@@ -1,0 +1,185 @@
+\documentclass{vilniustech-lt}
+\vilniustechsetup{
+    university={Vilniaus Gedimino technikos universitetas},
+    faculty={Fundamentinių mokslų fakultetas},
+    cathedral={Informacinių Sistemų katedra},
+    workTitle={Virtualios infrastruktūros ir debesų kompiuterijos sauga},
+    workType={Savarankiškas darbas},
+    workAuthorName={Aurimas Šakalys},
+    workAuthorGroup={ITSfm-22},
+    workRecipient={lektorius Kęstutis Pakrijauskas}
+}
+\addbibresource{bibliography.bib}
+\VTDocumentBegin
+
+
+\section{Uždavinys}
+
+\subsection{Kaip duotas}
+Sukonfigūruoti \textit{iSCSI} adapterį ir prijungti \textit{iSCSI} du \textit{LUN‘us}. Sukurti \textit{VMFS} saugyklą apjungiant du \textit{iSCSI} \textit{LUN}. Naudoti \textit{CHAP} autentifikaciją. \textit{iSCSI} saugykla (target) kuriama atskirame kompiuteryje arba virtualioje mašinoje naudojant laisvai pasirenkamą programinę įrangą (pvz. \textit{Microsoft iSCSI Software Target 3.3 for Windows Server 2008 R2}, \textit{iSCSI Cake}, \textit{Starwind iSCSI} ir t.t.). Naudodami \textit{WireShark} įrankį paanalizuoti persiunčiamus duomenų paketus tarp \textit{ESXi} ir \textit{iSCSI} saugyklos.
+
+\subsection{Perfrazuotas}
+\begin{enumerate}
+    \item Sukonfigūruoti \textit{iSCSI} adapterį;
+    \item Prijungti du \textit{LUN};
+    \item Sukurti \textit{VMFS}, apjungiančią du \textit{LUN} į vieną saugyklą;
+    \item Naudoti \textit{CHAP} autentikaciją;
+    \item Naudojant \textit{WireShark} išanalizuoti \textit{iSCSI} paketus tarp \textit{ESXi} ir \textit{iSCSI} saugyklos.
+\end{enumerate}
+
+\section{Uždavinio įgyvendinimas}
+\textit{iSCSI} saugykla bus įdiegta į \textit{Ubuntu Linux} virtualią mašiną (\autoref{fig:iscsi_ubuntu}). \textit{iSCSI} saugyklos konfigūracijai naudosime \textit{target} įrankį. 
+
+\VTImage
+{img/iscsi_ubuntu.png}
+{\textit{Ubuntu 16} virtuali mašina}
+{fig:iscsi_ubuntu}
+{16cm}
+
+Į virtualią mašiną įdiegus \textit{Ubuntu 16} susidūriau su problema - \textit{target} įrankis nebėra palaikomas oficialiose repozitorijose šiai \textit{Ubuntu} versijai (kitos, pvz.: \textit{Ubuntu 18} įrankį vis dar palaiko), todėl į sistemą turėjau pridėti papildomą programinės įrangos repozitoriją - \textit{mozgiii-ubuntu-iscsi-xenial} (\autoref{fig:iscsi_repository}).  
+
+\VTImage
+{img/iscsi_repository.png}
+{\textit{mozgiii-ubuntu-iscsi-xenial} repozitorija}
+{fig:iscsi_repository}
+{16cm}
+
+Atlikau \textit{iSCSI} konfigūraciją (\autoref{fig:iscsi_configuration}). Toliau detaliau aptarsiu kiekvieną konfigūracijos aspektą.
+\VTImage
+{img/iscsi_configuration.png}
+{\textit{iSCSI} saugyklos konfigūracija}
+{fig:iscsi_configuration}
+{16cm}
+
+Toliau galime matyti \textit{iSCSI backstore} (\autoref{fig:iscsi_backstore}) - elementus, kurie yra skirti blokų saugojimo tikslais. Viena jų reali blokinė saugykla, sukonfigūruota saugoti blokus \textit{/dev/sdb} diske, ir keturios saugyklos saugančios blokus failuose. 
+\VTImage
+{img/iscsi_backstore.png}
+{\textit{iSCSI} \textit{backstore} saugyklos}
+{fig:iscsi_backstore}
+{16cm}
+
+
+\textit{/dev/sdb} diskas yra papildomas diskas prijungtas prie šios virtualios mašinos (\autoref{fig:iscsi_vm_2_disks}), norint išbandyti realaus (virtualizuoto) disko prijungimą prie \textit{iSCSI} saugyklos.
+\VTImage
+{img/iscsi_vm_2_disks.png}
+{Du virtualūs diskai prijungti prie virtualios mašinos}
+{fig:iscsi_vm_2_disks}
+{16cm}
+
+Sukonfigūruojame \textit{iSCSI} saugyklą, ir nurodome jog prieigos kontrolė ir autentikacija turi būti sukonfigūruota kiekvienam \textit{iSCSI} iniciatoriui individualiai (\autoref{fig:iscsi_tpg}). 
+\VTImage
+{img/iscsi_tpg.png}
+{\textit{iSCSI} saugykla}
+{fig:iscsi_tpg}
+{16cm}
+
+
+Šiai \textit{iSCSI} saugyklai esame atidarę portalą, per kurį \textit{iSCSI} iniciatoriai turėtų pasiekti šią saugyklą (\autoref{fig:iscsi_portal}). Saugykla yra atvira naudojant 3260 prievadą pagal nutylėjimą.
+\VTImage
+{img/iscsi_portal.png}
+{\textit{iSCSI} portalas}
+{fig:iscsi_portal}
+{16cm}
+
+
+Taip pat šiai \textit{iSCSI} saugyklai sukuriame kelis \textit{LUN} (\autoref{fig:iscsi_lun}). Visi jie susiveda į anksčiau minėtas \textit{backstore} saugyklas.
+\VTImage
+{img/iscsi_lun.png}
+{\textit{iSCSI} \textit{LUN} vienetai}
+{fig:iscsi_lun}
+{16cm}
+
+Sukūrus \textit{LUN} vienetus, sukuriame prieigos įrašą \textit{iSCSI} iniciatoriui (\autoref{fig:iscsi_acls}). \textit{iSCSI} iniciatoriaus identifikatorių galime matyti \textit{ESXi} konsolėje, \textit{iSCSI} adapterio konfigūracijoje (\autoref{fig:iscsi_exsi_id}). Šiam inciatoriui priskiriame prieigą prie visų sukonfigūruotų \textit{LUN} ir pridedame vartotojo vardą ir slaptažodį \textit{CHAP} autentikacijai (\autoref{fig:iscsi_chap_config}). 
+\VTImage
+{img/iscsi_acls.png}
+{\textit{iSCSI} prieigos sąrašai}
+{fig:iscsi_acls}
+{16cm}
+
+\VTImage
+{img/iscsi_exsi_id.png}
+{\textit{iSCSI} iniciatoriaus identifikatorius}
+{fig:iscsi_exsi_id}
+{16cm}
+
+\VTImage
+{img/iscsi_chap_config.png}
+{\textit{iSCSI} \textit{CHAP} konfigūracija}
+{fig:iscsi_chap_config}
+{16cm}
+
+Atlikus šiuos veiksmus, išeiname iš \textit{targetcli} programinės įrangos ir pradedame \textit{ESXi} \textit{iSCSI} adapterio konfigūraciją (\autoref{fig:iscsi_exsi_config}). Ši konfigūracija yra nesudėtinga, nurodome virtualios mašinos IP adresą ir \textit{iSCSI} target, prie kurio norime jungtis, kartu su \textit{CHAP} autentikacijos vartotojo vardu ir slaptažodžiu.
+
+\VTImage
+{img/iscsi_exsi_config.png}
+{\textit{iSCSI} adapterio konfigūracija \textit{ESXi}}
+{fig:iscsi_exsi_config}
+{16cm}
+
+Kuriant naują \textit{VMFS} galime matyti keleta mums prieinamų \textit{LUN} (\autoref{fig:iscsi_vmfs}) (matosi ne visi penki, nes keli jų jau yra užimti kitos saugyklos).
+\VTImage
+{img/iscsi_vmfs.png}
+{\textit{iSCSI} \textit{VMFS} dialogas}
+{fig:iscsi_vmfs}
+{16cm}
+
+Ši saugykla bus sukurta pasirenkant vieną iš mums prieinamų \textit{LUN} (\autoref{fig:iscsi_disk_1}).
+\VTImage
+{img/iscsi_disk_1.png}
+{\textit{iSCSI} \textit{VMFS} saugykla}
+{fig:iscsi_disk_1}
+{16cm}
+
+Kadangi ši saugykla turi tik vieną \textit{LUN}, turime prie jos prijungti kitus \textit{LUN} (\autoref{fig:iscsi_add_extent}), norint įgyvendinti mūsų 3 užduoties punktą. 
+\VTImage
+{img/iscsi_add_extent.png}
+{Į \textit{iSCSI} saugyklą prijungiamas \textit{LUN} vienetas}
+{fig:iscsi_add_extent}
+{16cm}
+
+Prijungus papildomą \textit{LUN}, galime matyti, jog iš viso saugykloje galėtume saugoti 3.5GB duomenų (\autoref{fig:iscsi_capacity}). Taip pat matome, jog ši saugykla naudoja du saugyklos plėtinius (\autoref{fig:iscsi_extents}). 
+\VTImage
+{img/iscsi_capacity.png}
+{\textit{iSCSI} saugyklos talpa}
+{fig:iscsi_capacity}
+{16cm}
+
+\VTImage
+{img/iscsi_extents.png}
+{\textit{iSCSI} saugyklos plėtiniai}
+{fig:iscsi_extents}
+{16cm}
+
+Taip įgyvendinome keturis iš penkių užduoties punktų - turime \textit{iSCSI} \textit{VMFS} saugyklą, į kurią yra prijungti du \textit{LUN}, o šie yra pasiekiami tik naudojant \textit{CHAP} autentikaciją.
+
+Mums belieka panagrinėti paketus, kurie keliauja tarp \textit{ESXi} serverio ir \textit{iSCSI} target.
+
+Pagrindiniai \textit{iSCSI} \textit{protocol data unit} (\textit{PDU}) yra šie:
+
+\begin{itemize}
+\item \textit{NOP-In/NOP-Out} \textit{PDU} (\autoref{fig:iscsi_pdu_nop}) - skirti palaikyti nenutrūkstamą ryšį tarp iniciatoriaus ir saugyklos, kol nevyksta jokie kiti \textit{PDU} apsikeitimai. \textit{NOP-Out} yra užklausos paketas, \textit{NOP-In} yra atsakymo paketas.
+
+\item Prisijungimo/atsijungimo \textit{PDU} - skirti prisijungti ir susitarti dėl parametrų tarp iniciatoriaus ir saugyklos.
+
+\item \textit{SCSI} Komandos/Atsako \textit{PDU} - skirti nurodyti nuskaitymo, įrašymo ar kito tipo \textit{SCSI} operacijos inicijavimą.
+
+\item Duomenų \textit{PDU} (\autoref{fig:iscsi_data}) - skirti perduoti duomenis iš/į saugyklos/-ą.
+    \begin{itemize}
+    \item \textit{Data-Out} - duomenys siunčiami įrašymo operacijos metu, iš iniciatoriaus į saugyklą.
+    \item \textit{Data-In} - duomenys siunčiami nuskaitymo operacijos metu, iš saugyklos į iniciatorių.
+    \end{itemize}
+\end{itemize}
+
+\VTImage
+{img/iscsi_pdu_nop.png}
+{\textit{NOP} paketai \textit{WireShark} programoje}
+{fig:iscsi_pdu_nop}
+{16cm}
+
+\VTImage
+{img/iscsi_data.png}
+{Duomenų paketai \textit{WireShark} programoje}
+{fig:iscsi_data}
+{16cm}
+
+\VTDocumentEnd
