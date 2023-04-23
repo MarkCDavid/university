@@ -1,0 +1,313 @@
+\documentclass{vilniustech-lt}
+\vilniustechsetup{
+    university={Vilniaus Gedimino technikos universitetas},
+    faculty={Fundamentinių mokslų fakultetas},
+    cathedral={Informacinių Sistemų katedra},
+    workTitle={Saugumo patikros ir etiško įsilaužimo technologijos},
+    workType={Laboratorinis 3/4},
+    workAuthorName={Aurimas Šakalys},
+    workAuthorGroup={ITSfm-22},
+    workRecipient={lektorius Leonardas Marozas}
+}
+\addbibresource{bibliography.bib}
+\VTDocumentBegin
+
+
+\section{Užduotis}
+
+\begin{enumerate}
+\item (1 t.) Įsidiekite \textit{Metasploit} (\url{https://metasploit.com/}). Kaip alternatyvą galite naudoti \textit{Kali Linux} (kaip pagrindinę OS ar \textit{VMware}/\textit{VirtualBox}). Screenshot su įrodymu, kad sėkmingai įdiegėte \textit{Metasploit} (pvz. CMD/Shell su VM/kompiuterio IP adresu). 
+\item (1 t.) Įsidiekite \textit{metasploitable3} arba \textit{metasploitable2} (\textit{VMware} ar \textit{VirtualBox}). Screenshot su įrodymu, kad sėkmingai įdiegėte \textit{metasploitable2-3} (pvz. CMD/Shell su VM/kompiuterio IP adresu). (\url{https://github.com/rapid7/metasploitable3})
+\item (1 t.) Parodykite, kad tinklas tarp \textit{metasploit} ir \textit{metasploitable} kompiuterių funkcionuoja ir veikia
+\item (3 t.) Praskanuokite naudodami vulnerability scannerį (pvz \textit{Nessus}) arba \textit{nmap} (-sV) atidarytus \textit{metasploitable} VM \textit{portus}. Identifikuokite kurie servisai yra pažeidžiami. Pridėkite identifikuotų servisų/aplikacijų ir portų screenshotą.
+    \begin{enumerate}
+	\item (1 t.) - \textit{Nessus} scan rezultatai
+	\item (1 t.) - \textit{nmap} scan rezultatai    
+	\item (1 t.) - identifikuotu servisų/aplikacijų/portų sąrašas
+    \end{enumerate}
+\item (3 t.) Susiraskite \textit{Metasploit} exploitus, kuriuos naudosite prieš \textit{metasploitable} kompiuterį. Naudokitės \textit{search}, \textit{info}, \textit{set}, \textit{check}, \textit{use}, \textit{locate}, \textit{show}, \textit{exploit}/\textit{run} komandas.
+    \begin{enumerate}
+	\item (1 t.) - Pademonstruokite (screenshot) kaip renkatės exploitus   
+	\item (1 t.) - Sąrašas pažeidžiamumų (servisas, versija, portas) kuriuos exploitinsite (praktiškai tas pats 4c pernaudojimas)
+	\item (1 t.) - Pateikite screenshotą \textit{Metasploit} search komandos rezultatą, kur būtų matomas exploitas ir payloadas kurį naudosite.
+    \end{enumerate}
+\item (3 t.) Kai baigsite paruošimus ir pasiruošite naudoti exploitą (use) ir visi kintamieji savo vietose, pademonstruokite galutinę konfiguraciją (show options). Po 1 tašką už kiekvieną exploito paruošimą exploitinimui (pvz. 3 servisams)
+\item (8 t.) Exploitinkite (exploit arba run)
+    \begin{enumerate}
+	\item (2 t.) - Screenshotas su exploito paleidimo output’u
+	\item (2 t.) - Screenshots(-ai) “netstat -nt” OS ir pažymėkite IP adresus ir portus savo OS (\textit{Kali Linux}), kurie buvo sukurti arba naudojami exploitinant \textit{metasploitable} OS.
+	\item (2 t.) - Paleiskite \textit{Wireshark} (\textit{Kali}) ir pateikite paketų dumpą exploito tinklo srauto, kuris buvo siunčiamas tarp \textit{Metasploit} Frameworko ir \textit{metasploitable}
+	\item (2 t.) - Paaiškinkite kaip suveikė exploitas (exploitai) ir kaip tai siejasi su 7c tinklo srauto dumpu.
+    \end{enumerate}
+\end{enumerate}
+
+\section{Įgyvendinimas}
+
+\subsection{Mašinų paruošimas}
+Norint atlikti šias užduotis, męs turime įsidiegti \textit{Metasploit} karkasą ir \textit{Metasploitable} - specialiai paruoštą virtualią mašiną, kuri yra sukonfigūruota neteisingai, su pasenusia ir pažeidžiama programine įranga. Tai leidžia mums įšbandyti \textit{Metasploit} karkasą nepažeidžiant etinių normų ir įstatymų.
+
+\textit{Metasploit} karkasas įprastai yra įdiegtas \textit{Kali Linux} operacinės sistemos distribucijose (\autoref{fig:meta_meta}), todėl būtent ją ir įsidiegiame. Ją įsidiegus, sukonfigūruojame vieną tinklo adapterį būti tame pačiame \textit{host-only} tinkle (\autoref{fig:meta_host}), naudojant 192.168.56.0/24 tinklo identifikatorių.
+
+\VTImage
+{img/meta_host.png}
+{\textit{Host-only} tinklas \textit{VirtualBox} programinėje įrangoje}
+{fig:meta_host}
+{16cm}
+
+\VTImage
+{img/meta_meta.png}
+{\textit{Kali Linux} operacinė sistema su IP konfigūracija}
+{fig:meta_meta}
+{16cm}
+
+Norint paspartinti užduoties įvykdymą atsisiunčiame jau paruoštą \textit{Metasploitable} virtualios mašinos atvaizdą iš \url{https://sourceforge.net/projects/metasploitable/}. Šis atvaizdas yra paruoštas naudojant \textit{Metasploitable2} konfigūraciją. Ši mašina taip pat yra sukonfigūruojama priklausyti tam pačiam \textit{host-only} tinklo identifikatoriui (\autoref{fig:meta_sploitable}).
+
+\VTImage
+{img/meta_sploitable.png}
+{\textit{Metasploitable} operacinė sistema su IP konfigūracija}
+{fig:meta_sploitable}
+{16cm}
+
+Pabaigus pradinę šių mašinų konfigūraciją patikriname, ar mašinos gali pasiekti viena kitą per egzistuojantį tinklą naudojant \textit{ping} programinę įrangą. Kaip galime matyti - abi mašinos geba pasiekti viena kitą per tinklą.
+
+\VTImage
+{img/meta_ping.png}
+{Ryšio tarp sukonfiguruotų mašinų patikrinimas}
+{fig:meta_ping}
+{16cm}
+
+\subsection{Skenavimas}
+
+Į \textit{Kali} virtualią mašiną įsidiegiame \textit{Nessus} programinę įrangą (\autoref{fig:meta_nessus_install}).  \textit{Nessus} įrankis yra skirtas įvertinti programų sistemų pažeidžiamumą. 
+
+\VTImage
+{img/meta_nessus_install.png}
+{\textit{Nessus} programinės įrangos įdiegimas}
+{fig:meta_nessus_install}
+{16cm}
+
+Jį įdiegus atliekame \textit{Metasploitable2} mašinos skenavimą (\autoref{fig:meta_nessus_scan1}, \autoref{fig:meta_nessus_scan2}). Pagal šiuos rezultatus galime identifikuoti, kurios paslaugos yra su pažeidžiamumais, taip pat galime rasti informaciją apie šių paslaugų versijas (\autoref{fig:meta_scan_ftp}, \autoref{fig:meta_scan_irc}, \autoref{fig:meta_scan_samba}), kurios mums padėtų išsirinkti norimus pažeidžiamumus. 
+
+\VTImage
+{img/meta_nessus_scan1.png}
+{\textit{Nessus} skenavimo rezultatai (1)}
+{fig:meta_nessus_scan1}
+{16cm}
+
+\VTImage
+{img/meta_nessus_scan2.png}
+{\textit{Nessus} skenavimo rezultatai (2)}
+{fig:meta_nessus_scan2}
+{16cm}
+
+\VTImage
+{img/meta_scan_ftp.png}
+{\textit{FTP} paslaugos įdentifikavimas}
+{fig:meta_scan_ftp}
+{9cm}
+
+\VTImage
+{img/meta_scan_irc.png}
+{\textit{IRC} paslaugos įdentifikavimas}
+{fig:meta_scan_irc}
+{9cm}
+
+\VTImage
+{img/meta_scan_samba.png}
+{\textit{Samba} paslaugos įdentifikavimas}
+{fig:meta_scan_samba}
+{9cm}
+
+Atlikus \textit{Nessus} skenavimą, atliekame paprastesnį skenavimą naudojant \textit{nmap} įrankį. Čia galime matyti visus atvirus prievadus ir paslaugas, kurios veikia už jų. 
+
+\VTImage
+{img/meta_nmap.png}
+{\textit{nmap} skenavimo rezultatai}
+{fig:meta_nmap}
+{16cm}
+
+Identifikuojame paslaugas, kurias bandysime išnaudoti. Kaip matome, \textit{Metasploitable2} sistemoje veikia \textit{Samba} serveris (\autoref{fig:meta_scan_samba}, \autoref{fig:meta_nmap_samba}). Ši programinė įranga yra įžymi dėl turimų pažeidžiamumų, todėl ją nulaužti tikrai turėtų pavykti. Taip pat pasirenkame bandyti nulaužti ftp serverį (\autoref{fig:meta_scan_ftp}, \autoref{fig:meta_nmap_ftp}), kurie panašiai kaip Samba turi daugybę identifikuotų pažeidžiamumų. Trečiai paslaugai pasirenkame IRC serverį (\autoref{fig:meta_scan_irc}, \autoref{fig:meta_nmap_irc}), kuris galimai galėtų turėti pažeidžiamumus dėl to, kad yra seno tipo protokolas ir senos implementacijos gali turėti pažeidžiamumus.
+
+\VTImage
+{img/meta_nmap_samba.png}
+{\textit{Samba} paslauga \textit{nmap} įrankyje}
+{fig:meta_nmap_samba}
+{16cm}
+
+\VTImage
+{img/meta_nmap_ftp.png}
+{\textit{FTP} paslauga \textit{nmap} įrankyje}
+{fig:meta_nmap_ftp}
+{16cm}
+
+\VTImage
+{img/meta_nmap_irc.png}
+{\textit{IRC} paslauga \textit{nmap} įrankyje}
+{fig:meta_nmap_irc}
+{16cm}
+
+\subsection{Išnaudojimas}
+
+\subsubsection{\textit{Payload}}
+
+Kiekvienam sistemos išnaudojimui per \textit{Metasploit} bandysime naudoti \textit{cmd/unix/reverse} \textit{payload}. Šį \textit{payload} naudojame dėl to, kad jis paprastas, taip pat - jo pagalba galime lengvai patvirtinti, jog mūsų nulaužimas buvo sėkmingas. 
+
+\subsubsection{\textit{Samba}}
+
+Prisijungus prie \textit{Metasploit} karkaso, atliekame paiešką (\autoref{fig:meta_samba_search}, \autoref{fig:meta_samba_info}) pažeidžiamumų, kurie galėtų veikti prieš mūsų \textit{Metasploitable2} sistemą. 
+
+\VTImage
+{img/meta_samba_search.png}
+{\textit{Samba} pažeidžiamumų paieška \textit{Metasploit} karkase}
+{fig:meta_samba_search}
+{16cm}
+
+\VTImage
+{img/meta_samba_info.png}
+{\textit{Samba} pažeidžiamumo informacija \textit{Metasploit} karkase}
+{fig:meta_samba_info}
+{16cm}
+
+\VTImage
+{img/meta_samba_config.png}
+{\textit{Samba} pažeidžiamumo konfigūracija \textit{Metasploit} karkase}
+{fig:meta_samba_config}
+{16cm}
+
+Sukonfigūravus mūsų pažeidžiamumo išnaudojimo paketą (\autoref{fig:meta_samba_config}) jį paleidžiame. Šis pasileido sėkmingai, męs gavome \textit{reverse shell} kaip \textit{root} vartotojas (\autoref{fig:meta_samba_run}).
+
+\VTImage
+{img/meta_samba_run.png}
+{\textit{Samba} pažeidžiamumo paketo paleidimo rezultatai}
+{fig:meta_samba_run}
+{16cm}
+
+Kaip galime matyti, norint prijungti išnaudojamą sistemą prie mūsų, buvo užmegzta sesija per 4444 prievadą (\autoref{fig:meta_samba_netstat}), kaip ir sukonfigūravome (\autoref{fig:meta_samba_config}).
+
+\VTImage
+{img/meta_samba_netstat.png}
+{\textit{netstat} komandos rezultatai \textit{Samba} pažeidžiamumui}
+{fig:meta_samba_netstat}
+{16cm}
+
+Toliau galime matyti tinklo srautą tarp \textit{Metasploit} ir \textit{Metasploitable2} mašinų.
+
+\VTImage
+{img/meta_samba_wireshark.png}
+{Tinklo paketai \textit{Samba} pažeidžiamumui \textit{Wireshark} programinėje įrangoje}
+{fig:meta_samba_wireshark}
+{16cm}
+
+Šis pažeidžiamumas veikia dėl senos \textit{Samba} versijos, kur naudojant \textit{username map script} konfigūraciją, galima įtraukti tam tikrus \textit{meta} simbolius (\autoref{fig:meta_samba_exploit}), leidžiančius mums sistemoje paleisti savavališkas komandas. Galint paleisti savavališkas komandas, galime įgyvendinti \textit{reverse shell} \textit{payload}.
+
+\VTImage
+{img/meta_samba_exploit.png}
+{\textit{Samba} pažeidžiamumo išnaudojimo tinklo paketas}
+{fig:meta_samba_exploit}
+{16cm}
+
+\subsubsection{\textit{FTP}}
+
+Iš \textit{Nessus} ir \textit{nmap} skenavimo rezultatų žinome, jog serveryje yra naudojama \textit{VSFTPD 2.3.4} versija (\autoref{fig:meta_scan_ftp}, \autoref{fig:meta_nmap_ftp}). Ši versija turi \textit{backdoor} pažeidžiamumą. \textit{Metasploit} karkase surandame (\autoref{fig:meta_ftp_search}) pažeiždiamumo paketą skirtą šiai serverio versijai, kuri pasinaudoja šiuo \textit{backdoor} pažeidžiamumu.
+
+\VTImage
+{img/meta_ftp_search.png}
+{\textit{VSFTPD} pažeidžiamumų paieška \textit{Metasploit} karkase}
+{fig:meta_ftp_search}
+{16cm}
+
+Priešingai nei kituose pažeidžiamumų išnaudojimuose, šį kartą naudojame (pagal nutylėjimą parinktą) \textit{cmd/unix/interact} \textit{payload}, kadangi \textit{cmd/unix/reverse} naudoti šiame pažeidžiamumo pakete negalime.
+
+\VTImage
+{img/meta_ftp_config.png}
+{\textit{VSFTPD} pažeidžiamumo konfigūracija \textit{Metasploit} karkase}
+{fig:meta_ftp_config}
+{16cm}
+
+Sukonfigūravus (\autoref{fig:meta_ftp_run}) mūsų pažeidžiamumo išnaudojimo paketą jį paleidžiame. Šis pasileido sėkmingai, męs gavome \textit{shell} kaip \textit{root} vartotojas (\autoref{fig:meta_ftp_run}).
+
+\VTImage
+{img/meta_ftp_run.png}
+{\textit{VSFTPD} pažeidžiamumo paketo paleidimo rezultatai}
+{fig:meta_ftp_run}
+{16cm}
+
+Kaip galime matyti iš \textit{netstat} rezultatų - sudaroma sesija su \textit{FTP} serveriu ir per šią sesiją yra suteikiama prieiga prie \textit{shell}.
+
+\VTImage
+{img/meta_ftp_netstat.png}
+{\textit{netstat} komandos rezultatai \textit{VSFTPD} pažeidžiamumui}
+{fig:meta_ftp_netstat}
+{16cm}
+
+Toliau galime matyti tinklo srautą tarp \textit{Metasploit} ir \textit{Metasploitable2} mašinų.
+
+\VTImage
+{img/meta_ftp_wireshark.png}
+{Tinklo paketai \textit{VSFTPD} pažeidžiamumui \textit{Wireshark} programinėje įrangoje}
+{fig:meta_ftp_wireshark}
+{16cm}
+
+Šioje versijoje esantis \textit{backdoor} pažeidžiamumas yra toks - jei yra sutinkama ":)" simbolių kombinacija prisijungimo metu, šis \textit{backdoor} yra aktyvuojamas ir prisijungiančiam vartotojui yra suteikiama \textit{root} \textit{shell} prieiga.
+
+\VTImage
+{img/meta_ftp_exploit.png}
+{\textit{VSFTPD} pažeidžiamumo išnaudojimo tinklo paketas}
+{fig:meta_ftp_exploit}
+{16cm}
+
+\subsubsection{\textit{IRC}}
+
+Iš \textit{Nessus} ir \textit{nmap} skenavimo rezultatų žinome, jog serveryje yra naudojama \textit{Unreal IRC} programinė įranga (\autoref{fig:meta_scan_irc}, \autoref{fig:meta_nmap_irc}).  Ši versija turi \textit{backdoor} pažeidžiamumą. \textit{Metasploit} karkase surandame (\autoref{fig:meta_irc_search}) pažeiždiamumo paketą skirtą šiai serverio versijai, kuri pasinaudoja šiuo \textit{backdoor} pažeidžiamumu.
+
+\VTImage
+{img/meta_irc_search.png}
+{\textit{Unreal IRC} pažeidžiamumų paieška \textit{Metasploit} karkase}
+{fig:meta_irc_search}
+{16cm}
+
+Čia taip pat naudojame \textit{cmd/unix/reverse} \textit{payload}. Sukonfigūruojame (\autoref{fig:meta_irc_config}) tiek pažeidžiamumo išnaudojimo paketą ir \textit{cmd/unix/reverse} \textit{payload}.
+
+\VTImage
+{img/meta_irc_config.png}
+{\textit{Unreal IRC} pažeidžiamumo konfigūracija \textit{Metasploit} karkase}
+{fig:meta_irc_config}
+{16cm}
+
+Sukonfigūravus mūsų pažeidžiamumo išnaudojimo paketą jį paleidžiame. Šis pasileido sėkmingai, męs gavome \textit{reverse shell}.
+
+\VTImage
+{img/meta_irc_run.png}
+{\textit{Unreal IRC} pažeidžiamumo paketo paleidimo rezultatai}
+{fig:meta_irc_run}
+{16cm}
+    
+Kaip ir anksčiau, \textit{netstat} mums parodo, jog norint įgyvendinti \textit{reverse shell}, yra užmezgamas atgalinis ryšys, naudojant 4444 prievadą (\autoref{fig:meta_irc_netstat}).
+
+\VTImage
+{img/meta_irc_netstat.png}
+{\textit{Unreal IRC} komandos rezultatai \textit{VSFTPD} pažeidžiamumui}
+{fig:meta_irc_netstat}
+{16cm}
+
+Toliau galime matyti tinklo srautą tarp \textit{Metasploit} ir \textit{Metasploitable2} mašinų.
+
+\VTImage
+{img/meta_irc_wireshark.png}
+{Tinklo paketai \textit{Unreal IRC} pažeidžiamumui \textit{Wireshark} programinėje įrangoje}
+{fig:meta_irc_wireshark}
+{16cm}
+
+Panašiai kaip \textit{FTP} \textit{backdoor} pažeidžiamumas, šis tikisi tam tikros simbolių sekos. Ši simbolių seka yra "AB;" (\autoref{fig:meta_irc_exploit}). Kai šią seką gauna \textit{IRC} serveris, turime galimybę paleisti savavališkas komandas, kurių pagalba įgyvendiname \textit{reverse shell}.
+
+\VTImage
+{img/meta_irc_exploit.png}
+{\textit{Unreal IRC} pažeidžiamumo išnaudojimo tinklo paketas}
+{fig:meta_irc_exploit}
+{16cm}
+
+\section{Išvados}
+
+\textit{Metasploit} yra paprastas, tačiau galingas įrankis atliekant pažeidžiamumų išnaudojimą. Įrankis turi daugybę užregistruotų pažeidžiamumų prieš įvairias sistemas, jų versijas ir kombinacijas. Kiekvienas pažeidžiamumo paketas įprastai turi savo konfigūraciją, taip pat męs galime pasirinkti kokį \textit{payload} norime paleisti po pažeidžiamumo išnaudojimo.
+
+\VTDocumentEnd

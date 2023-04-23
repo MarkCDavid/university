@@ -1,0 +1,29 @@
+---
+- name: Install Metasploit Framework
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Download msfinstall script
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb
+        dest: /tmp/msfinstall
+        mode: '0755'
+        force: yes
+
+    - name: Check if Metasploit Framework is installed
+      ansible.builtin.command:
+        cmd: msfconsole --version
+      register: msf_installed
+      failed_when: false
+      changed_when: false
+
+    - name: Install Metasploit Framework if not installed
+      ansible.builtin.command:
+        cmd: /tmp/msfinstall
+      when: msf_installed.rc != 0
+
+    - name: Remove msfinstall script
+      ansible.builtin.file:
+        path: /tmp/msfinstall
+        state: absent
