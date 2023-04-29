@@ -1,0 +1,145 @@
+\documentclass{vilniustech-en}
+\vilniustechsetup{
+    university={Vilnius Gediminas technical university},
+    faculty={Faculty of Fundamental Sciences},
+    cathedral={Department of Information Systems},
+    workTitle={Computer Networks and Operating System Security},
+    workType={Firewall},
+    workAuthorName={Aurimas Šakalys},
+    workAuthorGroup={ITSfm-22},
+    workRecipient={lect. Vitalijus Gurčinas}
+}
+\addbibresource{bibliography.bib}
+\VTDocumentBegin
+
+\section{Requirements}
+
+The following are the requirements for this laboratory work. These requirements do not correspond one to one to the requirements that are presented in the laboratory work slides. This is due to the fact that we perform several modifications to allow us to streamline our laboratory work. For any significant modifications that were performed, we will provide an explanation as to why it was modified and what has been modified. The requirements are as follows:
+
+\begin{enumerate}
+    \item Set up two network interfaces: internal and external;
+    \item Assign IPv4 class C address to both of these interfaces;
+    \item Deny all inbound traffic;
+    \item Set up port forwarding on port 80 to an internal address:
+    \begin {enumerate}
+        \item An \textit{HTTP} server should be running behind the internal address;
+        \item All traffic that reaches the port 80 of the firewall should be forwarded to the internal address;
+        \item A GET request coming in to the external interface should be processed fully - a GET response should reach the requesting party;
+        \item The firewall itself should be capable of reaching the HTTP server as well;
+    \end{enumerate}
+    \item Only allow egress traffic on ports 80 and 443;
+    \item Allow SSH access to bandit.labs.overthewire.org on port 2220 from one of the internal addresses;
+    \item Only accept "Echo Request" ICMP packets;
+    \item Implement a few different MATCH and a few different TARGET conditions;
+    \item Allow rpc from specific external host;
+    \item Allow rdp from specific external host;
+    \item Implement SPA solution;
+    \item Configure the firewall to work with a jump server;
+    \item Configure the firewall rule to persist the configuration between restarts;
+    \item Test your firewall rules;
+    \item Run nmap on the external interface, provide and explain the results.
+\end{enumerate}
+
+These are the changes that were implemented to the original requirements:
+
+\begin{itemize}
+    \item For the original requirement 2, we had to assign a C class address to the internal interface, and a B class address to the external interface. While this does not complicate the implementation, we had started the laboratory work with C class addresses for both interfaces and as such it would have required a significant time investment to update the external interface to use a B class address;
+    \item The requirement 4 has been expanded to require an HTTP server to be running behind the intenal address that we forward traffic to. This allows us to provide additional rules to ensure that the traffic works correctly and allows us to test the rule in a more interesting way;
+    \item Requirement 6 required us to allow traffic through port 22 to fmf.vgtu.lt. This url is not in use, as such we have chosen a different url. The url chosen was to allow us to test out the firewall rules and actually connect to an address on the internet from the internal machine. This adds complexity to the requirement and allowed us to learn a lot more than the original requirement;
+    \item Requirement 7 was removed altogether, as it required us to add five additional advanced rules of our own choice. With the modifications to requirement 4 and requirement 6, we believe that this requirement becomes obsolete.
+    \item For the original requirement 10, we reduce the hard requirement for the amount of MATCH and TARGET rules as just a few more complex rules of this kind would allow us to understand what types of rules there are;
+    \item Requirement 13 is unavailable to us, as iptables is not capable of WAF.
+\end{itemize}
+
+
+\section{Preconfiguration}
+
+
+% \VTImage
+% {img/tinklas.png}
+% {Network diagram}
+% {fig:tinklas}
+% {16cm}
+
+% \section{Network}
+
+% The network is separated into two distinct segments, both of them representing one of the offices. The offices are connected via a leased line, which is the main communication scenario for the network. There is a possibility to access the internal network via the internet, with the help of a VPN, but this is usually done for remote users (which are not represented in the diagram) or in case there are issues with leased line connection. 
+
+% The traffic that comes in from the web (including the VPN traffic) is secured by a WSG, in our case we are using Sophos XG 230, which is a hardware solution for web filtering and threat protection. After the traffic passes this, it enters the DMZ via the firewall, which now additionally encounter a AMP, for which we are using Cisco Firepower 2110 with a AMP addition. This setup allows for checking for anomalous traffic, virus protection etc.. Any anomalous traffic is routed towards a honeypot suite. This setup, of WSG, DMZ and AMP to honeypot is reflected on the entrance to the network for both offices.
+
+% In the "larger" office, still in the DMZ we have a Mail Server and Web Server available. The Mail server is placed in the DMZ to reduce any attack surface that could come via the email. For the web servers, as they are providing a service to the users that access it via the web, we have a WAF solution to ensure that the incoming traffic is non-malicious and we are using a Imperva X10, which is a hardware based web traffic firewall to protect against DDoS, SQL injections, XSS, with monitoring of the traffic. Additionally, these web servers are load balanced, in case of any issues on either of the currently deployed servers.
+
+% Furthermore, the internal network behind the DMZ is separated into multiple VLANs, VLAN 10 for accounting and VLAN 20 for developers. 
+
+% There are (virtual) access points for both of these VLANs behind the DMZ as well, to provide more comfortable access to internal network for the employees. The access point itself has WIDPS enabled on it, to protect unauthorized and malicious access to the wireless network. Additionally, there is a guest access point provided, that connects withing the DMZ and provides access to services withing DMZ and to the internet.
+
+% On the other side, the setup is pretty similar, except there are no access points present for the VLANs. The guest access point is available within the DMZ with the same type of access.
+
+% \subsection{Security solutions}
+
+
+% \VTWrappedImage{r}
+% {img/leased.png}
+% {Leased line}
+% {fig:leased}
+% {5cm}
+
+
+% In \autoref{fig:leased} we can see the installation of the leased line. This is the main connecting line between the offices, that allows direct communication between the offices. While the leased line is rather expensive, as the employees in different locations need constant safe traffic for cooperation, leased line was used. 
+
+% \VTWrappedImage{l}
+% {img/VPN.png}
+% {VPN connection}
+% {fig:vpn}
+% {5cm}
+
+% In \autoref{fig:vpn} we can see the redundant secure connection vie the VPN. This is a secondary connecting line between the offices that can provide safe traffic. This line is used by any employees that are working from their home and need access to the network, or in case there are temporary issue with the leased line connection. Currently, employees working from home are not present, but they would be able to be added without a great hassle.
+
+% \VTWrappedImage{r}
+% {img/WSG.png}
+% {Web Secure Gateway}
+% {fig:wsg}
+% {5cm}
+
+% While the traffic between the sites do not go out to the internet, logically it does not need to pass the WSG pictured in \autoref{fig:wsg}. We will discuss this later. The hardware of choice in our case is Sophos XG 230, as it is capable of filtering internet traffic by rules set up by the administrators without introducing huge delays in the network packet delivery. Additionally, it is capable of performing load balancing for access to specific servers, which would allow us to double up on load balancing on office web servers. 
+
+
+% \VTWrappedImage{l}
+% {img/DMZ.png}
+% {Demilitarized zone}
+% {fig:dmz}
+% {5cm}
+
+% The hardware is capable of acting as a firewall as well, as such in a physical installation, there is no need for an additional firewall to indicate the beginning of the DMZ. This means, that while in the logical diagram the leased line connection could pass through WSG, in physical installation, it would have to be connected directly, for firewall checks.
+
+% \VTWrappedImage{r}
+% {img/AMP.png}
+% {Anti-malware protection installation}
+% {fig:amp}
+% {5cm}
+
+% As mentioned previously, the WSG takes up the initial entrance to the DMZ pictured in \autoref{fig:dmz}. The DMZ holds a multitude of equipment, like web and mail servers, anti-malware device with honeypots and AP for guests for access to the internet. The other end of the DMZ, for the internal network is controlled by pfSense.
+
+% Any traffic coming into the network has to go past the AMP installation pictured in \autoref{fig:amp}. This functionality is installed using Cisco Firepower 2110, with AMP module. This solution analyses the network traffic and blocks any packets that could have been identified as malicious, allows for containment of these threats and sandboxing them. Additionally, any anomalous traffic can be forwarded towards a honeypot suite.
+
+% Most of the server infrastructure is available within the DMZ as well, as pictured in \autoref{fig:servers}. 
+
+% \VTWrappedImage{L}
+% {img/Servers.png}
+% {Server deployment}
+% {fig:servers}
+% {5cm}
+
+% This ensures that any external traffic that accesses the severs cannot communicate with the internal network. The servers deployed are a mail server, for mail traffic and load balanced web servers, for the services provided by the organization. The mail server is in the DMZ, as mentioned previously, to reduce any threats that might come over the email. Of course, any traffic coming in would have to pass the AMP solutions, so the risk is reduced, but it is not zero. To reach the web servers, the traffic would have to pass through a WAF solution, for which we have chosen Imperva X10 Web Application Firewall, which specializes in protection of HTTP traffic and services or applications that are tried to reach. It provides certain protection against DDoS, which is not useful for us, as a DDoS attack would overwhelm other infrastructure in the network first, before it reaches the WAF hardware. The protection against XSS, SQL Injections and other types of network attacks is why this solution was chosen.
+
+% The very last security implementation is the usage of VLANs for different departments of the organization.
+
+% \VTWrappedImage{L}
+% {img/vlans.png}
+% {VLANs}
+% {fig:vlans}
+% {5cm}
+
+% VLAN 10 is used for accounting, while VLAN 20 is used for developers. These VLANs are replicated on both organization sites and any traffic within the internal network is within the VLANs. Additionally, as the larger site has more employees, access points are integrated into the networks. As they are wireless devices within the internal network, access points with WIDPS functionality has been chosen and this functionality has been enabled on these access points, thus providing some security regarding wireless attacks on the network.
+
+\VTDocumentEnd

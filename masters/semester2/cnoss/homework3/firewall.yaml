@@ -1,0 +1,70 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Install required packages
+      apt:
+        update_cache: yes
+        name:
+          - iptables
+          - iptables-persistent
+          - rpcbind
+          - fwknop-server
+          - nmap
+        state: present
+
+
+    - name: Enable IP forwarding
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        sysctl_set: yes
+        state: present
+        reload: yes
+
+    - name: Start netfilter-persistent service
+      systemd:
+        name: netfilter-persistent
+        state: started
+        enabled: yes
+
+    - name: Generate fwknop HMAC key
+      command: "fwknop --key-gen --use-hmac"
+      register: fwknop_key
+
+    - name: Configure fwknop server
+      lineinfile:
+        path: /etc/fwknop/fwknopd.conf
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+      with_items:
+        - { regexp: '^PCAP_INTF', line: 'PCAP_INTF enp0s8' }
+        - { regexp: '^ENABLE_PCAP_PROMISC', line: 'ENABLE_PCAP_PROMISC 1' }
+
+    - name: Configure fwknop access.conf
+      lineinfile:
+        path: /etc/fwknop/access.conf
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+      with_items:
+        - { regexp: '^KEY_BASE64', line: "KEY_BASE64                  {{ fwknop_key.stdout_lines[0].split(': ')[1] }}" }
+        - { regexp: '^HMAC_KEY_BASE64', line: "HMAC_KEY_BASE64                 {{ fwknop_key.stdout_lines[1].split(': ')[1] }}" }
+
+    - name: Change START_DAEMON to "yes" in /etc/default/fwknop-server
+      lineinfile:
+        path: /etc/default/fwknop-server
+        regexp: '^START_DAEMON='
+        line: 'START_DAEMON="yes"'
+
+    - name: Enable fwknop-server service
+      systemd:
+        name: fwknop-server
+        state: started
+        enabled: yes
+
+    - name: Copy fwknopd.conf from firewall machine to host machine
+      fetch:
+        src: /etc/fwknop/access.conf
+        dest: ./firewall-gateway

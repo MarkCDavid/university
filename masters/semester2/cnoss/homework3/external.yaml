@@ -1,0 +1,26 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Install fwknop client
+      apt:
+        update_cache: yes
+        name: 
+          - python3
+          - python3-pip
+          - fwknop-client
+        state: present
+
+    - name: Configure fwknop client
+      lineinfile:
+        path: /home/vagrant/.fwknoprc
+        line: "{{ item }}"
+        create: yes
+      with_items:
+        - "[firewall]"
+        - "ALLOW_IP                    192.168.56.100"
+        - "ACCESS                      tcp/22"
+        - "SPA_SERVER                  192.168.56.1"
+        - "KEY_BASE64                  rhekYTbHXjSA0cOkBqTLYzUlymSWwMdmuw/oYfRDzWw="
+        - "HMAC_KEY_BASE64             eQ+S9WNUhDcdxWdkebkALrhfJ3evtNFmSwnuw3Nk4Q69ejOpWX79V94EzbLxD+s6llm5OWM5bG0/0NiwItr1JA=="
+        - "USE_HMAC                    Y"

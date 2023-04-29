@@ -1,0 +1,52 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+    # Configure the Firewall/Gateway VM
+    config.vm.define "firewall_gateway" do |firewall_gateway|
+      firewall_gateway.vm.box = "ubuntu/bionic64"
+      firewall_gateway.vm.hostname = "firewall-gateway"
+      firewall_gateway.vm.network "private_network", ip: "192.168.56.1", virtualbox__intnet: "intnet1"
+      firewall_gateway.vm.network "private_network", ip: "192.168.57.1", virtualbox__intnet: "intnet2"
+      firewall_gateway.vm.provider "virtualbox" do |vb|
+        vb.name = "Firewall"
+        vb.memory = 512
+        vb.cpus = 1
+      end
+
+      firewall_gateway.vm.provision "ansible" do |firewall_ansible|
+        firewall_ansible.playbook = "firewall.yaml"
+      end
+    end
+  
+    # Configure the Internal Machine VM
+    config.vm.define "internal_machine" do |internal_machine|
+      internal_machine.vm.box = "ubuntu/bionic64"
+      internal_machine.vm.hostname = "internal-machine"
+      internal_machine.vm.network "private_network", ip: "192.168.57.10", virtualbox__intnet: "intnet2"
+      internal_machine.vm.provider "virtualbox" do |vb|
+        vb.name = "Internal Machine"
+        vb.memory = 512
+        vb.cpus = 1
+      end
+    end
+  
+    # Configure the External Machine VM
+    config.vm.define "external_machine" do |external_machine|
+      external_machine.vm.box = "ubuntu/bionic64"
+      external_machine.vm.hostname = "external-machine"
+      external_machine.vm.network "private_network", ip: "192.168.56.100", virtualbox__intnet: "intnet1"
+      external_machine.vm.provider "virtualbox" do |vb|
+        vb.name = "External Machine"
+        vb.memory = 512
+        vb.cpus = 1
+      end
+
+      external_machine.vm.provision "ansible" do |external_ansible|
+        external_ansible.playbook = "external.yaml"
+      end
+    end
+  
+  end
+  
