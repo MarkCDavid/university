@@ -24,122 +24,636 @@ The following are the requirements for this laboratory work. These requirements 
     \begin {enumerate}
         \item An \textit{HTTP} server should be running behind the internal address;
         \item All traffic that reaches the port 80 of the firewall should be forwarded to the internal address;
-        \item A GET request coming in to the external interface should be processed fully - a GET response should reach the requesting party;
-        \item The firewall itself should be capable of reaching the HTTP server as well;
+        \item A \textit{GET} request coming in to the external interface should be processed fully - a \textit{GET} response should reach the requesting party;
+        \item The firewall itself should be capable of reaching the \textit{HTTP} server as well;
     \end{enumerate}
     \item Only allow egress traffic on ports 80 and 443;
-    \item Allow SSH access to bandit.labs.overthewire.org on port 2220 from one of the internal addresses;
-    \item Only accept "Echo Request" ICMP packets;
-    \item Implement a few different MATCH and a few different TARGET conditions;
-    \item Allow rpc from specific external host;
-    \item Allow rdp from specific external host;
-    \item Implement SPA solution;
+    \item Allow SSH access to \url{bandit.labs.overthewire.org} on port 2220 from one of the internal addresses;
+    \item Only accept \textit{Echo Request} \textit{ICMP} packets;
+    \item Implement a few different \textit{MATCH} and a few different \textit{TARGET} conditions;
+    \item Allow \textit{RPC} from specific external host;
+    \item Allow \textit{RDP} from specific external host;
+    \item Implement \textit{SPA} solution;
     \item Configure the firewall to work with a jump server;
     \item Configure the firewall rule to persist the configuration between restarts;
-    \item Test your firewall rules;
-    \item Run nmap on the external interface, provide and explain the results.
+    \item Test your firewall rules.
 \end{enumerate}
 
 These are the changes that were implemented to the original requirements:
 
 \begin{itemize}
-    \item For the original requirement 2, we had to assign a C class address to the internal interface, and a B class address to the external interface. While this does not complicate the implementation, we had started the laboratory work with C class addresses for both interfaces and as such it would have required a significant time investment to update the external interface to use a B class address;
-    \item The requirement 4 has been expanded to require an HTTP server to be running behind the intenal address that we forward traffic to. This allows us to provide additional rules to ensure that the traffic works correctly and allows us to test the rule in a more interesting way;
-    \item Requirement 6 required us to allow traffic through port 22 to fmf.vgtu.lt. This url is not in use, as such we have chosen a different url. The url chosen was to allow us to test out the firewall rules and actually connect to an address on the internet from the internal machine. This adds complexity to the requirement and allowed us to learn a lot more than the original requirement;
-    \item Requirement 7 was removed altogether, as it required us to add five additional advanced rules of our own choice. With the modifications to requirement 4 and requirement 6, we believe that this requirement becomes obsolete.
-    \item For the original requirement 10, we reduce the hard requirement for the amount of MATCH and TARGET rules as just a few more complex rules of this kind would allow us to understand what types of rules there are;
-    \item Requirement 13 is unavailable to us, as iptables is not capable of WAF.
+    \item For the original requirement 2, we had to assign a class C address to the internal interface, and a class B address to the external interface. While this does not complicate the implementation, we had started the laboratory work with C class addresses for both interfaces and as such it would have required a significant time investment to update the external interface to use a B class address;
+    \item The requirement 4 has been expanded to require an \textit{HTTP} server to be running behind the internal address that we forward traffic to. This allows us to provide additional rules to ensure that the traffic works correctly and allows us to test the rule in a more interesting way;
+    \item Requirement 6 required us to allow traffic through port 22 to \url{fmf.vgtu.lt}. This \textit{URL} is not in use, as such we have chosen a different \textit{URL}. The \textit{URL} chosen was to allow us to test out the firewall rules and actually connect to an address on the internet from the internal machine. This adds complexity to the requirement and allowed us to learn a lot more than the original requirement;
+    \item Requirement 7 was removed altogether, as it required us to add five additional advanced rules of our own choice. With the modifications to requirement 4 and requirement 6, we believe that this requirement becomes obsolete;
+    \item For the original requirement 10, we reduce the hard requirement for the amount of MATCH and TARGET rules as just a few more complex rules of this kind would allow us to understand what types of rules there are and how to utilize them;
+    \item Requirement 13 is unavailable to us, as \textit{iptables} is not capable of \textit{WAF}.
 \end{itemize}
 
 
-\section{Preconfiguration}
+\section{Pre-configuration}
+
+To complete this laboratory work, we will be using three \textit{Ubuntu 18.04} virtual machines and use \textit{iptables} as our firewall.
+
+\subsection{Virtual Machines and Interfaces}
+To start working we need to perform configuration of our infrastructure. We will use \textit{Vagrant} and \textit{Ansible} to create the virtual machines that will act as our external and internal machines and firewall respectively. Our eventual topology of the machines can be seen in \autoref{fig:topology}. All our virtual machines are connected to the host machine using a \textit{NAT} interface, while the connections between the virtual machines are facilitated by use of internal network adapters.
+
+\VTImage
+{img/topology.png}
+{Topology of our network example}
+{fig:topology}
+{16cm}
+
+As mentioned before, the network is configured using \textit{Vagrant} (\autoref{fig:fw_vagrant_ips}) and the interfaces are configured during the virtual machine provisioning step. With this step, requirements 1 and 2 are fulfilled.
+
+\VTImage
+{img/fw_vagrant_ips.png}
+{Interface configuration in Vagrantfile}
+{fig:fw_vagrant_ips}
+{16cm}
+
+\subsection{Kernel forwarding}
+Because we are using \textit{iptables} as our firewall software and we have requirements for traffic forwarding, we need to perform additional kernel configuration. By default, \textit{Linux} kernel does not perform packet forwarding. This is not a desired configuration for us, as we want to be able to perform packet forwarding. To perform this configuration, we need to edit the \textit{/etc/sysctl.conf} file by adding the line \textit{net.ipv4.ip\_forward=1}.
+
+This modification, unintuitively, has to be performed on two machines - the firewall and the external machine. The firewall modification is self-explanatory, while the modification to the external machine is not so. The modification to the external machine has to be applied because of the requirement 6, as it will require for packets to be forwarded through the external machine to the internet, through the host via the \textit{NAT} interface. As such, this modification is applied to both of the machines. Once the modification is performed, we run the \textit{sysctl --system} command to reload the changed kernel parameter.
+
+\subsection{DNS Resolution} \label{sec:wargame}
+
+\VTWrappedImage{r}
+{img/fw_bandit_lookup_dns.png}
+{\textit{DNS} resolution for \url{bandit.labs.overthewire.org}}
+{fig:fw_bandit_lookup_dns}
+{9cm}
+
+Requirement 6 specifies a \textit{URL} that we need to provide access to via port 2220. This is not directly possible using iptables, as such, we will resolve the \textit{IP} address of the \textit{URL} using \textit{nslookup} (\autoref{fig:fw_bandit_lookup_dns}). As we can see the \textit{IP} address of the \textit{URL} is 16.16.8.216. As such, for implementation for requirement 6, we will use this resolved \textit{IP} instead of the provided \textit{URL}.
+
+\subsection{Persistance}
+
+\VTWrappedImage{l}
+{img/fw_iptables_install.png}
+{Installation of \textit{iptables-persistent} package}
+{fig:fw_iptables_install}
+{9cm}
+
+To persist the \textit{iptables} rules between reloads, we will utilize the \textit{iptables-persistent} package (\autoref{fig:fw_iptables_install}). Once the package is installed, we need to run commands from \autoref{lst:persistence_service} to make sure the service is running (\autoref{fig:fw_persistence_status}). 
+
+\begin{lstlisting}[language={json}, caption={Commands to start and enable the \textit{netfilter-persistent} service}, label={lst:persistence_service}, captionpos=b]
+systemctl enable netfilter-persistent 
+systemctl start netfilter-persistent 
+\end{lstlisting}
+
+\VTImage
+{img/fw_persistence_status.png}
+{Status of the \textit{netfilter-persistent} service}
+{fig:fw_persistence_status}
+{16cm}
+
+Once the service is running, the configuration that is stored in \textit{/etc/iptables/rules.v4} will be loaded on system boot. To populate that file with currently set up rules, we run the command \textit{iptables-save > /etc/iptables/rules.v4}. We will perform this action after we complete our firewall configuration.
 
 
-% \VTImage
-% {img/tinklas.png}
-% {Network diagram}
-% {fig:tinklas}
-% {16cm}
+\subsection{\textit{SPA} configuration}
+For \textit{SPA} implementation we shall use \textit{fwknop} software. We will install the \textit{fwknop} server on the firewall, and \textit{fwknop} client on the external machine. This means that we will be able to perform a knock on the firewall and for it to allow us to connect via the configured port. On the server, we run the command \textit{fwknop --key-gen --use-hmac} which generates the required keys for us to use \textit{fwknop}.
 
-% \section{Network}
+With the generated keys, we modify the following two files - \textit{/etc/fwknop/fwknopd.conf} by adding lines from \autoref{lst:fwknopd_config} and \textit{/etc/fwknop/access.conf} by adding lines from \autoref{lst:access_config}.
 
-% The network is separated into two distinct segments, both of them representing one of the offices. The offices are connected via a leased line, which is the main communication scenario for the network. There is a possibility to access the internal network via the internet, with the help of a VPN, but this is usually done for remote users (which are not represented in the diagram) or in case there are issues with leased line connection. 
+\begin{lstlisting}[language={json}, caption={\textit{/etc/fwknop/fwknopd.conf} configuration}, label={lst:fwknopd_config}, captionpos=b]
+PCAP_INTF           enp0s8
+ENABLE_PCAP_PROMISC 1
+\end{lstlisting}
 
-% The traffic that comes in from the web (including the VPN traffic) is secured by a WSG, in our case we are using Sophos XG 230, which is a hardware solution for web filtering and threat protection. After the traffic passes this, it enters the DMZ via the firewall, which now additionally encounter a AMP, for which we are using Cisco Firepower 2110 with a AMP addition. This setup allows for checking for anomalous traffic, virus protection etc.. Any anomalous traffic is routed towards a honeypot suite. This setup, of WSG, DMZ and AMP to honeypot is reflected on the entrance to the network for both offices.
+\begin{lstlisting}[language={json}, caption={\textit{/etc/fwknop/access.conf} configuration}, label={lst:access_config}, captionpos=b]
+SOURCE              ANY
+KEY_BASE64          sggO1r/d4/yJPZVQk5nWrvT7402CTNjYA6mfz/n6aW8=
+HMAC_KEY_BASE64     4LRYxjZ8c...qNgU5SFx82OFNLJQwKr6MjSdmmyD7Q==
+\end{lstlisting}
 
-% In the "larger" office, still in the DMZ we have a Mail Server and Web Server available. The Mail server is placed in the DMZ to reduce any attack surface that could come via the email. For the web servers, as they are providing a service to the users that access it via the web, we have a WAF solution to ensure that the incoming traffic is non-malicious and we are using a Imperva X10, which is a hardware based web traffic firewall to protect against DDoS, SQL injections, XSS, with monitoring of the traffic. Additionally, these web servers are load balanced, in case of any issues on either of the currently deployed servers.
+This configures the server to allow for anyone \textit{knocking} over the \textit{enp0s8} (external) interface with the correct data to be allowed access to the server on specified port. Now, we need to configure the client machine, which in our case is the external machine. We modify the \textit{/home/vagrant/.fwknoprc} by adding lines from \autoref{lst:fwknoprc_config}.
 
-% Furthermore, the internal network behind the DMZ is separated into multiple VLANs, VLAN 10 for accounting and VLAN 20 for developers. 
+\begin{lstlisting}[language={json}, caption={\textit{/home/vagrant/.fwknoprc} configuration}, label={lst:fwknoprc_config}, captionpos=b]
+[firewall]
+ALLOW_IP                    192.168.56.100
+ACCESS                      tcp/22
+SPA_SERVER                  192.168.56.1
+KEY_BASE64                  sggO1r/d4/yJPZ...2CTNjYA6mfz/n6aW8=
+HMAC_KEY_BASE64             4LRYxjZ8c...2OFNLJQwKr6MjSdmmyD7Q==
+USE_HMAC                    Y
+\end{lstlisting}
 
-% There are (virtual) access points for both of these VLANs behind the DMZ as well, to provide more comfortable access to internal network for the employees. The access point itself has WIDPS enabled on it, to protect unauthorized and malicious access to the wireless network. Additionally, there is a guest access point provided, that connects withing the DMZ and provides access to services withing DMZ and to the internet.
+This configures a named stanza, which we would use to perform the knock on the firewall, requesting access to our \textit{IP} address through port 22. If we are successful in our knock (\autoref{fig:fw_fwknop_send}), we should expect for the port 22 for 192.168.56.100 to be opened (\autoref{fig:fw_fwknop_post}). As we can see, we can perform the knock successfully and as such we fulfill the 11 requirement.
 
-% On the other side, the setup is pretty similar, except there are no access points present for the VLANs. The guest access point is available within the DMZ with the same type of access.
+\VTImage
+{img/fw_fwknop_send.png}
+{Performing a knock from the external machine}
+{fig:fw_fwknop_send}
+{16cm}
 
-% \subsection{Security solutions}
+\VTImage
+{img/fw_fwknop_post.png}
+{A new \textit{iptables} rule on the firewall}
+{fig:fw_fwknop_post}
+{16cm}
+
+\section{Firewall Rules}
+
+\subsection{Requirement 3}
+
+As the virtual machines that we have set up are headless \footnote{Without a graphical user interface}, we are configuring them through \textit{SSH} for a more comfortable working experience. If we were to apply the rules required for the fulfillment of requirement 3 (\autoref{lst:default_policy}) we would lose access to the virtual machines over \textit{SSH}. As such, we will apply rules that will allow us to connect via \textit{SSH} first (\autoref{lst:ssh_access}).
+
+\begin{lstlisting}[language={json}, caption={Allow access through \textit{SSH} on \textit{NAT} interface}, label={lst:ssh_access}, captionpos=b]
+iptables --append INPUT --in-interface enp0s3 --protocol tcp --destination-port 22 --jump ACCEPT
+iptables --append OUTPUT --out-interface enp0s3 --protocol tcp --source-port 22 --match state --state ESTABLISHED,RELATED --jump ACCEPT
+\end{lstlisting}
+
+The following rules (\autoref{lst:default_policy}) simply modify the default policies for packets. With these rules configured to drop the packets by default, we will need to build up rules to provide increased access to the system. We are configuring the \textit{FORWARD} chain with the \textit{DROP} policy here as well, as it is required by future requirements.
+
+\begin{lstlisting}[language={json}, caption={\textit{DROP} policy for \textit{INPUT} and \textit{FORWARD} chains}, label={lst:default_policy}, captionpos=b]
+iptables --policy INPUT DROP
+iptables --policy FORWARD DROP
+\end{lstlisting}
+
+\subsection{Requirement 4}
+
+For this implementation, we shall start from the requirement \textit{4D} as this brings us to an interesting aspect of packet processing. When we are generating a \textit{GET} request from the firewall towards the internal machine we will be generating a packet locally. As the packet is generated locally, that means it directly enters the \textit{OUTPUT} chain. As our default policy for the \textit{OUTPUT} chain is \textit{ACCEPT}, we do not need to add any additional rules to ensure that the packet will reach the \textit{HTTP} server on the internal machine. On the other hand, the packets of the return traffic will enter the \textit{INPUT} chain and as such, we will need to add a rule that would allow for such traffic to pass through. We install the rule in \autoref{lst:return_port_80} to enable this behavior. 
+
+\begin{lstlisting}[language={json}, caption={Allow for return traffic from internal interface on port 80}, label={lst:return_port_80}, captionpos=b]
+iptables --append INPUT --in-interface enp0s9 --protocol tcp --source-port 80 --match state --state RELATED,ESTABLISHED --jump ACCEPT
+\end{lstlisting}
+
+As we want for the \textit{HTTP} traffic coming into the firewall via the external interface to be routed to the machine on the internal interface, we need to perform \textit{NAT}, meaning, once we match a packet we want to route towards the internal machine, we need to change the destination \textit{IP} address. In \textit{iptables} we do so in the \textit{NAT} table. We simply match for a packet that is coming in through the external interface, towards port 80 . Once matched, we \textit{TARGET} the \textit{DNAT} action. This action modifies the destination \textit{IP} of the packet as configured. We install the rule in \autoref{lst:dnat_port_80} to enable this behavior. 
+
+\begin{lstlisting}[language={json}, caption={\textit{DNAT} incoming traffic destined for port 80}, label={lst:dnat_port_80}, captionpos=b]
+iptables --table nat --append PREROUTING --in-interface enp0s8 --protocol tcp --destination-port 80 --jump DNAT --to-destination 192.168.57.10:80
+\end{lstlisting}
+
+Now we have a packet that is destined to move forward through an interface (for forward traffic - towards internal interface, for return traffic - towards external interface), that means it will enter the \textit{FORWARD} chain. As our default policy for this chain is \textit{DENY}, we need to add additional rules that would allow for the packets going through the \textit{FORWARD} chain to be accepted. We install the rules in \autoref{lst:nat_forwarding_80} to enable this behavior. 
+
+\begin{lstlisting}[language={json}, caption={Enable forwarding traffic}, label={lst:nat_forwarding_80}, captionpos=b]
+iptables --append FORWARD --in-interface enp0s8 --out-interface enp0s9 --protocol tcp --destination-port 80 --match state --state NEW,ESTABLISHED,RELATED --jump ACCEPT
+iptables --append FORWARD --in-interface enp0s9 --out-interface enp0s8 --protocol tcp --source-port 80 --match state --state ESTABLISHED,RELATED --jump ACCEPT
+\end{lstlisting}
+
+\VTWrappedImage{r}
+{img/fw_routing_initial.png}
+{Routing table of the internal machine}
+{fig:fw_routing_initial}
+{8cm}
+
+With this configuration, we might expect for the traffic to pass through uninterrupted, but if we were to test this, we would run into an interesting issue. In this case an incoming \textit{GET} request would enter the firewall through the external interface, it would move through the set up chains, exit through the internal interface and would reach the \textit{HTTP} server. It would seem that we should be able to establish a connection with the server and yet - the connection would fail to be established. The issue in this case, is that the packet that reaches the \textit{HTTP} server has a source address of 192.168.56.100 and the internal machine does not have a routing rule (\autoref{fig:fw_routing_initial}) that would route the packet back towards the firewall. As such, the packet leaves the internal machine through the default route - the \textit{NAT} interface. As such, to remediate this issue, we need to add a routing rule to the internal machine to route the packet back to the firewall (\autoref{lst:route_internal_firewall}).
+
+\begin{lstlisting}[language={json}, caption={Route traffic for 192.168.56.0/24 through the firewall}, label={lst:route_internal_firewall}, captionpos=b]
+ip route add 192.168.56.0/24 via 192.168.57.1
+\end{lstlisting}
+
+With this done our configuration for this requirement is finished and we can now try to test whether the configuration allows for the expected behavior.
+
+\subsubsection{Testing}
+
+We will run the \textit{HTTP} server on the internal machine (\autoref{fig:fw_http_on_internal_machine}).
+
+\VTImage
+{img/fw_http_on_internal_machine.png}
+{Running a simple \textit{HTTP} server using \textit{Python}}
+{fig:fw_http_on_internal_machine}
+{16cm}
+
+With it running, we start watching for packet counts in iptables (\autoref{fig:fw_http_watch_initial}). We need to watch both the default filter table, as well as the \textit{NAT} table.
+
+\VTImage
+{img/fw_http_watch_initial.png}
+{Initial processed packet counts}
+{fig:fw_http_watch_initial}
+{16cm}
+
+First, we will check whether we can perform a \textit{GET} request from the firewall itself. As we can see, the \textit{GET} request was performed successfully (\autoref{fig:fw_http_from_firewall}).
+
+\VTImage
+{img/fw_http_from_firewall.png}
+{A successful \textit{GET} request from the firewall}
+{fig:fw_http_from_firewall}
+{16cm}
+
+Lets take note of the changed packet counts (\autoref{fig:fw_http_watch_post_firewall}).
+
+\VTImage
+{img/fw_http_watch_post_firewall.png}
+{Processed packet counts after \textit{GET} request from the firewall}
+{fig:fw_http_watch_post_firewall}
+{16cm}
+
+The only thing that has changed is the count of packets processed by the third \textit{INPUT} chain rule. This is the rule that allows for return traffic from the internal interface. This behavior is as expected.
+
+Next, we will check whether we can perform a \textit{GET} request from the external machine. As we can see, the \textit{GET} request was performed successfully (\autoref{fig:fw_http_from_external}).
+
+\VTImage
+{img/fw_http_from_external.png}
+{A successful \textit{GET} request from the external machine}
+{fig:fw_http_from_external}
+{16cm}
+
+Lets take note of the changed packet counts (\autoref{fig:fw_http_watch_post_firewall}).
+
+\VTImage
+{img/fw_http_watch_post_external.png}
+{Processed packet counts after \textit{GET} request from the external machine}
+{fig:fw_http_watch_post_external}
+{16cm}
+
+We shall go through the sequential processing route for the packets. Initially, the packet would go to the \textit{PREROUTING} chain on the \textit{NAT} table. We can see by the difference in the processed packet counts, that the packet was processed here and \textit{DNAT} translation took place. Next, the packet would be routed based on the local firewall routing rules - it would be routed towards the internal interface and would enter the \textit{FORWARDING} chain. We can see that the rule allowing forwarding from external to internal interface was hit multiple times. After this, the packets would arrive to the internal machine, be processed by the \textit{HTTP} server and return packets would be sent out. As they arrive from the internal interface and they are intended for the external interface, these packets are put on the \textit{FORWARD} chain \footnote{These packets skip the \textit{INPUT} chain by going through \textit{PREROUTING}, \textit{FORWARD} and \textit{POSTROUTING} chains respectively. As such there is no need to add a rule on \textit{INPUT} chain to allow their traffic.}. In this case, we can see that the rule allowing forwarding from internal to external interface was hit multiple times. With this, the packet has finished its journey and it returns to the external machine.
+
+As we can see, all of the defined rules played part in allowing the \textit{GET} request to finish its journey from the firewall and external machine. This completely covers the 4th requirement.
+
+\subsection{Requirement 5}
+
+To allow egress traffic, traffic originating in the internal interface and going towards the external interface, we will install the rules in \autoref{lst:egress_80_443}.
+
+\newpage
+\begin{lstlisting}[language={json}, caption={Allow for egress traffic on ports 80 and 443}, label={lst:egress_80_443}, captionpos=b]
+iptables --append FORWARD --in-interface enp0s9 --out-interface enp0s8 --protocol tcp --destination-port 80 --match state --state NEW,ESTABLISHED,RELATED --jump ACCEPT
+iptables --append FORWARD --in-interface enp0s9 --out-interface enp0s8 --protocol tcp --destination-port 443 --match state --state NEW,ESTABLISHED,RELATED --jump ACCEPT
+iptables --append FORWARD --in-interface enp0s8 --out-interface enp0s9 --protocol tcp --source-port 80 --match state --state ESTABLISHED,RELATED --jump ACCEPT
+iptables --append FORWARD --in-interface enp0s8 --out-interface enp0s9 --protocol tcp --source-port 443 --match state --state ESTABLISHED,RELATED --jump ACCEPT
+\end{lstlisting}
+
+\subsubsection{Testing}
+
+To test these rules, we will create a three simple \textit{HTTP} servers on the external machine, binding to ports 80, 443 and 1111. This will show that egress traffic is only allowed through the required ports.
+
+Additionally, similarly to previous routing issue, the external machine does not have the routing table rule to route the return packets towards the firewall, as such we need to add this rule to the external machine (\autoref{lst:route_external_firewall}). 
+
+\begin{lstlisting}[language={json}, caption={Route traffic for 192.168.57.0/24 through the firewall}, label={lst:route_external_firewall}, captionpos=b]
+ip route add 192.168.57.0/24 via 192.168.56.1
+\end{lstlisting}
+
+Now, we run these \textit{HTTP} servers on previously mentioned ports (\autoref{fig:fw_3http_egress_start}).
+\VTImage
+{img/fw_3http_egress_start.png}
+{Three \textit{HTTP} servers running on the external machine}
+{fig:fw_3http_egress_start}
+{8cm}
+
+We take note of the packet processed counts for the newly added forwarding rules(\autoref{fig:fw_3http_initial_watch}).
+\VTImage
+{img/fw_3http_initial_watch.png}
+{Processed packet counts before \textit{GET} requests from the internal machine}
+{fig:fw_3http_initial_watch}
+{16cm}
+
+We run the \textit{GET} requests for each of the ports, and we can see that for ports 80 and 443 we managed to receive a response, while for the port 1111 we got no response(\autoref{fig:fw_3http_wget}).
+\VTImage
+{img/fw_3http_wget.png}
+{\textit{GET} requests from the internal machine}
+{fig:fw_3http_wget}
+{12cm}
+
+As we can see in the total processed counts for the packets, the rules that allow forwarding packets to go through were hit.(\autoref{fig:fw_3http_post_watch}).
+\VTImage
+{img/fw_3http_post_watch.png}
+{Processed packet counts after \textit{GET} requests from the internal machine}
+{fig:fw_3http_post_watch}
+{16cm}
+
+\subsection{Requirement 6}
+
+As mentioned in \autoref{sec:wargame} we will be trying to connect to the \textit{bandit} wargame, but instead of using the \textit{URL} \url{bandit.labs.overthewire.org}, we will use the resolved \textit{IP} address of 16.16.8.216.
+
+The expected journey of the \textit{SSH} connection packets is as follows:
+\begin{enumerate}
+    \item Leave internal machine for the firewall;
+    \item Pass through the firewall towards the external machine;
+    \item Go out to the internet through the \textit{NAT} interface;
+    \item Reach 16.16.8.216;
+    \item Go back to the external machine through the host \textit{NAT} interface;
+    \item Pass through the external machine towards the firewall;
+    \item Pass through the firewall towards the internal machine.
+\end{enumerate}
+
+For the above journey to be possible, we need to modify routing tables on the internal machine and the firewall (\autoref{lst:route_wargame}), as the packets intended to go to 16.16.8.216 would be routed to the local \textit{NAT} interfaces by default.
+
+\begin{lstlisting}[language={json}, caption={Route traffic destined for 16.16.8.216 correctly}, label={lst:route_wargame}, captionpos=b]
+ip route add 16.16.8.216 via 192.168.57.1 dev enp0s8 # internal machine
+ip route add 16.16.8.216 via 192.168.56.100 dev enp0s8 # firewall
+\end{lstlisting}
+
+With this done, we would almost expect for the \textit{SSH} connection to be established without any issues \footnote{Assuming we installed required forwarding rules. These rules will be addressed later.}, but if we were to try, this would not be the case. The issue in this case is that when the packet leaves through the \textit{NAT} interface on the external machine the \textit{NAT} translation performed and the packet source address is changed the the address of the host (\autoref{fig:fw_wireshark_nat}). 
+
+\VTImage
+{img/fw_wireshark_nat.png}
+{Packets before and after the \textit{MASQUARADE} rule}
+{fig:fw_wireshark_nat}
+{16cm}
+
+When the packet comes back, it is routed back to the external machine, but the external machine has no indication that reverse \textit{NAT} should be performed on the packet to update the destination \textit{IP} address to the address of the internal machine \footnote{We are unsure if this is actually the reason why adding the \textit{MASQUARADE} rule helps. This assumption seems to be logical, given all the data we have, e.g. that the \textit{NAT} translation is performed regardless if the rule is present or not, as seen in \autoref{fig:fw_wireshark_nat}.} As such we install the rule in \autoref{lst:masquarade} to enable this behavior. 
+
+\begin{lstlisting}[language={json}, caption={\textit{MASQUARADE} the packets destined for 16.16.8.216}, label={lst:masquarade}, captionpos=b]
+iptables --table nat --append POSTROUTING --out-interface enp0s3 --source 0.0.0.0/0 --destination 16.16.8.216 --jump MASQUERADE
+\end{lstlisting}
+
+Additionally, as forwarding of packets is performed, we need to add rules that would allow forwarding of the packets through the firewall (\autoref{lst:forward_wargame}). We add these rules with a restriction for the traffic to only be allowed from the internal machine.
+
+\begin{lstlisting}[language={json}, caption={Forwarding in the firewall for \textit{SSH} traffic on port 2220 from 192.168.57.10}, label={lst:forward_wargame}, captionpos=b]
+iptables --append FORWARD --in-interface enp0s9 --out-interface enp0s8 --protocol tcp --destination-port 2220 --source 192.168.57.10 --match state --state NEW,ESTABLISHED,RELATED --jump ACCEPT
+iptables --append FORWARD --in-interface enp0s8 --out-interface enp0s9 --protocol tcp --source-port 2220 --destination 192.168.57.10 --match state --state ESTABLISHED,RELATED --jump ACCEPT
+\end{lstlisting}
+
+\subsubsection{Testing}
+
+We take note of the packet amounts for the added \textit{FORWARD} rules as well as the \textit{MASQUARADE} rule (\autoref{fig:fw_bandit_fw_pre}, \autoref{fig:fw_bandit_external_pre}).
+\VTImage
+{img/fw_bandit_fw_pre.png}
+{Processed packet amounts for the \textit{FORWARD} rules before \textit{SSH} connection}
+{fig:fw_bandit_fw_pre}
+{16cm}
+
+\VTImage
+{img/fw_bandit_external_pre.png}
+{Processed packet amounts for the \textit{MASQUARADE} rule before \textit{SSH} connection}
+{fig:fw_bandit_external_pre}
+{16cm}
+
+We perform an \textit{SSH} connection to the \textit{bandit} wargame from the internal machine. We can see that the connection is established correctly (\autoref{fig:fw_bandit_connected_ssh}).
+
+\VTImage
+{img/fw_bandit_connected_ssh.png}
+{Successful \textit{SSH} connection to the \textit{bandit} wargame}
+{fig:fw_bandit_connected_ssh}
+{16cm}
+
+With this done, we take a look at how many packets were processed by \textit{iptables}. As we can see, both \textit{FORWARD} rules (\autoref{fig:fw_bandit_fw_post}) and \textit{MASQUARADE} rules (\autoref{fig:fw_bandit_external_post}) have processed packets. With this, we can confirm that our configuration works correctly.
+
+\VTImage
+{img/fw_bandit_fw_post.png}
+{Processed packet amounts for the \textit{FORWARD} rules after \textit{SSH} connection}
+{fig:fw_bandit_fw_post}
+{16cm}
+
+\VTImage
+{img/fw_bandit_external_post.png}
+{Processed packet amounts for the \textit{MASQUARADE} rule after \textit{SSH} connection}
+{fig:fw_bandit_external_post}
+{16cm}
+
+\subsection{Requirement 7}
+
+As we can see, when we try to \textit{ping} the firewall from the external machine, all the packets are dropped (\autoref{fig:fw_ping_no_work}).
+
+\VTImage
+{img/fw_ping_no_work.png}
+{\textit{ping} command not receiving responses}
+{fig:fw_ping_no_work}
+{16cm}
+
+We shall install the rule in \autoref{lst:icmp_echo} to allow for \textit{ICMP} \textit{Echo Requests}. 
+
+\begin{lstlisting}[language={json}, caption={Allow only \textit{Echo Request} for \textit{ICMP} protocol with a 2 requests per second limit}, label={lst:icmp_echo}, captionpos=b]
+iptables --append INPUT --in-interface enp0s8 --protocol icmp --icmp-type echo-request --match limit --limit 2/sec --limit-burst 2 --jump ACCEPT
+\end{lstlisting}
+
+\subsubsection{Testing}
+
+With the rule present, we shall take note of how many packets were processed before running the \textit{ping} request (\autoref{fig:fw_ping_rule_pre}).
+\VTImage
+{img/fw_ping_rule_pre.png}
+{Processed packet amounts before \textit{ping} request}
+{fig:fw_ping_rule_pre}
+{16cm}
+
+Then we shall run the \textit{ping} request to the firewall. As we can see, we have responses coming back to our requests (\autoref{fig:fw_ping_work}).
+\VTImage
+{img/fw_ping_work.png}
+{\textit{ping} command receiving responses}
+{fig:fw_ping_work}
+{16cm}
+
+Additionally, we can see that just as above, three packets came back and we have processed three packet requests (\autoref{fig:fw_ping_rule_post}).
+\VTImage
+{img/fw_ping_rule_post.png}
+{Processed packet amounts after \textit{ping} request}
+{fig:fw_ping_rule_post}
+{16cm}
+
+\subsection{Requirement 8}
+We already have match rules on state and limitation, we shall add a few more custom match rules. 
+
+To test these more custom rules, we shall use \textit{scapy} \textit{Python} library (\autoref{fig:fw_scapy_installation}), which will allow us to send arbitrary packets to the destination. 
+
+\VTImage
+{img/fw_scapy_installation.png}
+{\textit{scapy} installation}
+{fig:fw_scapy_installation}
+{16cm}
+
+\subsubsection{MATCH}
+
+The first rule is for matching on an \textit{IP} range (\autoref{lst:ip_range}).
+
+\begin{lstlisting}[language={json}, caption={Matching on \textit{IP} range}, label={lst:ip_range}, captionpos=b]
+iptables --append INPUT --in-interface enp0s8 --match iprange --src-range 192.168.0.60-192.168.0.70 --jump ACCEPT
+\end{lstlisting}
+
+To test this rule, we prepare a \textit{Python} script with \textit{scapy} (\autoref{fig:fw_iprange_python}) and take note of the number of processed packets  (\autoref{fig:fw_iprange_pre}).
+
+\VTImage{img/fw_iprange_python.png}
+{\textit{Python} script to test \textit{IP} range matching rule}
+{fig:fw_iprange_python}
+{16cm}
+
+\VTImage
+{img/fw_iprange_pre.png}
+{Processed packet amounts before running the script to test \textit{IP} range matching rule}
+{fig:fw_iprange_pre}
+{16cm}
+
+We run the script to send out our configured packet. We can see that the packet was sent successfully (\autoref{fig:fw_iprange_send}) and the the firewall rule was triggered (\autoref{fig:fw_iprange_post}).
+
+\VTImage{img/fw_iprange_send.png}
+{Successful run of the \textit{Python} script to test \textit{IP} range matching rule}
+{fig:fw_iprange_send}
+{16cm}
+
+\VTImage{img/fw_iprange_post.png}
+{Processed packet amounts after running the script to test \textit{IP} range matching rule}
+{fig:fw_iprange_post}
+{16cm}
 
 
-% \VTWrappedImage{r}
-% {img/leased.png}
-% {Leased line}
-% {fig:leased}
-% {5cm}
+The second rule is to match based on time and day (\autoref{lst:time_day}).
+\begin{lstlisting}[language={json}, caption={Matching on time and day}, label={lst:time_day}, captionpos=b]
+iptables --append INPUT --in-interface enp0s8 --protocol tcp --destination-port 5020 --match time --timestart 09:00 --timestop 17:00 --weekdays Mon,Sat,Sun --jump ACCEPT
+\end{lstlisting}
+
+To test this rule, we prepare a \textit{Python} script with \textit{scapy} (\autoref{fig:fw_time_python}) and take note of the number of processed packets  (\autoref{fig:fw_time_pre}).
+
+\VTImage{img/fw_time_python.png}
+{\textit{Python} script to test time and day matching rule}
+{fig:fw_time_python}
+{16cm}
+
+\VTImage
+{img/fw_time_pre.png}
+{Processed packet amounts before running the script to test time and day matching rule}
+{fig:fw_time_pre}
+{16cm}
+
+We run the script to send out our configured packet. We can see that the packet was sent successfully (\autoref{fig:fw_time_send}) and the the firewall rule was triggered (\autoref{fig:fw_time_post}).
+
+\VTImage{img/fw_time_send.png}
+{Successful run of the \textit{Python} script to test time and day matching rule}
+{fig:fw_time_send}
+{16cm}
+
+\VTImage{img/fw_time_post.png}
+{Processed packet amounts after running the script to test time and day matching rule}
+{fig:fw_time_post}
+{16cm}
+
+The following two rules (\autoref{lst:additional_untested}) will simply be installed into the firewall, but they will not be tested. The first rule matches packets based on the string contents and in this case, we disallow for \textit{HTTP} traffic that uses a \textit{Mozilla} user agent. The second rule simply drops packets based on the owner id of the process where the packets are originating from.
+
+\begin{lstlisting}[language={json}, caption={Rules to match based on a string and on the owner identifier}, label={lst:additional_untested}, captionpos=b]
+iptables --append INPUT --in-interface enp0s8 --protocol tcp --destination-port 80 --match string --algo bm --string "User-Agent: Mozilla/5.0" --jump DROP
+iptables --append OUTPUT --out-interface enp0s8 --match owner --uid-owner 1001 --jump DROP
+\end{lstlisting}
+
+\subsubsection{TARGET}
+
+For target rules, we shall add a few simple rules. We add a new chain, add a new rule to the chain and route specified packets to the chain (\autoref{lst:vilniustech_chain}).
+
+\begin{lstlisting}[language={json}, caption={Add a \textit{VILNIUSTECH} chain and jump some of the packets to this chain}, label={lst:vilniustech_chain}, captionpos=b]
+iptables --new-chain VILNIUSTECH
+iptables --append VILNIUSTECH --jump DROP
+iptables --append INPUT --in-interface enp0s8 --protocol tcp --destination-port 5030 --jump VILNIUSTECH
+\end{lstlisting}
 
 
-% In \autoref{fig:leased} we can see the installation of the leased line. This is the main connecting line between the offices, that allows direct communication between the offices. While the leased line is rather expensive, as the employees in different locations need constant safe traffic for cooperation, leased line was used. 
+To test this rule, we prepare a \textit{Python} script with \textit{scapy} (\autoref{fig:fw_vilniustech_chain_python}) and take note of the number of processed packets  (\autoref{fig:fw_vilniustech_chain_pre}).
 
-% \VTWrappedImage{l}
-% {img/VPN.png}
-% {VPN connection}
-% {fig:vpn}
-% {5cm}
+\VTImage
+{img/fw_vilniustech_chain_python.png}
+{\textit{Python} script to test new chain target rule}
+{fig:fw_vilniustech_chain_python}
+{16cm}
 
-% In \autoref{fig:vpn} we can see the redundant secure connection vie the VPN. This is a secondary connecting line between the offices that can provide safe traffic. This line is used by any employees that are working from their home and need access to the network, or in case there are temporary issue with the leased line connection. Currently, employees working from home are not present, but they would be able to be added without a great hassle.
+\VTImage
+{img/fw_vilniustech_chain_pre.png}
+{Processed packet amounts before running the script to test new chain target rule}
+{fig:fw_vilniustech_chain_pre}
+{16cm}
 
-% \VTWrappedImage{r}
-% {img/WSG.png}
-% {Web Secure Gateway}
-% {fig:wsg}
-% {5cm}
+We run the script to send out our configured packet. We can see that the packet was sent successfully (\autoref{fig:fw_vilniustech_chain_send}) and the the firewall rules were triggered (\autoref{fig:fw_vilniustech_chain_post_1}, \autoref{fig:fw_vilniustech_chain_post_2}).
 
-% While the traffic between the sites do not go out to the internet, logically it does not need to pass the WSG pictured in \autoref{fig:wsg}. We will discuss this later. The hardware of choice in our case is Sophos XG 230, as it is capable of filtering internet traffic by rules set up by the administrators without introducing huge delays in the network packet delivery. Additionally, it is capable of performing load balancing for access to specific servers, which would allow us to double up on load balancing on office web servers. 
+\VTImage
+{img/fw_vilniustech_chain_send.png}
+{Successful run of the \textit{Python} script to test new chain target rule}
+{fig:fw_vilniustech_chain_send}
+{16cm}
 
+\VTImage
+{img/fw_vilniustech_chain_post_1.png}
+{Processed packet amounts after running the script to test new chain target rule}
+{fig:fw_vilniustech_chain_post_1}
+{16cm}
 
-% \VTWrappedImage{l}
-% {img/DMZ.png}
-% {Demilitarized zone}
-% {fig:dmz}
-% {5cm}
+\VTImage
+{img/fw_vilniustech_chain_post_2.png}
+{Processed packet amounts after running the script to test new chain target rule}
+{fig:fw_vilniustech_chain_post_2}
+{16cm}
 
-% The hardware is capable of acting as a firewall as well, as such in a physical installation, there is no need for an additional firewall to indicate the beginning of the DMZ. This means, that while in the logical diagram the leased line connection could pass through WSG, in physical installation, it would have to be connected directly, for firewall checks.
+The following two rules (\autoref{lst:additional_target}) will simply be installed into the firewall, but they will not be tested. The first rule rejects packets destined for port 5040 with a custom \textit{TCP} reset message (custom flags). The second rule modifies the packet and adds additional data to the packet that could be used in the chain for further processing (e.g. \textit{QoS}).
 
-% \VTWrappedImage{r}
-% {img/AMP.png}
-% {Anti-malware protection installation}
-% {fig:amp}
-% {5cm}
+\begin{lstlisting}[language={json}, caption={Target rules to reject with a custom massage and mark the packet}, label={lst:additional_target}, captionpos=b]
+iptables --append INPUT --in-interface enp0s8 --protocol tcp --destination-port 5040 --jump REJECT --reject-with tcp-reset
+iptables --append PREROUTING --table mangle --protocol tcp --destination-port 5050 --jump MARK --set-mark 1
+\end{lstlisting}
 
-% As mentioned previously, the WSG takes up the initial entrance to the DMZ pictured in \autoref{fig:dmz}. The DMZ holds a multitude of equipment, like web and mail servers, anti-malware device with honeypots and AP for guests for access to the internet. The other end of the DMZ, for the internal network is controlled by pfSense.
+\subsection{Requirement 9}
 
-% Any traffic coming into the network has to go past the AMP installation pictured in \autoref{fig:amp}. This functionality is installed using Cisco Firepower 2110, with AMP module. This solution analyses the network traffic and blocks any packets that could have been identified as malicious, allows for containment of these threats and sandboxing them. Additionally, any anomalous traffic can be forwarded towards a honeypot suite.
+To be able to test our configuration to allow for \textit{RPC} traffic, we need to install \textit{rpcbind} package (\autoref{fig:fw_rpc_install}).
 
-% Most of the server infrastructure is available within the DMZ as well, as pictured in \autoref{fig:servers}. 
+\VTImage
+{img/fw_rpc_install.png}
+{Installation of \textit{rpcbind} package}
+{fig:fw_rpc_install}
+{16cm}
 
-% \VTWrappedImage{L}
-% {img/Servers.png}
-% {Server deployment}
-% {fig:servers}
-% {5cm}
+With it installed, we install the rules in \autoref{lst:rpc} to allow for the \textit{RPC} traffic.
 
-% This ensures that any external traffic that accesses the severs cannot communicate with the internal network. The servers deployed are a mail server, for mail traffic and load balanced web servers, for the services provided by the organization. The mail server is in the DMZ, as mentioned previously, to reduce any threats that might come over the email. Of course, any traffic coming in would have to pass the AMP solutions, so the risk is reduced, but it is not zero. To reach the web servers, the traffic would have to pass through a WAF solution, for which we have chosen Imperva X10 Web Application Firewall, which specializes in protection of HTTP traffic and services or applications that are tried to reach. It provides certain protection against DDoS, which is not useful for us, as a DDoS attack would overwhelm other infrastructure in the network first, before it reaches the WAF hardware. The protection against XSS, SQL Injections and other types of network attacks is why this solution was chosen.
+\begin{lstlisting}[language={json}, caption={Rules allowing for \textit{RPC} traffic}, label={lst:rpc}, captionpos=b]
+iptables --append INPUT --in-interface enp0s8 --source 192.168.56.100 --protocol tcp --destination-port 111 --match state --state NEW,ESTABLISHED --jump ACCEPT
+iptables --append INPUT --in-interface enp0s8 --source 192.168.56.100 --protocol udp --destination-port 111 --match state --state NEW,ESTABLISHED --jump ACCEPT
+\end{lstlisting}
 
-% The very last security implementation is the usage of VLANs for different departments of the organization.
+To test this rule, we will use the \textit{rpcinfo} command from the external machine and take note of the number of processed packets before running the command(\autoref{fig:fw_rpc_pre}).
 
-% \VTWrappedImage{L}
-% {img/vlans.png}
-% {VLANs}
-% {fig:vlans}
-% {5cm}
+\VTImage
+{img/fw_rpc_pre.png}
+{Processed packet amounts before running the \textit{rpcinfo} command}
+{fig:fw_rpc_pre}
+{16cm}
 
-% VLAN 10 is used for accounting, while VLAN 20 is used for developers. These VLANs are replicated on both organization sites and any traffic within the internal network is within the VLANs. Additionally, as the larger site has more employees, access points are integrated into the networks. As they are wireless devices within the internal network, access points with WIDPS functionality has been chosen and this functionality has been enabled on these access points, thus providing some security regarding wireless attacks on the network.
+We run the command and we can see that it executed successfully (\autoref{fig:fw_rpc_send}). Additionally, we can see that the installed firewall rules were triggered (\autoref{fig:fw_vilniustech_chain_post_2}).
+
+\VTImage
+{img/fw_rpc_send.png}
+{Successful run of the \textit{rpcinfo} command}
+{fig:fw_rpc_post}
+{16cm}
+
+\VTImage
+{img/fw_rpc_post.png}
+{Processed packet amounts after running the \textit{rpcinfo} command}
+{fig:fw_rpc_post}
+{16cm}
+
+\subsection{Requirement 10}
+
+To be able to test our configuration to allow for \textit{RDP} traffic, we need to install \textit{xrdp} package (\autoref{fig:fw_xrdp_install}) which allows us to run a \textit{RDP} server.
+
+\VTImage
+{img/fw_xrdp_install.png}
+{Installation of \textit{xrdp} package}
+{fig:fw_xrdp_install}
+{16cm}
+
+With the package installed, we install the rules in \autoref{lst:rdp} to allow for the \textit{RDP} traffic.
+
+\begin{lstlisting}[language={json}, caption={Rules allowing for \textit{RDP} traffic}, label={lst:rdp}, captionpos=b]
+iptables --append INPUT --in-interface enp0s8 --source 192.168.56.100 --protocol tcp --destination-port 3389 --match state --state NEW,ESTABLISHED --jump ACCEPT
+iptables --append INPUT --in-interface enp0s8 --source 192.168.56.100 --protocol udp --destination-port 3389 --match state --state NEW,ESTABLISHED --jump ACCEPT
+\end{lstlisting}
+
+As our virtual machines are headless, we would not be able to establish an \textit{RDP} connection as we do not have a \textit{GUI} to connect to. As such, to test this rule, we will use the \textit{nmap} and see whether the port responds with packets that we expect. As before, we take note of the number of processed packets before running the command (\autoref{fig:fw_xrdp_pre}).
+
+\VTImage
+{img/fw_xrdp_pre.png}
+{Processed packet amounts before testing \textit{RDP} via \textit{nmap}}
+{fig:fw_xrdp_pre}
+{16cm}
+
+We run the command and we can see that it executed successfully (\autoref{fig:fw_xrdp_send}). Additionally, we can see that the installed firewall rules were triggered (\autoref{fig:fw_xrdp_post}).
+
+\VTImage
+{img/fw_xrdp_send.png}
+{Successful testing of \textit{RDP} via \textit{nmap}}
+{fig:fw_xrdp_send}
+{16cm}
+
+\VTImage
+{img/fw_xrdp_post.png}
+{Processed packet amounts after testing \textit{RDP} via \textit{nmap}}
+{fig:fw_xrdp_post}
+{16cm}
+
+\subsection{Requirement 12}
+
+The following ruleset (\autoref{lst:jump_server}) would allow for us to work with a jump server. We simply assume that the jump server is at the \textit{IP} address of 203.0.113.1 and allow for it to establish \textit{SSH} connections to the firewall. While some of the previous rules remove the security of the jump server (as we allow for some \textit{SSH} connections via the \textit{fwknop}), this would allow for connections only from the jump server.
+
+\begin{lstlisting}[language={json}, caption={Rules enabling jump server}, label={lst:jump_server}, captionpos=b]
+iptables --append INPUT --in-interface enp0s3 --source 203.0.113.1 --protocol tcp --destination-port 22 --match state --state NEW,ESTABLISHED --jump ACCEPT
+iptables --append OUTPUT --out-interface enp0s3 --destination 203.0.113.1 --protocol tcp --source-port 22 --match state --state ESTABLISHED --jump ACCEPT
+\end{lstlisting}
+
+\section{Summary}
+
+In this laboratory work we have configured a firewall for some imagined scenario. We have learned how packets are processed and routed through the firewall on a low level, how to manipulate and route them according to our needs. Having this knowledge, we now could build up and use easier tools for firewall management (e.g. \textit{ufw} or \textit{pfSense}) as now we roughly know how these tools utilize low level routing and processing.
 
 \VTDocumentEnd
