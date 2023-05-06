@@ -1,0 +1,253 @@
+\documentclass{vilniustech-en}
+\vilniustechsetup{
+    university={Vilnius Gediminas technical university},
+    faculty={Faculty of Fundamental Sciences},
+    cathedral={Department of Information Systems},
+    workTitle={Malware Analysis Methods},
+    workType={Laboratory Work 3},
+    workAuthorName={Aurimas Šakalys},
+    workAuthorGroup={ITSfm-22},
+    workRecipient={lecturer Vitalijus Gurčinas}
+}
+\addbibresource{bibliography.bib}
+\VTDocumentBegin
+
+\section{Requirements}
+
+The task requires us to use manual unpacking techniques to unpack a packed malware sample. In this case, it does not actually need to be a malware sample that is packed, as we are practicing manual unpacking techniques. As such we shall use a very simple C program (\autoref{fig:packing_simple_c_code}), that asks the user to enter text and then outputs the text that the user provided back to the user.
+
+\VTImage
+{img/packing_simple_c_code.png}
+{Sample C program}
+{fig:packing_simple_c_code}
+{16cm}
+
+As we can see, the program was compiled and its behavior is as expected (\autoref{fig:packing_compiled_and_running}).
+
+\VTImage
+{img/packing_compiled_and_running.png}
+{Sample compilation and execution}
+{fig:packing_compiled_and_running}
+{16cm}
+
+Now we perform the packing of the sample using \textit{UPX} (\autoref{fig:packing_pack_sample}). With the original sample and packed sample ready, we can perform the unpacking.
+
+\VTImage
+{img/packing_pack_sample.png}
+{Packing of the sample using \textit{UPX}}
+{fig:packing_pack_sample}
+{16cm}
+
+\section{Unpacking}
+
+As we have both the original and packed samples, we will run two instances of \textit{x64dbg}, so that we would be able to make sure we found the correct entry point to the packed sample. While this would not usually be the case when analyzing real malware, this will allow us to learn unpacking techniques.
+
+Before we unpack, let us see what kinds of strings can we find in both original and in unpacked sample. This will allow us to see whether the dump of the sample is (at least partially) correct. As we can see, the packed sample is missing the prepared strings that we used to check whether the packing would have worked (\autoref{fig:packing_strings_all}). In this case, the strings have been packed and parts of the strings can be found using a smaller minimum size for the string.
+
+\VTImage
+{img/packing_strings_all.png}
+{Strings in the packed and unpacked samples}
+{fig:packing_strings_all}
+{16cm}
+
+With this done, let us begin the debugging and unpacking. Here are the instructions at the entrypoint of the unpacked sample that we will be looking for (\autoref{fig:packing_original_entrypoint}).
+
+\VTImage
+{img/packing_original_entrypoint.png}
+{Entrypoint of the original sample}
+{fig:packing_original_entrypoint}
+{16cm}
+
+We open up the packed sample and go to the entrypoint of this sample (\autoref{fig:packing_packed_entrypoint}). 
+
+\VTImage
+{img/packing_packed_entrypoint.png}
+{Entrypoint of the packed sample}
+{fig:packing_packed_entrypoint}
+{16cm}
+
+Generally, \textit{UPX} pushes the states of the registers to the stack using \textit{pushal} instruction and then eventually, once it is done unpacking, it uses \textit{popal} instruction to pop the values of the registers back and then goes to the entrypoint of the original sample. In our case, we can see that instead of the unified instruction that would store all registry values, it uses multiple \textit{push} instructions.
+
+\VTImage
+{img/packing_multiple_push_instructions.png}
+{Push instructions at the entrypoint of the packed sample}
+{fig:packing_multiple_push_instructions}
+{16cm}
+
+As mentioned above, we should expect for the reverse of this to be executed just prior to the jump to the original entry point of the sample, as such, we will search for \textit{pop rbx} (\autoref{fig:unpacking_pop_rbx_search}) and similar (\autoref{fig:unpacking_pop_rdi_search}, \autoref{fig:unpacking_pop_rbp_search}) instructions in this region. 
+
+\VTImage
+{img/unpacking_pop_rbx_search.png}
+{Search for \textit{pop rbx} instructions}
+{fig:unpacking_pop_rbx_search}
+{8cm}
+
+\VTImage
+{img/unpacking_pop_rdi_search.png}
+{Search for \textit{pop rdi} instructions}
+{fig:unpacking_pop_rdi_search}
+{8cm}
+
+\VTImage
+{img/unpacking_pop_rbp_search.png}
+{Search for \textit{pop rbp} instructions}
+{fig:unpacking_pop_rbp_search}
+{8cm}
+
+As we can see, the search for \textit{pop rbp} instruction (\autoref{fig:unpacking_pop_rbp_search}), provides us only with one instruction in current region, as such, we suspect that this will be the pop instruction set that we are looking for.
+
+\VTImage
+{img/unpacking_popping_registers.png}
+{Pop instructions at the end of the unpacking procedure}
+{fig:unpacking_popping_registers}
+{16cm}
+
+As suspected - we have the pop instructions around the found instruction (\autoref{fig:unpacking_popping_registers}). Here the packer will jump unconditionally to the original entry point of the sample, as such, we add a breakpoint on that line and continue execution of the sample (\autoref{fig:unpacking_breakpoint_to_oep}).
+
+\VTImage
+{img/unpacking_breakpoint_to_oep.png}
+{Breakpoint on the jump to \textit{OEP}}
+{fig:unpacking_breakpoint_to_oep}
+{16cm}
+
+We step into the instruction, which jumps us to the original entrypoint. As we can see, the instructions in the original sample and in the packed sample are the same (\autoref{fig:unpacking_the_same_ep}). This means, we have gotten to the original entry point within the packed sample, and now can proceed with the dumping of the binary.
+
+\VTImage
+{img/unpacking_the_same_ep.png}
+{Comparison between the entrypoints}
+{fig:unpacking_the_same_ep}
+{16cm}
+
+We will use \textit{OllyDumpEx} (\autoref{fig:packing_ollydumpex}) \textit{x64dbg} plugin to dump out the uncompressed binary from the memory. In this screen we must update entry point and tick the \textit{Disable Relocation} option. We need to update the entry point because by default it is at a different address. As we are currently at the original entry point within \textit{x64dbg} (\textit{RIP} is pointing to the first instruction of the original binary), we can use the \textit{Get RIP as OEP} button to update it automatically. Regarding the \textit{Disable Relocation} options - I am unsure exactly why this is required, but without this option ticked the created dump cannot be launched, even after we fix the import address table (\textit{IAT}). 
+
+\VTImage
+{img/packing_ollydumpex.png}
+{Using \textit{OllyDumpEx} to dump the sample}
+{fig:packing_ollydumpex}
+{16cm}
+
+With these changes done, we can perform the dump of the binary. It has completed successfully (\autoref{fig:packing_ollydumpex_finish}). 
+
+\VTImage
+{img/packing_ollydumpex_finish.png}
+{Successful dump of the sample}
+{fig:packing_ollydumpex_finish}
+{10cm}
+
+As an additional confirmation, we can check for strings in the dumped binary and we can see the strings that were present in the original binary as well (\autoref{fig:packing_dump_strings}).
+
+\VTImage
+{img/packing_dump_strings.png}
+{Strings in the dumped binary}
+{fig:packing_dump_strings}
+{16cm}
+
+If we were to run this dump, it would not work as expected, as it is missing its \textit{IAT} (\autoref{fig:packing_dump_does_not_run}).
+
+\VTImage
+{img/packing_dump_does_not_run.png}
+{No output by running the unfixed binary dump}
+{fig:packing_dump_does_not_run}
+{16cm}
+
+To find the table and generate the \textit{IAT} we will use \textit{Scylla} plugin for \textit{x64dbg}. As we are currently at the original entry point of the original sample, \textit{Scylla} picks the correct \textit{OEP}, we then perform a search for this table and get the imports. Once that is done, we use the \textit{Fix Dump} functionality and update the dump of the binary with this \textit{IAT} (\autoref{fig:packing_scylla_iat}).
+
+\VTImage
+{img/packing_scylla_iat.png}
+{Found \textit{IAT} in \textit{Scylla}}
+{fig:packing_scylla_iat}
+{16cm}
+
+With it in place, we can see that the dumped binary works as it did previously (\autoref{fig:packing_dumped_works}).
+
+\VTImage
+{img/packing_dumped_works.png}
+{A working binary dump}
+{fig:packing_dumped_works}
+{16cm}
+
+\section{Extension for Lab 2}
+
+This section will require some knowledge from the work done in Lab 2. Here, we will try to remove the encryption mechanisms that were available within the \textit{GravityRAT} malware sample. 
+
+As before, we run our \textit{C2} server on the infected machine. Once the malware communicates with the \textit{C2} server, we schedule a drive scan task on the infected machine, as it is one of the tasks that uses encryption (\autoref{fig:encryption_c2_schedule_initial}).
+
+\VTImage
+{img/encryption_c2_schedule_initial.png}
+{Scheduling a \textit{DriveScan} task on the \textit{C2} server}
+{fig:encryption_c2_schedule_initial}
+{16cm}
+
+Once the task has finished, we can find the results of the drive scan in the \textit{AppData} folder for the malware. As we can see this file only contains the encrypted string of the contents (\autoref{fig:encryption_encrypted_drive_scan}). As this uses symmetric encryption and we do have the encryption key, we could decrypt the file contents, we will use a different approach. 
+
+\VTImage
+{img/encryption_encrypted_drive_scan.png}
+{Encrypted results of the \textit{DriveScan} task}
+{fig:encryption_encrypted_drive_scan}
+{16cm}
+
+Using \textit{dnSpy} we locate the classes and methods that are responsible for encrypting and decrypting files and we can see that these use methods within the \textit{Crypto} namespace (\autoref{fig:encryption_efile}).
+
+\VTImage
+{img/encryption_efile.png}
+{\textit{eFile} class text encryption and decryption methods }
+{fig:encryption_efile}
+{16cm}
+
+Taking a look at these methods, we can see that they actually implement the procedures for encrypting and decrypting (\autoref{fig:encryption_aes_actual}).
+
+\VTImage
+{img/encryption_aes_actual.png}
+{Decryption method in the \textit{Crypto} namespace }
+{fig:encryption_aes_actual}
+{16cm}
+
+To remove this behavior we simply modify the classes to return back the same data that was provided. This way the data will not get encrypted and we should be able to see the unencrypted contents of the drive scan task (\autoref{fig:encryption_ruined}). 
+
+\VTImage
+{img/encryption_ruined.png}
+{Encryption and decryption methods replaced}
+{fig:encryption_ruined}
+{16cm}
+
+Once we have done our modification, we recompile the malware executable and we launch it again (\autoref{fig:encryption_compile}).
+
+\VTImage
+{img/encryption_compile.png}
+{Recompilation of the modified code}
+{fig:encryption_compile}
+{16cm}
+
+As before, once the malware communicates with our \textit{C2} server, we schedule a drive scan task (\autoref{fig:encryption_c2_schedule_post}).
+
+\VTImage
+{img/encryption_c2_schedule_post.png}
+{Scheduling a \textit{DriveScan} task on the \textit{C2} server}
+{fig:encryption_c2_schedule_post}
+{16cm}
+
+Once the task is completed, we can see that a new file with the contents of the drive scan task has been created (we moved the old, encrypted file and added a \textit{encrypted} infix to it) (\autoref{fig:encryption_new_drive_scan}).
+
+\VTImage
+{img/encryption_new_drive_scan.png}
+{File with the results of the \textit{DriveScan} task}
+{fig:encryption_new_drive_scan}
+{16cm}
+
+As we open the newly created file, we are greeted with the actual, unencrypted results of the drive scan, which apparently simply logs the existing interesting files in the infected system (\autoref{fig:encryption_unencrypted_contents}).
+
+\VTImage
+{img/encryption_unencrypted_contents.png}
+{Unencrypted results of the \textit{DriveScan} task}
+{fig:encryption_unencrypted_contents}
+{16cm}
+
+\section{Conclusion}
+
+In this laboratory work we have completed both of the required tasks, one of which was to manually unpack a malware sample and the second one was to find the encryption key and modify the encryption process. 
+
+For the unpacking we used a sample that was packed using \textit{UPX} and unpacked it by following the known behavior of \textit{UPX} unpacking process. 
+
+For the encryption we used the previously analyzed \textit{GravityRAT} malware sample and used \textit{dnSpy} to modify the executable to remove the encryption process.
+
+\VTDocumentEnd
