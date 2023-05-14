@@ -1,0 +1,132 @@
+\documentclass{vilniustech-en}
+\vilniustechsetup{
+    university={Vilnius Gediminas technical university},
+    faculty={Faculty of Fundamental Sciences},
+    cathedral={Department of Information Systems},
+    workTitle={Malware Analysis Methods},
+    workType={Laboratory Work 4},
+    workAuthorName={Aurimas Šakalys},
+    workAuthorGroup={ITSfm-22},
+    workRecipient={lecturer Vitalijus Gurčinas}
+}
+\addbibresource{bibliography.bib}
+\VTDocumentBegin
+
+\section{Requirements}
+
+We must identify two or more unique blocks within the malware sample that would allow us to write a \textit{Yara} rule to match that signature.
+
+\section{Yara}
+
+We have chosen to use the \textit{IceFrog} malware family (\autoref{fig:yara_icefrog}, \autoref{fig:yara_malware_on_machine}), as it contains a lot of different samples from the same family, which will allow us to check whether our created \textit{Yara} rule is capable of matching members of the malware family.
+
+
+\VTImage
+{img/yara_icefrog.png}
+{\textit{IceFrog} samples in \textit{vx-underground}}
+{fig:yara_icefrog}
+{16cm}
+
+\VTImage
+{img/yara_malware_on_machine.png}
+{\textit{IceFrog} samples in the virtual machine}
+{fig:yara_malware_on_machine}
+{16cm}
+
+At first, we shall simply try to check for any strings that might be reused between the members of the malware family (\autoref{fig:yara_matching_strings}). We will check for strings in the first two samples and we will use the third sample to check, whether our created rule works for an unknown member of the malware family.
+
+\VTImage
+{img/yara_matching_strings.png}
+{Similar strings in \textit{IceFrog} samples}
+{fig:yara_matching_strings}
+{16cm}
+
+We can see that the strings \textit{/jd/uploads/\%s} and \textit{/jd/order/\%s} are reused between the first and the second sample and in addition, these two strings are rather unique individually and should prove to be properly unique when used together for our use case. 
+
+As such, we will prepare a \textit{Yara} rule (\autoref{lst:yara_rule}) that would allow us to detect these strings in the binary or in the memory.
+
+\begin{lstlisting}[language={json}, caption={\textit{Yara} rules to detect \textit{IceFrog} malware family}, label={lst:yara_rule}, captionpos=b]
+rule IceFrog_Detector {
+    meta:
+        author = "Aurimas"
+        description = "Detects IceFrog"
+        date = "2023-05-06"
+    
+    strings:
+        $uploads = { 2F 6A 64 2F 75 70 6C 6F 61 64 73 2F [0-10] 25 73 }
+        $order = { 2F 6A 64 2F 6F 72 64 65 72 2F ( 25 73 | 25 64 ) }
+    
+    condition:
+        $uploads and $order
+}
+\end{lstlisting}
+
+In the above rule we simply convert the strings we have decided to use into hexadecimal string patterns. This allows us to provide some customization to the rules, so that we do not simply match directly on the chosen strings. 
+
+For the uploads string, we add a wildcard range of \textit{[0-10]}, which allows for strings like \textit{/jd/uploads/\%s}, \textit{/jd/uploads/abc/\%s}, \textit{/jd/uploads/def/ghi/\%s} to match. The rule allows for 0 to 10 arbitrary symbols to be between the \textit{/} and \textit{\%s} symbols.
+
+For the order string we provide byte alternatives. The one ending in \textit{25 73} corresponds to \textit{\%s}, while the \textit{25 64} corresponds to \textit{\%d}. As such, we allow for strings \textit{/jd/order/\%s} and \textit{/jd/order/\%d} to match.
+
+Having these rules set up, we shall run the \textit{Yara} rule on the folder with the malware samples (\autoref{fig:yara_matches_direct_malware}). As we can see, these rules match all three of the malware samples, meaning this would allow for us to detect members of this malware family (albeit not with 100\% certainty).
+
+\VTImage
+{img/yara_matches_direct_malware.png}
+{\textit{Yara} rule matching the \textit{IceFrog} samples}
+{fig:yara_matches_direct_malware}
+{16cm}
+
+We shall run the \textit{Yara} rule on the entire filesystem. We need to run the command in this way, as it spits out a lot of errors due to access issues (the rule is run using an \textit{PowerShell} with administrator rights). Once the run is done, we can see that only three files have matched the rule, and all three of them are the malware samples we've checked. As such, this rule does not match arbitrary files in the filesystem.
+
+\VTImage
+{img/yara_yara_on_file_system.png}
+{\textit{Yara} rule Only matching the \textit{IceFrog} samples in the entire filesystem}
+{fig:yara_yara_on_file_system}
+{16cm}
+
+With the "static" analysis done, we now turn to trying to using \textit{Yara} to scan the memory of the system. To do so, we will create a memory dump with the malicious process running at that time (\autoref{fig:yara_malware_running}).
+
+Firstly, we have reduced the amount of memory in the virtual machine down to 1GB. This will reduce the time that it will take to create and analyze the memory dump.
+
+\VTImage
+{img/yara_memory_small.png}
+{Reduced memory in the virtual machine}
+{fig:yara_memory_small}
+{6cm}
+
+We have tried to use a few tools to create the dump of the memory, but found \textit{OSForensics} to work best in our case. We launch one of the samples (\autoref{fig:yara_malware_running}) and while it resides within the memory, we create a memory dump (\autoref{fig:yara_memory_dump}).
+
+\VTImage
+{img/yara_malware_running.png}
+{\textit{IceFrog} sample running within memory}
+{fig:yara_malware_running}
+{16cm}
+
+\VTImage
+{img/yara_memory_dump.png}
+{Created memory dump using \textit{OSForensics}}
+{fig:yara_memory_dump}
+{16cm}
+
+With the memory dump created, we extradite \footnote{With all the previous preparation for data introduction and extradition, this seems to be the first and the last time we will extradite data for this course.} it to our local machine, as it will allow us to analyze the dump much faster (\autoref{fig:yara_dump_extradition}).
+
+\VTImage
+{img/yara_dump_extradition.png}
+{Extradition of the memory dump}
+{fig:yara_dump_extradition}
+{16cm}
+
+Once we have the memory dump in our local machine, we run the same \textit{Yara} rule on this memory dump. 
+
+\VTImage
+{img/yara_memory_match.png}
+{Matching \textit{Yara} signature on the memory dump}
+{fig:yara_memory_match}
+{16cm}
+
+As we can see, the rule allows us to find matching areas in the dump of the memory (\autoref{fig:yara_memory_match}), which indicates to us that this malware sample had been running on the machine when the memory dump was taken.
+
+\section{Summary}
+
+We have chosen a few malware samples from the \textit{IceFrog} malware family. We performed static analysis of the samples and determined a good hexadecimal pattern to match and created a \textit{Yara} rule. With this rule, we checked both the filesystem that contained the malware samples and a memory dump with a malware sample running. In both of these cases malware sample had been identified.
+
+\VTDocumentEnd
