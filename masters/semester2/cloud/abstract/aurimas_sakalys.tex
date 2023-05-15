@@ -1,0 +1,119 @@
+\documentclass{vilniustech-en}
+\vilniustechsetup{
+    university={Vilnius Gediminas technical university},
+    faculty={Faculty of Fundamental Sciences},
+    cathedral={Department of Information Systems},
+    workTitle={Software Defined Networks (SDNs) in Data Centers: pros, cons and risks},
+    workType={Abstract},
+    workAuthorName={Aurimas Šakalys},
+    workAuthorGroup={ITSfm-22},
+    workRecipient={prof. dr. Dalius Mažeika}
+}
+\addbibresource{bibliography.bib}
+\VTDocumentBegin
+\nocite{*}
+
+\section{Operating model of physical networking devices}
+
+At the very start of the development of physical networking devices, most of the actions performed by these devices were implemented using the software. Most routers at the time were simple \textit{Unix} computers that would use software to search for entries within the routing table and forward the packets accordingly. On the \textit{datalink} layer, there were several competing products like \textit{IBMs Token Ring} and \textit{Ethernet}.
+
+As time progressed and network sizes started increasing, so did the demand for fast switching for frames and routing packets. As such, some of the functionality of the devices started to be moved to implementations in hardware. First of such advancements came with specific circuits for quick hashing for table lookups; next \textit{content-addressable memory} technology emerged, which provided blazing fast lookups on destination addresses. Performing this functionality purely within software took longer than desired. 
+
+\VTImage
+{img/planes.png}
+{Planes of (most) physical networking devices}
+{fig:planes}
+{5cm}
+
+Most of these devices had 2 (in some literature 3) logical abstraction layers called \textit{planes} (\autoref{fig:planes}):
+\begin{itemize}
+    \item Forwarding plane - it is responsible for receiving and transmitting packets and executing forwarding decisions with the help of the forwarding table. If the forwarding plane encounters any control packets or packets the plane does not understand, they are forwarded to the control plane to handle;
+    \item Control plane - it is responsible for handling control packets, unknown packets or packets without an entry in the forwarding table.
+\end{itemize}
+
+After a packet that has yet to be put into the forwarding table is forwarded to it, the control plane reads the packet, updates the forwarding table in the forwarding plane and sends the packet back. This way, the next time a packet with the same destination is received, the forwarding plane can handle it without the intervention of the control plane. 
+
+The control plane is responsible for the control packets, and these packets usually require to be processed by specific protocols that are too complex to be implemented purely in hardware, as opposed to the forwarding plane, which can be implemented purely in hardware.
+
+In some literature, an additional management plane can be defined. Network managers interact and configure the device through this plane. This distinction could be simplified, and the responsibilities of the management plane be merged with the control plane itself.
+
+As mentioned previously, during the early days of networking, the forwarding plane had relatively simple hardware implementation, and most of the complex work was delegated to the software implementation of the control plane. With the increase in network loads, complex handling within the control plane reduced the performance capability of the devices. With this, a need for moving protocol handling and packet modifications to the forwarding plane arose. Here \textit{programmable rules} were introduced to the forwarding plane, which allowed handling of some protocols to be moved away from the control plane. While more complex protocols would still have to be handled in the control plane, less complex ones were handled by the forwarding plane, allowing additional processing power to be freed in the control plane. 
+
+\VTImage
+{img/network_old.png}
+{Multiple connected dynamic network devices}
+{fig:network_old}
+{9cm}
+
+Additionally, most of the protocols that are handled by the control plane pertain to the handling of topology update control protocols. This update handling behaviour is because these protocols were designed to provide stability within a large inter-network like the internet, where links between devices could go down often, and devices would join and leave the topology. Because of this, network devices are constantly bombarded with control packets, where they are trying to converge on valid forwarding table rules. 
+
+The network in the data centre usually has a stable core topology, which only changes sometimes. Suppose the data centre uses networking devices that barrage everyone in the network with topology update packets. In that case, this type of traffic grows exponentially and takes up a substantial portion of network traffic processing in the data centre. While this is valid for devices on the internet, this might be less attractive to networking devices within the data centre. Additionally, unlike the internet, installation and removal of new hardware servers and creation and deletion of virtual machines within the data centre happens only with the approval of central orchestration software. As such, network devices capable of reacting to dynamic changes in the network are not up to the task when in the data centre environment.
+
+\section{Software-defined network}
+
+The inadequate operational model of dynamic networking devices in the data centre gave rise to the idea of software-defined networking. The core idea is to remove the control plane from the networking devices and move it to one centralized area (\autoref{fig:sdn_simple}).
+
+\VTImage
+{img/sdn_simple.png}
+{Simplified diagram of SDN}
+{fig:sdn_simple}
+{9cm}
+
+The core benefit of this arrangement is that we remove most of the redundant topology update packets that were using up a significant portion of the resources in the data centre's network. Additionally, this would allow us to partially move the control to the central orchestrator, which would allow the network to change quickly and accurately to reflect the current status of hardware servers and virtual machines in the network.
+
+In this case, removing the control plane from the device means that the device itself can still contain logic for bridging, routing and filtering by using forwarding, routing and filter rule hardware tables. This capability ensures that the performance of the device does not degrade due to the extraction of the control plane. 
+
+We can see in \autoref{fig:planes} that the control plane installs the forwarding table to the hardware table in the forwarding plane. This functionality stays as before in the context of SDN. The complicated software controlling the device configuration, rule determination and installation behaviours is moved to a centralized location. 
+
+While before, given that a device would get data regarding a change in topology, the control plane would have to do work, keep possible existing topology in memory and provide forwarding rules based on information that comes in through the network. 
+
+With the control plane in a centralized location, the control plane would have a view of the entire local network, and because of this, it could determine optimal forwarding and routing rules. Additionally, the control plane software is capable of creating rulesets that consider multiple devices at the same time. Because of this, more complex and possibly more optimal routes can be installed into the connected devices.
+
+\VTImage
+{img/vm_migration_classic.png}
+{A classic migration of a virtual machine}
+{fig:vm_migration_classic}
+{10cm}
+
+Lastly, SDNs can interoperate with hypervisors or be part of the hypervisors in the data centre. As virtual machines are the core part of data centres, there used to be significant slowdowns for data moving within the data centre itself (horizontal travel). With an SDN cooperating/being integrated within the hypervisor, it would be capable of updating the hardware tables in the physical devices based on the changes in the virtual machine topology. Say a virtual machine must be moved to a new physical machine (\autoref{fig:vm_migration_classic}). In the past, it might have meant that the network configuration would have to be changed manually, taking hours or even days. Now the SDN software would be capable of reconfiguring the network automatically and optimally based on this change (\autoref{fig:vm_migration_sdn}) and only require minutes to finish.
+
+\VTImage
+{img/vm_migration_sdn.png}
+{Migration of a virtual machine that employs a SDN}
+{fig:vm_migration_sdn}
+{10cm}
+
+While there are issues with deploying an SDN solution within the data centre, the main issues are the complexity of installation and interoperability with legacy network architecture, dependency on the centralized SDN control plane and aggregation of the attack surface into a single point of attack in the SDN controller.
+
+An SDN is a good choice for new network segments being created, but to fully use its capabilities, one would also have to migrate the legacy network segments. If the networking is segregated properly within the data centre, partial migration of segregated segments could be performed. It still poses a risk; while SDN is supposed to be vendor-agnostic, specific hardware devices and software implementations in the networking sphere might need to interoperate with SDNs correctly. 
+
+Due to the centralization of the networking control within the SDN controller, the controller becomes a point of failure. In this case, multiple controllers would be needed for possible failover switching. Additionally, monitoring of the controller's health should be implemented.
+
+While SDNs can provide significant speedup in inter-networking traffic, separating the control plane increases the latency between the control and forwarding planes. This latency can create issues in more "simple" scenarios where significant topology changes are not involved.
+
+While SDN removes some types of network management complexity layers, it does introduce new ones. A change from physical networking management might require the data centre to train or hire new staff capable of working with these networks. Given that the data centre is in a middle of a migration to the SDN service, a new layer of complexity appears - management of both physical and software defines networks. In this case, more is needed to ensure that both of the network segments would work well individually, but the networks' interoperability must be considered.
+
+While one could argue that both physical and SDN installations would need constant monitoring, SDN networks need additional monitoring due to their dynamic nature. In a physical scenario, once the device is configured, it usually stays that way for a long time. The opposite is true for SDN, where the configuration might change frequently. The frequent configuration changes require the engineers to establish additional continuous monitoring and management solutions, as they must know the state of the devices and the SDN control plane to solve any issue
+
+Lastly, the installation of an SDN is a costly endeavour. While in the long run, installation of an SDN would reduce the costs of managing the network, initial installation, integration, staff training, and potential downtime incurs a high cost.
+
+\section{Summary}
+
+We discussed how networking worked before SDNs, and how SDNs themselves worked, and we looked at possible pros and cons of using SDN within a data centre.
+
+\VTTable{[
+    caption = Pros and cons of SDNs in data centers,
+    label = {tbl:pros_cons}
+    ]{
+    colspec = {X[4] X[4]},
+    row{1} = {font=\bfseries}
+    }
+    Pros & Cons \\
+    Efficient use of networking resources & Complex and costly implementation and integration \\
+    Centralized network control & Potential single point of failure via the centralized SDN controller \\ 
+    Optimal routing and forwarding rules & Additional malicious attack surface \\
+    Hypervisor integration for efficient VM management & Latency increases due to the separation of control and forwarding planes \\ 
+    Reduced management complexity in dynamic environments & - \\
+}
+
+\VTDocumentEnd
