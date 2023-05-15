@@ -9,3 +9,4 @@ out/
 slides/
 ignore/
 .vagrant/
+*.pdf
