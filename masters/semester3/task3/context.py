@@ -21,23 +21,25 @@ class Context:
     
     def update_smallest_prime(self: 'Context', value: 'int') -> 'None':
         with self._smallest_prime_lock:
-            if self._smallest_prime > value:
+            if self._smallest_prime is None:
+                self._smallest_prime = value
+            elif self._smallest_prime > value:
                 self._smallest_prime = value
     
     def update_largest_prime(self: 'Context', value: 'int') -> 'None':
         with self._largest_prime_lock:
-            if self._largest_prime < value:
+            if self._largest_prime is None:
+                self._largest_prime = value
+            elif self._largest_prime < value:
                 self._largest_prime = value
     
     @property
     def smallest_prime(self: 'Context') -> 'int | None':
-        with self._smallest_prime_lock:
-            return self._smallest_prime
+        return self._smallest_prime
     
     @property
     def largest_prime(self: 'Context') -> 'int | None':
-        with self._largest_prime_lock:
-            return self._largest_prime
+        return self._largest_prime
     
     @property
     def files_processed(self: 'Context') -> 'int':
@@ -49,7 +51,7 @@ class Context:
 
     def _get_files(self: 'Context', path: 'str') -> 'Queue[str]':
         queue = Queue()
-        for filename in os.listdir(path):
+        for filename in sorted(os.listdir(path)):
             queue.put(filename)
         return queue
 
